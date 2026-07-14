@@ -1,0 +1,1523 @@
+Farmer_ID,Season,District,Soil_Type,Temperature_C,Rainfall_mm,Humidity_pct,pH,Previous_Crop,Previous_Yield_t_ha,Market_Demand,Recommended_Crop
+F00001,Yala,Badulla,Loam,33.7,238,64,7.2,Potato,21.4,High,Potato
+F00002,Maha,Monaragala,Sandy Loam,24.9,292,63,5.5,Carrot,3.8,High,Maize
+F00003,Maha,Batticaloa,Sandy,24.7,260,74,6.0,Beans,21.5,Medium,Onion
+F00004,Yala,Jaffna,Sandy Loam,28.5,197,92,5.9,,21.6,High,Brinjal
+F00005,Maha,Anuradhapura,Clay Loam,28.7,397,81,6.3,Maize,5.2,Medium,Rice
+F00006,Maha,Polonnaruwa,Clay Loam,27.1,288,89,6.1,Cabbage,5.0,Medium,Rice
+F00007,Maha,Ampara,Clay Loam,29.4,312,94,5.8,Tomato,,High,Rice
+F00008,Yala,Jaffna,Sandy Loam,30.8,219,88,7.2,Carrot,28.2,High,Tomato
+F00009,Maha,Ampara,Clay Loam,28.4,282,77,6.5,,5.8,High,Rice
+F00010,Maha,Kandy,Clay,25.4,231,75,5.3,Potato,30.2,High,Tomato
+F00011,Maha,Badulla,Loam,24.6,415,89,6.3,Beans,19.4,High,Brinjal
+F00012,Maha,Badulla,Loam,30.3,297,64,6.2,Brinjal,24.7,High,Cabbage
+F00013,Maha,Jaffna,,30.5,302,75,7.2,Maize,15.9,High,Onion
+F00014,Yala,Nuwara Eliya,Silty Loam,17.6,279,63,6.6,Chili,18.3,Low,Potato
+F00015,Maha,Batticaloa,Sandy,28.1,373,67,5.3,Potato,22.9,High,Potato
+F00016,Maha,Jaffna,Sandy Loam,30.5,364,92,5.8,Tomato,6.2,High,Rice
+F00017,Maha,Polonnaruwa,Clay Loam,28.3,286,66,6.9,Potato,5.1,Medium,Rice
+F00018,Yala,Ampara,Clay Loam,30.3,160,64,6.1,Rice,2.8,Medium,Chili
+F00019,Yala,Anuradhapura,Clay Loam,30.9,240,77,6.2,Carrot,5.5,Medium,Maize
+F00020,Yala,Kurunegala,Loam,30.6,162,79,6.3,,2.3,Low,Chili
+F00021,Yala,Anuradhapura,Clay Loam,30.7,122,70,6.3,Rice,4.0,Medium,Maize
+F00022,Yala,Kurunegala,Loam,30.3,157,85,6.4,Beans,1.8,Medium,Chili
+F00023,Maha,Nuwara Eliya,Silty Loam,20.5,213,87,5.7,Cabbage,8.5,Low,Beans
+F00024,Maha,Polonnaruwa,Clay Loam,24.7,397,58,7.3,Carrot,5.7,Medium,Rice
+F00025,Yala,Anuradhapura,Clay Loam,33.1,200,80,6.5,Cabbage,19.0,Medium,Potato
+F00026,Maha,Ampara,Clay Loam,27.5,372,71,6.5,Potato,5.0,Medium,Rice
+F00027,Yala,Matara,Loam,33.7,134,68,5.5,Onion,2.6,Low,Chili
+F00028,Yala,Ampara,Clay Loam,29.7,190,62,5.9,Tomato,16.3,Low,Onion
+F00029,Maha,Matara,Loam,30.7,286,61,5.5,Brinjal,,High,Rice
+F00030,Maha,Badulla,Loam,26.6,379,60,7.2,Potato,16.0,Medium,Onion
+F00031,Yala,Batticaloa,Sandy,33.2,205,74,6.1,Rice,19.6,Medium,Onion
+F00032,Yala,Matara,Loam,29.7,194,65,5.9,Onion,8.7,Low,Beans
+F00033,Maha,Hambantota,Sandy Loam,23.4,323,65,5.6,Maize,3.9,Medium,Maize
+F00034,Maha,Anuradhapura,Clay Loam,27.6,288,,6.2,,4.9,Medium,Rice
+F00035,Yala,Kurunegala,Loam,31.3,156,92,,Brinjal,20.0,Medium,Onion
+F00036,Yala,Matara,Loam,30.5,232,78,5.6,Maize,23.4,Medium,Potato
+F00037,Maha,Badulla,Loam,27.2,342,78,5.4,Chili,5.3,High,Rice
+F00038,Yala,Jaffna,Sandy Loam,32.2,212,81,7.3,Cabbage,2.8,Medium,Chili
+F00039,Yala,Badulla,Loam,30.8,201,87,6.5,Potato,17.7,Low,Brinjal
+F00040,Maha,Kurunegala,Loam,30.2,304,80,7.0,Beans,27.1,Medium,Cabbage
+F00041,Yala,Matara,,31.3,205,74,5.6,Rice,4.8,High,Maize
+F00042,Maha,Monaragala,Sandy Loam,30.6,191,82,6.4,Tomato,28.3,Low,Cabbage
+F00043,Yala,Jaffna,Sandy Loam,30.0,209,74,6.0,Chili,18.6,Medium,Potato
+F00044,Maha,Badulla,Loam,30.8,214,70,7.3,Potato,5.7,High,Rice
+F00045,Maha,Ampara,Clay Loam,28.8,223,59,5.7,,22.6,High,Cabbage
+F00046,Yala,Badulla,Loam,30.2,126,71,6.4,Potato,4.2,Low,Maize
+F00047,Maha,Nuwara Eliya,Silty Loam,19.8,237,74,6.6,Maize,23.9,High,Cabbage
+F00048,Yala,Ampara,Clay Loam,33.0,173,87,7.2,Maize,16.0,High,Brinjal
+F00049,Maha,Matara,Loam,29.0,247,72,5.7,Cabbage,8.6,Medium,Beans
+F00050,Maha,Kandy,Clay,24.4,260,87,5.8,Onion,5.9,Medium,Rice
+F00051,Maha,Hambantota,Sandy Loam,26.5,219,94,6.7,Beans,25.4,High,Tomato
+F00052,Maha,Matara,Loam,29.9,395,74,5.6,Chili,17.8,Low,Brinjal
+F00053,Yala,Matara,Loam,31.4,185,83,6.1,Onion,5.7,Medium,Rice
+F00054,Maha,Batticaloa,Sandy,28.1,396,92,6.4,Onion,20.0,Low,Brinjal
+F00055,Maha,Jaffna,Sandy Loam,23.1,224,93,6.8,Onion,,Medium,Tomato
+F00056,Maha,Nuwara Eliya,Silty Loam,20.1,170,75,6.0,Chili,9.0,Medium,Beans
+F00057,Maha,Polonnaruwa,Clay Loam,28.5,322,92,6.9,Maize,4.8,High,Rice
+F00058,Maha,Hambantota,Sandy Loam,28.4,335,77,,Cabbage,8.8,Medium,Beans
+F00059,Yala,Anuradhapura,Clay Loam,33.6,179,60,5.7,Chili,28.4,High,Cabbage
+F00060,Maha,Badulla,Loam,25.5,268,88,5.8,Brinjal,15.8,Medium,Brinjal
+F00061,Yala,Nuwara Eliya,Silty Loam,20.0,190,81,5.9,Beans,8.1,Medium,Beans
+F00062,Maha,Polonnaruwa,Clay Loam,28.8,365,90,6.7,Brinjal,6.3,Medium,Rice
+F00063,Maha,Nuwara Eliya,Silty Loam,16.9,,93,7.1,Brinjal,24.2,High,Potato
+F00064,Maha,Batticaloa,Sandy,30.4,207,71,5.4,Chili,4.5,High,Chili
+F00065,Yala,Ampara,Clay Loam,32.8,164,75,6.9,Carrot,,High,Maize
+F00066,Maha,Badulla,Loam,26.1,346,92,5.7,Cabbage,11.6,Low,Rice
+F00067,Yala,Kurunegala,Loam,32.8,125,60,5.9,Tomato,15.5,,Onion
+F00068,Maha,Kurunegala,Loam,24.3,297,61,6.9,Beans,28.0,Medium,Tomato
+F00069,Yala,Matara,Loam,31.1,166,92,5.5,Beans,4.1,,Maize
+F00070,Yala,Nuwara Eliya,Silty Loam,16.8,205,79,6.9,,18.8,High,Potato
+F00071,Maha,Batticaloa,Sandy,24.6,290,68,5.8,,22.1,Medium,Carrot
+F00072,Maha,Jaffna,Sandy Loam,26.7,288,81,6.8,Carrot,22.0,Medium,Brinjal
+F00073,Maha,Polonnaruwa,Clay Loam,30.2,404,70,5.5,,5.1,High,Rice
+F00074,Yala,Polonnaruwa,Clay Loam,29.2,154,85,5.7,Rice,19.3,Low,Brinjal
+F00075,Maha,Matara,Loam,25.9,369,58,6.3,Brinjal,25.4,Medium,Carrot
+F00076,Yala,Polonnaruwa,Clay Loam,31.4,146,80,6.3,Potato,3.9,High,Maize
+F00077,Maha,Matara,Loam,23.6,354,87,6.0,Cabbage,6.2,High,Rice
+F00078,Maha,Anuradhapura,Clay Loam,27.7,200,62,6.4,Potato,20.3,,Carrot
+F00079,Maha,Monaragala,Sandy Loam,27.3,302,67,7.2,Rice,53.0,Low,Tomato
+F00080,Maha,Anuradhapura,Clay Loam,29.0,191,62,6.9,Maize,26.6,High,Cabbage
+F00081,Maha,Jaffna,Sandy Loam,25.5,219,88,5.8,Carrot,,Medium,Rice
+F00082,Maha,Kandy,Clay,26.9,190,69,6.2,Potato,4.7,Medium,Maize
+F00083,Yala,Nuwara Eliya,,14.3,259,66,5.9,Onion,23.4,Medium,Cabbage
+F00084,Yala,Badulla,Loam,33.7,152,65,6.5,Potato,1.4,Low,Chili
+F00085,Maha,Polonnaruwa,Clay Loam,23.8,385,84,6.1,Rice,,Low,Rice
+F00086,Yala,Ampara,Clay Loam,33.5,178,63,5.8,Chili,5.8,Medium,Rice
+F00087,Yala,Nuwara Eliya,,21.1,259,90,6.6,Rice,16.8,High,Beans
+F00088,Yala,Batticaloa,Sandy,28.3,233,63,5.7,Brinjal,4.2,Medium,Maize
+F00089,Yala,Nuwara Eliya,Silty Loam,19.6,279,68,6.4,Potato,25.3,Medium,Cabbage
+F00090,Yala,Ampara,Clay Loam,29.4,200,83,6.3,Rice,23.6,Medium,Tomato
+F00091,Yala,Nuwara Eliya,Silty Loam,15.3,191,90,6.9,Brinjal,26.4,High,Carrot
+F00092,Maha,Polonnaruwa,Clay Loam,25.8,184,66,7.4,Cabbage,23.0,High,Potato
+F00093,Maha,Jaffna,Sandy Loam,28.5,218,78,5.7,Maize,22.5,High,Cabbage
+F00094,Yala,Jaffna,Sandy Loam,31.8,237,94,6.0,Maize,20.7,Medium,Brinjal
+F00095,Maha,Hambantota,Sandy Loam,26.0,209,73,7.3,Potato,22.3,Medium,Potato
+F00096,Maha,Jaffna,Sandy Loam,23.1,316,59,6.0,Carrot,27.6,Medium,Tomato
+F00097,Maha,Kurunegala,Loam,30.6,335,88,5.5,Rice,27.8,Medium,Tomato
+F00098,Maha,Matara,Loam,26.6,185,76,7.3,Rice,8.4,Low,Beans
+F00099,Yala,Badulla,Loam,32.9,223,82,7.3,Carrot,24.6,High,Carrot
+F00100,Maha,Nuwara Eliya,Silty Loam,17.8,220,68,5.5,Rice,,High,Cabbage
+F00101,Maha,Jaffna,Sandy Loam,31.0,374,72,7.1,Tomato,20.1,Medium,Onion
+F00102,Yala,Monaragala,Sandy Loam,31.9,195,83,5.7,Brinjal,6.1,Medium,Rice
+F00103,Maha,Jaffna,Sandy Loam,25.8,247,86,5.8,Brinjal,4.6,Medium,Rice
+F00104,Yala,Matara,Loam,33.1,,66,6.2,Carrot,19.3,Medium,Onion
+F00105,Yala,Monaragala,Sandy Loam,31.4,196,84,5.8,Cabbage,6.1,High,Rice
+F00106,Maha,Batticaloa,Sandy,30.7,392,90,6.0,Beans,19.2,Low,Brinjal
+F00107,Maha,Kandy,Clay,30.1,339,81,7.1,Chili,5.5,Medium,Rice
+F00108,Yala,Polonnaruwa,Clay Loam,29.3,170,89,6.6,Tomato,18.5,Low,Brinjal
+F00109,Yala,Ampara,Clay Loam,33.9,131,65,5.8,Carrot,2.4,Medium,Chili
+F00110,Yala,Kandy,Clay,29.9,170,58,5.5,Onion,5.0,Medium,Maize
+F00111,Maha,Polonnaruwa,Clay Loam,23.8,344,70,7.1,Cabbage,6.0,Medium,Rice
+F00112,Yala,Polonnaruwa,Clay Loam,30.1,132,67,6.2,Cabbage,2.7,Medium,Chili
+F00113,Yala,Polonnaruwa,Clay Loam,32.1,115,85,7.1,Carrot,2.2,Medium,Chili
+F00114,Maha,Jaffna,Sandy Loam,31.0,205,84,5.7,Maize,5.0,Medium,Rice
+F00115,Yala,Kandy,Clay,30.1,137,68,5.3,,2.4,Medium,Chili
+F00116,Maha,Polonnaruwa,Clay Loam,24.8,357,62,6.2,Maize,5.5,Medium,Rice
+F00117,Maha,Kandy,Clay,27.9,399,77,5.8,Potato,5.4,Medium,Rice
+F00118,Maha,Anuradhapura,Clay Loam,27.9,322,91,6.3,Beans,5.8,High,Rice
+F00119,Yala,Jaffna,Sandy Loam,29.0,223,91,5.9,Brinjal,16.3,Medium,Brinjal
+F00120,Yala,Hambantota,Sandy Loam,32.2,196,65,6.7,Beans,8.7,Medium,Beans
+F00121,Yala,Badulla,Loam,32.5,220,86,,Beans,5.1,High,Rice
+F00122,Maha,Jaffna,Sandy Loam,29.3,269,,5.3,Carrot,15.8,Low,Brinjal
+F00123,Maha,Ampara,Clay Loam,29.3,319,65,6.9,Beans,5.0,Medium,Rice
+F00124,Maha,Anuradhapura,Clay Loam,24.7,232,62,5.8,Onion,6.2,High,Rice
+F00125,Maha,Polonnaruwa,Clay Loam,27.9,353,91,6.6,Rice,5.0,Low,Rice
+F00126,Maha,Hambantota,Sandy Loam,28.6,209,62,7.2,Potato,5.4,High,Maize
+F00127,Yala,Kurunegala,Loam,33.8,222,93,6.8,Beans,22.0,Medium,Brinjal
+F00128,Maha,Hambantota,Sandy Loam,23.4,418,77,5.6,Tomato,25.7,High,Cabbage
+F00129,Yala,Nuwara Eliya,Silty Loam,17.5,177,58,5.9,Tomato,20.5,Medium,Potato
+F00130,Maha,Ampara,Clay Loam,,339,78,5.6,Brinjal,4.6,Low,Rice
+F00131,Maha,Kandy,Clay,25.9,199,62,7.1,Onion,5.5,Low,Rice
+F00132,Yala,Hambantota,Sandy Loam,29.5,197,77,6.4,Cabbage,3.9,Medium,Maize
+F00133,Maha,Kurunegala,Loam,24.2,223,93,5.8,Beans,25.3,Medium,Tomato
+F00134,Maha,Hambantota,Sandy Loam,29.1,228,81,6.3,Tomato,21.9,Medium,Potato
+F00135,Yala,Ampara,Clay Loam,33.1,198,72,6.8,Rice,25.9,Low,Carrot
+F00136,Maha,Kandy,Clay,29.3,,64,5.7,Maize,5.0,,Rice
+F00137,Maha,Polonnaruwa,Clay Loam,25.5,302,77,5.6,Rice,6.2,Medium,Rice
+F00138,Maha,Polonnaruwa,Clay Loam,24.6,404,70,7.3,Rice,4.6,Medium,Rice
+F00139,Yala,Batticaloa,Sandy,28.6,191,89,7.4,Onion,19.3,Medium,Brinjal
+F00140,Yala,Badulla,Loam,33.6,236,89,6.7,Onion,29.6,Medium,Tomato
+F00141,Maha,Ampara,Clay Loam,27.2,342,83,6.4,Maize,5.6,High,Rice
+F00142,Yala,Kandy,Clay,33.6,229,61,6.7,Carrot,4.8,High,Rice
+F00143,Maha,Polonnaruwa,Clay Loam,30.3,362,80,7.3,Brinjal,4.7,Medium,Rice
+F00144,Yala,Matara,Loam,30.8,164,58,5.6,Cabbage,4.7,Low,Maize
+F00145,Yala,Hambantota,Sandy Loam,29.1,187,85,5.9,Cabbage,18.5,Low,Brinjal
+F00146,Maha,Badulla,Loam,24.7,403,92,6.9,Carrot,5.0,Medium,Rice
+F00147,Yala,Jaffna,Sandy Loam,31.3,194,70,6.9,Maize,26.7,Medium,Tomato
+F00148,Yala,Matara,Loam,30.8,214,87,5.4,Brinjal,20.4,Medium,Brinjal
+F00149,Maha,Nuwara Eliya,Silty Loam,14.5,239,91,6.4,Onion,24.4,Low,Cabbage
+F00150,Maha,Polonnaruwa,Clay Loam,23.4,360,66,5.8,Onion,6.0,High,Rice
+F00151,Yala,Matara,Loam,28.1,179,76,7.2,,22.9,Medium,Potato
+F00152,Yala,Ampara,Clay Loam,29.6,142,75,6.1,Beans,30.2,Medium,Tomato
+F00153,Maha,Ampara,Clay Loam,23.1,356,93,5.3,Rice,6.1,High,Rice
+F00154,Yala,Batticaloa,Sandy,31.8,190,59,5.3,Rice,5.6,Low,Rice
+F00155,Yala,Hambantota,Sandy Loam,31.0,149,72,5.4,Rice,15.9,Medium,Onion
+F00156,Maha,Nuwara Eliya,Silty Loam,20.2,534,83,7.1,Maize,8.2,Medium,Beans
+F00157,Yala,Polonnaruwa,Clay Loam,29.1,111,73,6.4,Rice,6.0,Low,Rice
+F00158,Yala,Anuradhapura,Clay Loam,29.9,111,82,5.7,Maize,25.6,Medium,Carrot
+F00159,Maha,Badulla,Loam,29.5,225,73,7.2,Tomato,4.6,Low,Maize
+F00160,Yala,Kurunegala,Loam,30.8,225,79,7.0,Tomato,21.6,Medium,Potato
+F00161,Yala,Monaragala,Sandy Loam,28.4,240,70,5.7,Tomato,6.3,High,Rice
+F00162,Yala,Ampara,Clay Loam,28.7,217,93,7.1,Potato,29.5,Medium,Tomato
+F00163,Yala,Matara,Loam,33.6,235,83,6.3,Onion,17.3,High,Brinjal
+F00164,Yala,Kandy,,33.8,211,72,7.0,Beans,4.7,High,Maize
+F00165,Yala,Badulla,Loam,29.2,228,93,6.8,,24.3,High,Tomato
+F00166,Yala,Kandy,Clay,29.3,177,84,6.1,Cabbage,29.2,Medium,Tomato
+F00167,Yala,Anuradhapura,Clay Loam,32.2,144,77,5.6,Rice,2.6,Low,Chili
+F00168,Yala,Ampara,Clay Loam,33.7,167,59,6.9,Potato,4.9,Medium,Maize
+F00169,Maha,Anuradhapura,,31.0,404,65,6.4,Cabbage,5.6,Medium,Rice
+F00170,Yala,Matara,Loam,29.9,141,87,7.2,Maize,25.1,High,Tomato
+F00171,Yala,Badulla,Loam,30.3,155,81,7.2,Chili,21.4,Medium,Onion
+F00172,Yala,Nuwara Eliya,Silty Loam,19.1,174,64,6.7,Beans,25.9,Low,Cabbage
+F00173,Yala,Ampara,,30.4,198,87,5.4,Tomato,25.0,,Tomato
+F00174,Maha,Monaragala,Sandy Loam,25.7,410,74,5.8,Brinjal,24.9,High,Carrot
+F00175,Maha,Anuradhapura,Clay Loam,24.6,196,81,5.6,Beans,4.8,High,Rice
+F00176,Maha,Polonnaruwa,Clay Loam,28.7,365,88,5.5,Maize,4.8,High,Rice
+F00177,Maha,Hambantota,Sandy Loam,28.0,240,62,6.2,Onion,21.7,High,Cabbage
+F00178,Maha,Ampara,Clay Loam,29.2,184,78,,Beans,3.9,Low,Maize
+F00179,Yala,Kurunegala,Loam,30.1,155,68,5.5,Rice,2.0,High,Chili
+F00180,Yala,Matara,Loam,31.6,145,,7.0,Chili,4.3,Medium,Maize
+F00181,Yala,Hambantota,Sandy Loam,30.4,240,62,7.0,Tomato,19.6,High,Onion
+F00182,Yala,Kurunegala,Loam,33.6,154,91,7.2,Beans,4.2,High,Maize
+F00183,Maha,Nuwara Eliya,Silty Loam,19.7,232,77,7.2,Beans,23.1,Medium,Carrot
+F00184,Yala,Matara,Loam,32.5,145,85,5.9,Tomato,2.4,High,Chili
+F00185,Maha,Matara,Loam,28.9,245,86,,Brinjal,29.3,High,Tomato
+F00186,Maha,Polonnaruwa,Clay Loam,27.9,237,83,6.8,Onion,5.1,Medium,Rice
+F00187,Maha,Badulla,Loam,23.1,296,84,5.4,Brinjal,20.4,Medium,Brinjal
+F00188,Maha,Batticaloa,Sandy,24.3,334,92,7.1,Maize,15.6,High,Brinjal
+F00189,Maha,Matara,,25.3,245,77,7.0,Chili,5.3,Low,Rice
+F00190,Maha,Ampara,Clay Loam,29.6,,66,7.0,Rice,8.5,Medium,Beans
+F00191,Maha,Badulla,Loam,26.3,200,77,6.4,Cabbage,23.2,Low,Carrot
+F00192,Yala,Monaragala,Sandy Loam,29.0,220,69,5.4,Carrot,24.4,Medium,Cabbage
+F00193,Maha,Polonnaruwa,Clay Loam,23.1,208,94,6.4,Beans,20.2,Low,Brinjal
+F00194,Yala,Kurunegala,Loam,33.1,113,59,7.3,Beans,5.5,Low,Maize
+F00195,Maha,Matara,Loam,30.9,227,91,5.6,Beans,5.8,High,Rice
+F00196,Maha,Matara,Loam,23.5,235,87,6.9,Beans,22.0,Medium,Brinjal
+F00197,Yala,Kurunegala,Loam,28.7,163,88,7.2,Potato,16.6,Medium,Brinjal
+F00198,Maha,Hambantota,Sandy Loam,31.0,399,76,5.9,Beans,20.6,Medium,Potato
+F00199,Yala,Polonnaruwa,Clay Loam,32.8,119,,5.7,Beans,2.6,Medium,Chili
+F00200,Yala,Kurunegala,Loam,33.0,229,72,6.4,Tomato,5.4,Medium,Maize
+F00201,Maha,Polonnaruwa,Clay Loam,28.3,275,66,6.6,Onion,18.5,Low,Potato
+F00202,Maha,Matara,Loam,25.7,223,78,6.3,Chili,24.8,Medium,Cabbage
+F00203,Maha,Hambantota,Sandy Loam,25.6,255,85,7.1,Beans,29.8,Medium,Tomato
+F00204,Yala,Polonnaruwa,Clay Loam,29.8,129,76,6.2,Beans,24.2,High,Potato
+F00205,Maha,Badulla,Loam,29.1,369,60,5.4,Cabbage,17.8,High,Brinjal
+F00206,Yala,Anuradhapura,Clay Loam,,138,73,5.4,Beans,14.8,High,Onion
+F00207,Yala,Ampara,Clay Loam,33.4,160,90,6.8,Potato,1.9,Medium,Chili
+F00208,Maha,Polonnaruwa,Clay Loam,30.9,415,62,5.4,Potato,5.8,High,Rice
+F00209,Maha,Jaffna,Sandy Loam,30.6,411,74,5.9,Onion,4.0,Medium,Maize
+F00210,Maha,Badulla,Loam,28.4,370,66,6.9,,5.1,Medium,Rice
+F00211,Yala,Batticaloa,Sandy,33.7,152,,6.5,Potato,5.3,High,Maize
+F00212,Maha,Monaragala,Sandy Loam,25.6,334,62,7.0,Chili,26.9,Medium,Tomato
+F00213,Maha,Batticaloa,Sandy,29.1,324,94,6.0,,27.2,High,Tomato
+F00214,Maha,Kurunegala,Loam,26.7,248,74,7.2,Rice,23.8,Medium,Cabbage
+F00215,Yala,Jaffna,,30.2,206,91,7.1,Tomato,20.8,Low,Brinjal
+F00216,Maha,Badulla,Loam,26.5,377,91,7.0,Chili,17.3,Medium,Brinjal
+F00217,Maha,Polonnaruwa,Clay Loam,26.0,235,81,5.3,Brinjal,18.6,Medium,Potato
+F00218,Yala,Batticaloa,Sandy,31.9,188,73,5.5,Maize,24.0,Medium,Potato
+F00219,Yala,Nuwara Eliya,Silty Loam,17.5,189,93,6.4,Potato,20.0,Low,Carrot
+F00220,Maha,Polonnaruwa,Clay Loam,26.4,313,62,7.2,Chili,5.7,High,Rice
+F00221,Yala,Kandy,Clay,30.5,190,72,5.5,Chili,21.2,High,Brinjal
+F00222,Maha,Matara,Loam,26.2,366,65,6.4,Onion,22.2,Medium,Carrot
+F00223,Maha,Kurunegala,Loam,25.2,356,82,6.1,Tomato,5.4,High,Maize
+F00224,Yala,Kurunegala,Loam,33.0,238,93,6.0,Onion,6.0,Low,Rice
+F00225,Yala,Batticaloa,Sandy,33.3,204,87,6.9,Carrot,5.5,High,Rice
+F00226,Maha,Ampara,Clay Loam,26.9,311,74,6.5,Potato,6.2,High,Rice
+F00227,Yala,Nuwara Eliya,Silty Loam,21.2,,78,6.3,Beans,8.4,High,Beans
+F00228,Maha,Matara,Loam,27.2,344,84,6.3,Cabbage,5.8,Medium,Rice
+F00229,Yala,Polonnaruwa,Clay Loam,33.4,210,,6.9,Carrot,22.0,Medium,Cabbage
+F00230,Yala,Kandy,Clay,28.3,181,70,5.6,Potato,4.0,Low,Maize
+F00231,Yala,Monaragala,Sandy Loam,29.2,123,78,6.3,Onion,5.5,Medium,Rice
+F00232,Maha,Nuwara Eliya,Silty Loam,20.4,217,80,6.3,Maize,7.7,High,Beans
+F00233,Maha,Monaragala,Sandy Loam,27.6,408,71,6.9,Chili,22.5,Low,Cabbage
+F00234,Maha,Matara,Loam,29.1,260,75,5.7,,4.4,Medium,Maize
+F00235,Maha,Hambantota,Sandy Loam,26.2,283,77,6.3,Carrot,16.9,Medium,Brinjal
+F00236,Yala,Matara,Loam,28.8,204,93,7.2,Carrot,16.3,Low,Brinjal
+F00237,Maha,Matara,Loam,30.0,244,58,5.9,Potato,5.9,Medium,Rice
+F00238,Yala,Matara,Loam,,162,77,7.0,Onion,2.3,High,Chili
+F00239,Yala,Ampara,Clay Loam,31.8,135,79,7.0,Brinjal,15.0,High,Onion
+F00240,Maha,Kandy,Clay,29.8,223,88,5.5,Onion,28.4,Low,Tomato
+F00241,Maha,Batticaloa,Sandy,26.2,,62,5.5,Tomato,8.3,High,Beans
+F00242,Maha,Ampara,Clay Loam,25.9,,61,5.7,Rice,5.6,Medium,Maize
+F00243,Maha,Badulla,Loam,27.6,369,85,5.3,Maize,22.3,Medium,Brinjal
+F00244,Yala,Anuradhapura,Clay Loam,33.9,114,60,6.3,Beans,16.8,Medium,Onion
+F00245,Maha,Nuwara Eliya,Silty Loam,15.4,208,91,6.4,Rice,24.0,Low,Potato
+F00246,Maha,Jaffna,Sandy Loam,25.0,267,60,6.4,Tomato,23.0,Medium,Cabbage
+F00247,Maha,Hambantota,Sandy Loam,29.3,180,79,7.1,Rice,22.4,Low,Potato
+F00248,Yala,Kurunegala,Loam,,222,72,7.1,Cabbage,21.3,High,Brinjal
+F00249,Maha,Nuwara Eliya,Silty Loam,,293,94,6.0,Onion,25.8,Low,Cabbage
+F00250,Yala,Monaragala,Sandy Loam,30.8,132,70,6.8,Chili,2.5,Medium,Chili
+F00251,Yala,Batticaloa,Sandy,30.7,173,67,7.1,Cabbage,7.6,Medium,Beans
+F00252,Maha,Anuradhapura,Clay Loam,28.9,263,65,7.4,Chili,26.9,High,Cabbage
+F00253,Maha,Kandy,Clay,24.2,209,73,6.5,Tomato,27.1,Medium,Cabbage
+F00254,Yala,Nuwara Eliya,Silty Loam,17.8,146,90,5.3,Cabbage,20.2,Low,Potato
+F00255,Maha,Hambantota,Sandy Loam,26.4,213,75,6.0,Brinjal,26.3,Medium,Carrot
+F00256,Yala,Matara,Loam,,162,76,6.8,Carrot,,Low,Maize
+F00257,Yala,Kurunegala,,33.7,195,64,7.3,Maize,26.3,Medium,Tomato
+F00258,Maha,Kandy,Clay,28.9,294,80,6.7,Tomato,6.2,Low,Rice
+F00259,Yala,Ampara,Clay Loam,32.4,240,,6.9,Cabbage,25.0,Low,Tomato
+F00260,Yala,Nuwara Eliya,Silty Loam,14.8,162,86,6.0,Beans,17.8,Medium,Potato
+F00261,Maha,Nuwara Eliya,Silty Loam,16.1,254,86,7.3,,20.5,Medium,Potato
+F00262,Yala,Nuwara Eliya,Silty Loam,19.6,188,76,7.2,Beans,19.7,High,Potato
+F00263,Maha,Jaffna,Sandy Loam,23.3,276,85,6.7,Carrot,25.8,High,Tomato
+F00264,Maha,Polonnaruwa,Clay Loam,30.9,264,89,6.3,Chili,,Medium,Tomato
+F00265,Yala,Kandy,Clay,32.1,209,70,5.3,Brinjal,18.3,Medium,Brinjal
+F00266,Yala,Polonnaruwa,Clay Loam,32.9,239,73,5.7,Cabbage,20.8,Low,Carrot
+F00267,Maha,Anuradhapura,Clay Loam,28.9,350,77,6.5,Onion,4.9,Low,Rice
+F00268,Maha,Anuradhapura,Clay Loam,27.0,299,76,5.9,Chili,6.3,Medium,Rice
+F00269,Yala,Nuwara Eliya,Silty Loam,37.6,162,69,7.2,Tomato,22.1,Medium,Carrot
+F00270,Maha,Badulla,Loam,26.5,,89,5.6,Rice,15.9,Low,Brinjal
+F00271,Yala,Batticaloa,Sandy,30.3,,69,6.2,Chili,17.4,High,Onion
+F00272,Maha,Kandy,Clay,26.9,336,82,6.5,Carrot,5.9,Low,Rice
+F00273,Maha,Ampara,Clay Loam,29.3,325,94,6.4,Brinjal,6.3,Low,Rice
+F00274,Yala,Jaffna,Sandy Loam,31.4,230,87,5.9,Tomato,16.5,Medium,Brinjal
+F00275,Yala,Anuradhapura,Clay Loam,30.7,174,93,6.0,Cabbage,4.6,High,Rice
+F00276,Yala,Kandy,Clay,33.7,198,60,5.9,Carrot,24.4,High,Potato
+F00277,Maha,Anuradhapura,Clay Loam,25.8,218,64,6.5,Carrot,5.3,Medium,Rice
+F00278,Maha,Badulla,Loam,25.8,235,60,5.9,Cabbage,5.9,Medium,Rice
+F00279,Maha,Polonnaruwa,Clay Loam,24.9,365,79,5.4,Potato,5.7,Medium,Rice
+F00280,Yala,Kandy,Clay,33.7,153,66,7.3,Tomato,4.3,,Maize
+F00281,Maha,Batticaloa,Sandy,26.6,186,90,6.8,Onion,20.7,Medium,Brinjal
+F00282,Yala,Ampara,Clay Loam,32.2,177,66,5.6,Rice,18.9,High,Onion
+F00283,Maha,Polonnaruwa,Clay Loam,30.1,413,86,6.2,Rice,5.0,Medium,Rice
+F00284,Yala,Nuwara Eliya,Silty Loam,17.2,279,70,6.6,Beans,23.1,High,Carrot
+F00285,Maha,Kurunegala,Loam,30.3,199,74,6.4,Chili,6.1,High,Rice
+F00286,Maha,Nuwara Eliya,Silty Loam,15.6,148,80,5.4,Potato,24.9,Medium,Cabbage
+F00287,Maha,Badulla,Loam,25.5,295,92,6.3,Rice,28.3,Low,Tomato
+F00288,Yala,Anuradhapura,Clay Loam,33.8,144,66,,Chili,3.9,Medium,Maize
+F00289,Maha,Nuwara Eliya,Silty Loam,14.7,200,89,6.9,Cabbage,22.5,High,Potato
+F00290,Yala,Anuradhapura,Clay Loam,30.1,178,73,5.7,Beans,4.0,Medium,Maize
+F00291,Maha,Matara,Loam,24.6,403,86,6.1,Rice,30.4,High,Tomato
+F00292,Yala,Kurunegala,Loam,32.2,122,82,7.2,Tomato,2.8,Medium,Chili
+F00293,Maha,Monaragala,Sandy Loam,29.2,342,72,6.8,,23.8,High,Cabbage
+F00294,Maha,Batticaloa,Sandy,29.3,371,63,5.8,Carrot,17.4,Low,Onion
+F00295,Maha,Badulla,Loam,24.1,359,94,5.5,Cabbage,4.7,Medium,Rice
+F00296,Maha,Batticaloa,Sandy,29.8,409,69,5.4,Onion,28.9,High,Tomato
+F00297,Yala,Batticaloa,Sandy,30.8,144,82,7.4,Chili,4.2,Medium,Maize
+F00298,Maha,Polonnaruwa,Clay Loam,30.7,189,68,6.5,Tomato,24.5,Medium,Potato
+F00299,Yala,Matara,Loam,28.7,173,72,6.0,Carrot,20.6,Low,Carrot
+F00300,Yala,Jaffna,Sandy Loam,30.7,195,,6.9,Beans,4.7,Medium,Rice
+F00301,Maha,Hambantota,Sandy Loam,27.8,193,79,6.1,Maize,5.2,High,Maize
+F00302,Maha,Ampara,Clay Loam,28.5,304,93,6.6,Brinjal,4.6,High,Rice
+F00303,Maha,Nuwara Eliya,Silty Loam,17.4,168,62,7.1,Maize,28.2,High,Cabbage
+F00304,Maha,Ampara,Clay Loam,25.3,247,80,6.5,Maize,19.9,Medium,Brinjal
+F00305,Yala,Matara,Loam,31.7,117,72,6.9,Brinjal,4.2,High,Maize
+F00306,Maha,Monaragala,Sandy Loam,29.8,196,64,,Rice,20.0,Medium,Carrot
+F00307,Maha,Monaragala,Sandy Loam,27.6,384,66,5.4,Rice,20.9,Medium,Brinjal
+F00308,Yala,Ampara,Clay Loam,30.1,115,72,6.0,Rice,3.9,Low,Maize
+F00309,Maha,Badulla,Loam,23.5,216,73,6.6,Cabbage,8.1,Low,Beans
+F00310,Yala,Matara,Loam,32.5,118,82,5.9,Tomato,16.6,Medium,Onion
+F00311,Maha,Anuradhapura,Clay Loam,24.8,265,82,6.0,Rice,23.9,High,Tomato
+F00312,Yala,Ampara,Clay Loam,29.9,223,72,5.4,Rice,5.8,Medium,Rice
+F00313,Maha,Jaffna,,27.0,235,64,5.3,Tomato,25.8,Low,Carrot
+F00314,Maha,Kurunegala,Loam,25.4,213,78,7.0,Brinjal,21.4,High,Potato
+F00315,Maha,Badulla,Loam,27.5,216,73,6.7,Maize,1.7,High,Chili
+F00316,Yala,Jaffna,Sandy Loam,30.6,149,75,5.4,Maize,4.7,Medium,Maize
+F00317,Yala,Kandy,Clay,33.5,119,83,6.9,Chili,1.6,Medium,Chili
+F00318,Maha,Batticaloa,Sandy,30.1,271,84,6.7,Carrot,5.5,Medium,Rice
+F00319,Yala,Nuwara Eliya,Silty Loam,15.9,172,65,6.8,Carrot,26.3,Low,Carrot
+F00320,Maha,Nuwara Eliya,Silty Loam,21.9,151,61,5.4,Cabbage,,High,Beans
+F00321,Maha,Badulla,Loam,27.6,249,79,5.6,Onion,19.8,Medium,Carrot
+F00322,Yala,Monaragala,Sandy Loam,29.7,179,59,6.1,Chili,19.1,Medium,Brinjal
+F00323,Maha,Matara,Loam,28.9,359,60,,Rice,18.8,Low,Brinjal
+F00324,Yala,Ampara,Clay Loam,31.2,116,79,7.3,Potato,20.5,Medium,Onion
+F00325,Maha,Hambantota,Sandy Loam,29.7,253,76,6.2,Beans,27.0,High,Tomato
+F00326,Maha,Kurunegala,Loam,24.7,208,81,5.5,Beans,4.6,High,Maize
+F00327,Yala,Badulla,Loam,30.4,147,63,6.9,,1.7,Medium,Chili
+F00328,Maha,Badulla,Loam,27.1,229,77,6.5,Carrot,3.0,Medium,Chili
+F00329,Yala,Matara,Loam,32.9,144,79,7.0,Beans,14.8,,Onion
+F00330,Maha,Monaragala,Sandy Loam,29.9,286,60,7.2,Chili,57.6,Low,Tomato
+F00331,Maha,Batticaloa,,24.9,199,88,6.4,Carrot,4.6,Low,Rice
+F00332,Maha,Kurunegala,,28.0,245,92,6.4,Cabbage,18.1,Medium,Brinjal
+F00333,Yala,Ampara,Clay Loam,33.5,195,79,6.5,Potato,22.9,High,Cabbage
+F00334,Yala,Kandy,Clay,28.6,164,79,5.5,Carrot,4.8,High,Maize
+F00335,Yala,Nuwara Eliya,Silty Loam,21.4,176,63,7.2,Tomato,7.8,High,Beans
+F00336,Maha,Polonnaruwa,Clay Loam,25.2,239,71,6.8,Potato,21.5,High,Potato
+F00337,Maha,Jaffna,Sandy Loam,26.1,,74,6.9,Tomato,9.3,Low,Beans
+F00338,Maha,Matara,Loam,27.7,320,90,6.2,Tomato,4.7,Medium,Rice
+F00339,Maha,Polonnaruwa,Clay Loam,28.4,285,69,6.0,Potato,5.2,Medium,Rice
+F00340,Maha,Jaffna,Sandy Loam,28.7,331,58,7.3,Chili,4.4,High,Maize
+F00341,Maha,Monaragala,Sandy Loam,25.0,380,,6.1,Carrot,20.5,Medium,Brinjal
+F00342,Yala,Anuradhapura,Clay Loam,29.9,218,87,5.8,Potato,18.5,Medium,Brinjal
+F00343,Yala,Kandy,Clay,32.1,141,93,6.8,Rice,3.0,High,Chili
+F00344,Yala,Monaragala,Sandy Loam,28.5,232,64,5.4,Tomato,20.8,Medium,Onion
+F00345,Yala,Anuradhapura,Clay Loam,30.0,229,65,5.8,Potato,25.2,High,Tomato
+F00346,Yala,Matara,Loam,28.1,132,58,6.0,Carrot,19.8,Medium,Onion
+F00347,Maha,Anuradhapura,Clay Loam,30.6,304,63,7.3,Beans,5.0,Medium,Rice
+F00348,Yala,Polonnaruwa,Clay Loam,30.2,180,64,5.9,Rice,1.6,Medium,Chili
+F00349,Yala,Batticaloa,Sandy,28.5,157,64,6.3,Rice,18.1,Medium,Brinjal
+F00350,Yala,Anuradhapura,Clay Loam,29.0,182,60,5.9,Carrot,28.2,Medium,Cabbage
+F00351,Yala,Jaffna,Sandy Loam,28.8,141,64,6.7,Carrot,21.3,Medium,Onion
+F00352,Maha,Batticaloa,Sandy,29.9,354,74,6.4,,16.7,Medium,Brinjal
+F00353,Yala,Ampara,Clay Loam,33.9,,74,7.4,Cabbage,9.3,Medium,Beans
+F00354,Maha,Monaragala,Sandy Loam,28.7,369,72,,Brinjal,23.1,Medium,Carrot
+F00355,Maha,Monaragala,Sandy Loam,23.7,267,59,6.8,Beans,17.8,High,Brinjal
+F00356,Maha,Badulla,Loam,25.5,319,83,5.5,Carrot,16.9,Medium,Brinjal
+F00357,Yala,Hambantota,Sandy Loam,30.8,146,78,5.7,Tomato,2.4,High,Chili
+F00358,Maha,Nuwara Eliya,Silty Loam,18.3,145,75,5.4,Maize,27.2,,Cabbage
+F00359,Maha,Jaffna,Sandy Loam,30.9,201,69,5.9,Onion,5.2,Medium,Maize
+F00360,Yala,Ampara,Clay Loam,29.3,118,89,5.4,Cabbage,4.9,High,Rice
+F00361,Yala,Hambantota,Sandy Loam,31.0,154,63,6.5,Tomato,20.9,Medium,Onion
+F00362,Yala,Batticaloa,Sandy,33.6,153,91,6.7,Cabbage,17.4,Low,Onion
+F00363,Maha,Matara,Loam,28.8,213,60,6.1,Onion,16.4,Medium,Onion
+F00364,Maha,Anuradhapura,Clay Loam,24.8,306,69,6.5,Tomato,4.9,Low,Rice
+F00365,Yala,Polonnaruwa,Clay Loam,33.1,237,61,7.1,Carrot,20.4,Medium,Onion
+F00366,Maha,Polonnaruwa,Clay Loam,26.4,327,84,6.5,Maize,5.0,Medium,Rice
+F00367,Maha,Anuradhapura,Clay Loam,30.4,336,71,5.8,,6.1,Low,Rice
+F00368,Yala,Badulla,Loam,28.4,187,86,6.7,Onion,27.9,Medium,Tomato
+F00369,Maha,Kandy,Clay,23.6,233,,7.0,Carrot,23.6,Medium,Carrot
+F00370,Maha,Anuradhapura,Clay Loam,23.7,203,88,6.8,Brinjal,18.5,Medium,Brinjal
+F00371,Yala,Jaffna,Sandy Loam,31.7,157,81,6.8,Rice,4.7,Medium,Maize
+F00372,Maha,Kurunegala,Loam,27.0,203,64,7.2,Onion,16.3,High,Onion
+F00373,Maha,Anuradhapura,Clay Loam,27.3,367,67,6.8,,4.9,High,Rice
+F00374,Maha,Badulla,Loam,26.4,405,58,6.0,Brinjal,1.9,Medium,Chili
+F00375,Yala,Kurunegala,Loam,28.7,111,77,6.7,,4.9,Medium,Maize
+F00376,Yala,Matara,Loam,29.9,181,83,6.0,Chili,6.2,Medium,Rice
+F00377,Yala,Hambantota,Sandy Loam,31.1,553,72,6.3,Cabbage,17.1,High,Onion
+F00378,Yala,Kurunegala,,28.9,238,68,7.1,Potato,19.4,Medium,Brinjal
+F00379,Yala,Anuradhapura,Clay Loam,33.3,175,78,5.6,Rice,22.8,Medium,Potato
+F00380,Yala,Ampara,Clay Loam,30.0,197,75,6.2,Cabbage,5.1,Medium,Rice
+F00381,Yala,Ampara,Clay Loam,31.6,170,59,6.4,Maize,22.1,Medium,Brinjal
+F00382,Maha,Polonnaruwa,Clay Loam,24.7,362,69,5.3,Beans,5.2,Medium,Rice
+F00383,Maha,Kandy,Clay,25.4,192,91,6.5,Maize,18.9,Medium,Brinjal
+F00384,Yala,Matara,Loam,31.7,130,76,6.1,Onion,16.4,Medium,Onion
+F00385,Yala,Jaffna,Sandy Loam,29.2,236,73,5.5,Maize,9.0,High,Beans
+F00386,Yala,Polonnaruwa,Clay Loam,28.3,196,85,5.4,Chili,25.0,Low,Tomato
+F00387,Maha,Badulla,Loam,28.0,246,77,6.9,Potato,22.2,Low,Potato
+F00388,Yala,Kandy,Clay,30.7,184,71,5.8,Beans,25.8,Medium,Cabbage
+F00389,Yala,Monaragala,Sandy Loam,29.8,240,74,6.1,Carrot,1.3,Low,Chili
+F00390,Maha,Kurunegala,Loam,30.5,397,64,5.7,Brinjal,4.0,High,Maize
+F00391,Yala,Batticaloa,Sandy,33.1,198,62,6.9,Cabbage,21.2,Low,Carrot
+F00392,Maha,Batticaloa,Sandy,25.0,584,70,7.4,Cabbage,9.1,High,Beans
+F00393,Maha,Jaffna,Sandy Loam,29.8,259,61,6.3,Maize,8.0,Medium,Beans
+F00394,Yala,Nuwara Eliya,Silty Loam,22.0,287,74,5.6,,8.2,Medium,Beans
+F00395,Maha,Matara,Loam,26.1,302,85,6.7,Beans,20.9,Medium,Brinjal
+F00396,Maha,Ampara,Clay Loam,24.0,323,68,6.9,Potato,5.9,Medium,Rice
+F00397,Yala,Batticaloa,,29.4,217,81,7.2,Beans,17.3,High,Brinjal
+F00398,Yala,Hambantota,Sandy Loam,31.5,154,72,6.8,Rice,1.8,High,Chili
+F00399,Maha,Polonnaruwa,,29.1,393,73,7.4,Onion,6.2,High,Rice
+F00400,Yala,Anuradhapura,Clay Loam,28.7,230,62,6.7,Beans,3.1,Low,Chili
+F00401,Yala,Hambantota,Sandy Loam,32.2,119,77,6.1,,2.1,Medium,Chili
+F00402,Yala,Badulla,,32.7,199,70,6.9,Chili,8.2,Medium,Beans
+F00403,Maha,Matara,Loam,27.2,189,83,5.7,Onion,29.1,Medium,Tomato
+F00404,Maha,Jaffna,Sandy Loam,29.9,205,66,6.6,Beans,22.3,Low,Brinjal
+F00405,Yala,Anuradhapura,Clay Loam,33.4,150,90,7.1,Cabbage,4.7,High,Maize
+F00406,Yala,Anuradhapura,Clay Loam,31.3,144,67,7.3,Brinjal,5.4,High,Maize
+F00407,Yala,Batticaloa,Sandy,29.8,190,65,5.9,Tomato,16.8,Medium,Onion
+F00408,Yala,Matara,Loam,33.0,,72,5.4,Carrot,21.0,High,Brinjal
+F00409,Maha,Kurunegala,Loam,27.7,251,79,6.9,Maize,26.5,Low,Cabbage
+F00410,Yala,Jaffna,Sandy Loam,29.3,,89,7.3,Maize,16.1,Low,Brinjal
+F00411,Maha,Kurunegala,Loam,26.1,274,74,7.2,Chili,2.0,Medium,Chili
+F00412,Maha,Batticaloa,Sandy,26.3,401,58,6.9,Chili,25.4,High,Carrot
+F00413,Maha,Matara,Loam,29.5,261,66,7.3,Tomato,5.6,Medium,Rice
+F00414,Yala,Badulla,Loam,,160,79,5.5,Chili,16.3,Medium,Onion
+F00415,Yala,Ampara,Clay Loam,29.6,218,82,5.9,Cabbage,27.5,Medium,Tomato
+F00416,Maha,Hambantota,Sandy Loam,25.0,403,70,6.2,Rice,29.5,Low,Tomato
+F00417,Yala,Jaffna,Sandy Loam,28.2,118,67,6.6,Cabbage,26.1,Medium,Carrot
+F00418,Maha,Ampara,Clay Loam,23.4,275,76,5.6,Chili,5.3,Medium,Rice
+F00419,Maha,Hambantota,Sandy Loam,28.5,331,87,5.4,Rice,28.1,High,Tomato
+F00420,Yala,Badulla,Loam,32.1,184,84,6.4,Onion,28.1,High,Tomato
+F00421,Maha,Anuradhapura,Clay Loam,26.3,,91,6.3,Onion,4.7,Low,Rice
+F00422,Maha,Hambantota,Sandy Loam,23.1,364,89,5.9,Brinjal,5.1,Medium,Rice
+F00423,Yala,Badulla,Loam,32.7,238,70,5.9,Rice,21.2,Low,Carrot
+F00424,Maha,Kurunegala,Loam,27.9,255,72,5.6,Beans,22.9,Low,Potato
+F00425,Maha,Nuwara Eliya,Silty Loam,20.4,196,70,7.2,Onion,9.4,High,Beans
+F00426,Maha,Anuradhapura,Clay Loam,27.4,218,67,5.9,Chili,4.1,High,Maize
+F00427,Yala,Matara,Loam,31.8,123,91,7.2,Tomato,,Medium,Onion
+F00428,Maha,Kandy,,30.0,311,86,6.4,Tomato,5.2,Medium,Rice
+F00429,Maha,Hambantota,Sandy Loam,24.6,293,74,5.3,,,High,Rice
+F00430,Maha,Batticaloa,Sandy,30.1,253,89,5.9,Chili,27.6,High,Tomato
+F00431,Yala,Badulla,Loam,33.8,116,78,7.1,Carrot,2.4,Medium,Chili
+F00432,Maha,Kandy,Clay,30.8,265,94,7.0,,25.3,Medium,Tomato
+F00433,Yala,Badulla,Loam,28.9,201,84,6.6,Maize,18.4,High,Brinjal
+F00434,Maha,Anuradhapura,Clay Loam,28.9,376,73,6.5,Beans,5.0,Medium,Rice
+F00435,Yala,Ampara,Clay Loam,33.3,192,86,7.3,Potato,5.5,High,Rice
+F00436,Maha,Nuwara Eliya,Silty Loam,15.3,636,79,5.9,Tomato,23.3,Medium,Cabbage
+F00437,Maha,Badulla,Loam,30.6,305,61,5.9,Beans,19.3,High,Potato
+F00438,Maha,Nuwara Eliya,Silty Loam,16.8,229,62,6.5,Carrot,26.4,Medium,Cabbage
+F00439,Yala,Nuwara Eliya,Silty Loam,19.5,285,72,5.6,Beans,25.7,Medium,Cabbage
+F00440,Yala,Badulla,,31.1,116,88,6.9,Chili,2.2,Medium,Chili
+F00441,Yala,Jaffna,Sandy Loam,,204,72,5.9,Tomato,5.1,Medium,Maize
+F00442,Yala,Kurunegala,Loam,28.8,143,89,6.3,Potato,18.6,Medium,Brinjal
+F00443,Maha,Jaffna,Sandy Loam,25.4,274,68,5.6,Beans,19.5,Low,Onion
+F00444,Maha,Ampara,Clay Loam,29.9,345,59,5.4,Tomato,6.0,High,Rice
+F00445,Yala,Monaragala,Sandy Loam,32.8,159,70,7.4,Maize,17.6,Medium,Onion
+F00446,Maha,Matara,Loam,28.6,272,82,6.0,,4.7,Medium,Rice
+F00447,Maha,Kandy,Clay,28.9,335,93,5.5,Maize,5.5,Medium,Rice
+F00448,Yala,Jaffna,Sandy Loam,30.8,155,71,5.5,,15.2,Low,Onion
+F00449,Yala,Badulla,Loam,28.7,229,92,6.2,Beans,4.7,Low,Rice
+F00450,Maha,Kandy,Clay,30.3,227,70,5.8,Onion,17.9,High,Brinjal
+F00451,Maha,Kurunegala,Loam,24.5,191,66,5.8,Carrot,14.8,High,Onion
+F00452,Maha,Matara,Loam,26.8,184,59,6.2,Tomato,23.1,High,Carrot
+F00453,Maha,Nuwara Eliya,Silty Loam,,200,63,5.6,Beans,28.0,Low,Cabbage
+F00454,Maha,Anuradhapura,Clay Loam,30.2,252,80,6.3,Beans,18.1,High,Onion
+F00455,Maha,Jaffna,Sandy Loam,,307,82,6.3,Rice,24.0,Medium,Cabbage
+F00456,Maha,Polonnaruwa,Clay Loam,23.4,316,61,5.7,Potato,6.0,Medium,Rice
+F00457,Maha,Batticaloa,,28.8,213,84,6.6,Onion,24.2,High,Tomato
+F00458,Yala,Jaffna,Sandy Loam,33.9,229,86,5.7,Tomato,21.8,Medium,Brinjal
+F00459,Maha,Jaffna,Sandy Loam,26.7,282,79,5.7,Cabbage,5.3,Low,Rice
+F00460,Yala,Anuradhapura,Clay Loam,30.9,189,91,5.4,Beans,20.4,Medium,Brinjal
+F00461,Maha,Kurunegala,Loam,28.1,244,82,5.7,Carrot,8.0,High,Beans
+F00462,Maha,Hambantota,Sandy Loam,25.1,185,,,Rice,27.6,High,Tomato
+F00463,Yala,Kurunegala,Loam,32.4,218,64,7.1,Onion,1.5,High,Chili
+F00464,Maha,Hambantota,Sandy Loam,25.8,270,90,5.8,Rice,27.3,Low,Tomato
+F00465,Yala,Jaffna,Sandy Loam,30.2,146,60,7.1,Onion,16.2,Low,Onion
+F00466,Yala,Ampara,Clay Loam,31.1,111,82,5.9,Maize,3.0,Low,Chili
+F00467,Maha,Hambantota,Sandy Loam,28.6,386,78,7.0,Maize,2.7,Low,Chili
+F00468,Maha,Anuradhapura,Clay Loam,24.9,301,75,5.6,Beans,4.7,Medium,Rice
+F00469,Maha,Batticaloa,Sandy,24.5,275,81,6.5,Maize,8.5,Medium,Beans
+F00470,Yala,Polonnaruwa,Clay Loam,30.8,193,82,7.1,Maize,5.2,Medium,Maize
+F00471,Yala,Kurunegala,Loam,28.9,206,74,6.2,Chili,2.3,Medium,Chili
+F00472,Maha,Kurunegala,Loam,27.6,212,58,7.2,Carrot,22.9,Medium,Carrot
+F00473,Yala,Ampara,Clay Loam,,240,61,6.1,Onion,4.9,Medium,Rice
+F00474,Maha,Nuwara Eliya,Silty Loam,15.0,158,68,6.0,,25.3,Low,Carrot
+F00475,Yala,Badulla,Loam,33.0,186,63,5.6,Rice,26.4,Medium,Cabbage
+F00476,Yala,Hambantota,Sandy Loam,29.4,143,82,6.9,Carrot,5.7,High,Rice
+F00477,Maha,Anuradhapura,Clay Loam,27.3,204,92,7.3,Carrot,4.5,Low,Rice
+F00478,Maha,Anuradhapura,Clay Loam,28.2,185,76,7.3,Tomato,22.4,,Potato
+F00479,Maha,Kandy,,26.4,297,76,5.4,Rice,6.3,Low,Rice
+F00480,Maha,Ampara,Clay Loam,26.7,,66,,Carrot,5.6,Low,Rice
+F00481,Yala,Badulla,Loam,30.0,220,59,6.4,Potato,25.8,High,Tomato
+F00482,Yala,Jaffna,Sandy Loam,29.3,195,87,,Chili,5.4,High,Rice
+F00483,Yala,Kurunegala,Loam,32.5,172,73,5.7,Maize,25.2,High,Carrot
+F00484,Maha,Kandy,Clay,28.1,244,87,5.7,Rice,22.1,Medium,Brinjal
+F00485,Yala,Kandy,Clay,31.2,114,58,5.8,Maize,5.4,Medium,Maize
+F00486,Yala,Kurunegala,Loam,32.5,191,91,5.6,Cabbage,16.1,High,Brinjal
+F00487,Maha,Jaffna,Sandy Loam,27.1,402,76,5.6,Beans,17.7,Medium,Onion
+F00488,Maha,Monaragala,Sandy Loam,29.4,,79,5.4,Onion,2.6,High,Chili
+F00489,Yala,Jaffna,Sandy Loam,32.3,116,90,7.3,Onion,5.0,Medium,Maize
+F00490,Yala,Polonnaruwa,Clay Loam,,194,84,,Tomato,26.0,Medium,Tomato
+F00491,Yala,Matara,Loam,28.9,118,74,5.8,Brinjal,20.5,Low,Onion
+F00492,Maha,Anuradhapura,Clay Loam,25.0,266,71,5.4,Rice,2.6,Medium,Chili
+F00493,Yala,Ampara,Clay Loam,29.1,,83,6.8,Onion,18.8,Medium,Brinjal
+F00494,Yala,Nuwara Eliya,Silty Loam,15.7,231,67,5.6,,20.0,Medium,Potato
+F00495,Maha,Matara,Loam,27.6,343,94,5.5,Cabbage,21.7,Medium,Brinjal
+F00496,Yala,Badulla,Loam,30.9,165,79,6.2,Tomato,5.1,Low,Maize
+F00497,Maha,Jaffna,Sandy Loam,25.2,303,88,5.5,Maize,24.3,Low,Tomato
+F00498,Yala,Polonnaruwa,Clay Loam,29.7,138,60,5.9,Chili,28.3,Medium,Tomato
+F00499,Yala,Batticaloa,Sandy,32.2,210,77,7.0,Maize,21.9,Low,Carrot
+F00500,Yala,Nuwara Eliya,Silty Loam,16.4,265,90,7.2,Rice,26.0,Medium,Cabbage
+F00501,Yala,Monaragala,Sandy Loam,29.0,229,91,7.1,Chili,22.4,High,Brinjal
+F00502,Maha,Polonnaruwa,Clay Loam,23.4,274,90,6.2,Tomato,16.3,Medium,Brinjal
+F00503,Maha,Jaffna,Sandy Loam,25.3,273,87,6.7,Tomato,4.7,High,Rice
+F00504,Yala,Kurunegala,Loam,31.5,201,72,7.0,Rice,22.5,Low,Potato
+F00505,Yala,Badulla,Loam,29.8,172,91,6.0,Rice,5.4,Medium,Rice
+F00506,Maha,Kurunegala,Loam,28.0,333,89,6.9,Rice,6.1,Low,Rice
+F00507,Yala,Polonnaruwa,Clay Loam,31.9,237,75,6.6,Chili,8.9,Medium,Beans
+F00508,Maha,Kandy,Clay,27.5,266,82,6.0,Tomato,6.0,Medium,Rice
+F00509,Maha,Ampara,Clay Loam,27.6,286,81,5.6,Onion,5.4,Low,Rice
+F00510,Maha,Nuwara Eliya,Silty Loam,,200,64,5.8,Cabbage,9.2,High,Beans
+F00511,Maha,Polonnaruwa,Clay Loam,23.7,219,71,6.6,Beans,4.0,Medium,Maize
+F00512,Yala,Hambantota,,31.4,215,75,6.9,Brinjal,1.4,Low,Chili
+F00513,Maha,Anuradhapura,Clay Loam,23.4,273,62,6.2,Potato,20.2,Medium,Onion
+F00514,Maha,Anuradhapura,Clay Loam,28.0,389,81,5.3,Onion,5.5,Low,Rice
+F00515,Maha,Batticaloa,Sandy,25.5,,60,6.7,Brinjal,17.8,Medium,Onion
+F00516,Yala,Hambantota,Sandy Loam,30.1,201,93,7.1,,5.1,Low,Rice
+F00517,Yala,Badulla,Loam,30.0,191,74,5.7,Chili,1.5,Medium,Chili
+F00518,Yala,Anuradhapura,Clay Loam,32.1,176,63,6.6,Tomato,17.9,Medium,Onion
+F00519,Maha,Hambantota,Sandy Loam,25.1,313,86,5.5,Brinjal,5.1,Medium,Rice
+F00520,Maha,Anuradhapura,Clay Loam,26.8,332,60,6.8,Maize,5.3,Low,Rice
+F00521,Maha,Anuradhapura,Clay Loam,24.1,268,61,5.4,Chili,18.9,High,Brinjal
+F00522,Maha,Polonnaruwa,Clay Loam,24.7,342,79,5.9,Carrot,5.8,Medium,Rice
+F00523,Yala,Monaragala,,33.5,164,90,6.5,,4.7,Medium,Maize
+F00524,Maha,Polonnaruwa,Clay Loam,28.8,223,68,6.7,Brinjal,5.9,Medium,Rice
+F00525,Maha,Jaffna,Sandy Loam,30.6,363,91,5.4,Chili,18.2,High,Brinjal
+F00526,Maha,Anuradhapura,Clay Loam,24.7,180,75,6.8,Maize,25.4,Low,Carrot
+F00527,Yala,Badulla,Loam,28.7,112,63,7.0,Beans,4.9,Medium,Rice
+F00528,Yala,Kurunegala,Loam,29.2,136,94,5.9,Chili,26.8,Medium,Tomato
+F00529,Yala,Kandy,Clay,30.9,141,93,6.2,Carrot,1.3,High,Chili
+F00530,Maha,Monaragala,Sandy Loam,29.5,340,86,5.9,Potato,21.4,Medium,Brinjal
+F00531,Maha,Polonnaruwa,Clay Loam,,191,91,7.0,Cabbage,28.0,Low,Tomato
+F00532,Yala,Kurunegala,Loam,30.1,212,70,6.7,Chili,5.0,Medium,Maize
+F00533,Yala,Kandy,Clay,,,77,7.2,Onion,8.6,Medium,Beans
+F00534,Yala,Matara,Loam,29.7,166,,6.7,Potato,6.2,Medium,Rice
+F00535,Yala,Kandy,Clay,30.9,150,88,5.3,Potato,4.0,Low,Maize
+F00536,Maha,Polonnaruwa,Clay Loam,31.0,307,93,5.5,Onion,6.2,,Rice
+F00537,Maha,Jaffna,Sandy Loam,,364,84,5.4,Rice,17.4,Medium,Brinjal
+F00538,Maha,Monaragala,Sandy Loam,27.8,352,58,7.3,Onion,1.6,High,Chili
+F00539,Maha,Kurunegala,Loam,28.4,360,82,7.1,Beans,2.4,High,Chili
+F00540,Yala,Polonnaruwa,Clay Loam,28.4,225,94,,Tomato,5.6,Medium,Rice
+F00541,Yala,Jaffna,Sandy Loam,31.9,177,79,6.9,Onion,5.5,Medium,Rice
+F00542,Yala,Jaffna,Sandy Loam,29.2,179,87,6.2,Chili,4.8,Medium,Rice
+F00543,Yala,Matara,Loam,32.5,232,69,,Beans,1.6,Medium,Chili
+F00544,Yala,Nuwara Eliya,Silty Loam,19.6,241,73,7.1,Beans,22.7,Low,Cabbage
+F00545,Maha,Nuwara Eliya,Silty Loam,14.1,167,84,6.3,Tomato,22.1,High,Cabbage
+F00546,Yala,Kurunegala,Loam,29.4,140,89,6.8,Onion,16.3,Medium,Brinjal
+F00547,Yala,Ampara,Clay Loam,,195,58,,Rice,18.8,Medium,Onion
+F00548,Maha,Batticaloa,Sandy,28.3,370,93,5.3,Rice,,High,Tomato
+F00549,Maha,Kurunegala,Loam,29.2,,66,7.2,Brinjal,2.7,High,Chili
+F00550,Yala,Kandy,Clay,28.3,166,63,5.3,Carrot,16.9,Medium,Onion
+F00551,Maha,Jaffna,Sandy Loam,24.5,388,88,7.2,Maize,19.0,Medium,Brinjal
+F00552,Yala,Polonnaruwa,Clay Loam,28.0,126,80,5.7,Rice,21.7,High,Potato
+F00553,Yala,Polonnaruwa,Clay Loam,32.9,167,60,5.9,Chili,16.0,High,Onion
+F00554,Yala,Polonnaruwa,Clay Loam,32.1,,66,7.2,Potato,2.0,High,Chili
+F00555,Maha,Nuwara Eliya,Silty Loam,21.2,238,82,5.5,Cabbage,9.1,,Beans
+F00556,Maha,Batticaloa,Sandy,25.0,185,82,6.0,Tomato,5.3,Medium,Maize
+F00557,Yala,Kandy,Clay,33.8,142,78,6.0,Carrot,1.9,Low,Chili
+F00558,Maha,Monaragala,Sandy Loam,30.1,,93,5.6,Potato,26.4,Low,Tomato
+F00559,Maha,Batticaloa,Sandy,26.0,228,92,6.6,Rice,16.5,High,Brinjal
+F00560,Yala,Hambantota,Sandy Loam,28.8,150,79,5.4,Carrot,23.7,High,Tomato
+F00561,Maha,Hambantota,Sandy Loam,26.4,385,73,7.0,Tomato,22.4,Medium,Potato
+F00562,Yala,Nuwara Eliya,Silty Loam,17.4,231,,5.4,Rice,26.6,High,Cabbage
+F00563,Maha,Anuradhapura,Clay Loam,25.2,196,60,7.4,Rice,4.8,Low,Maize
+F00564,Maha,Nuwara Eliya,Silty Loam,17.4,299,90,6.2,Rice,23.0,Low,Carrot
+F00565,Maha,Anuradhapura,Clay Loam,23.4,388,88,6.6,Chili,5.2,Medium,Rice
+F00566,Yala,Anuradhapura,Clay Loam,29.6,213,92,6.3,Rice,4.8,Low,Rice
+F00567,Maha,Hambantota,Sandy Loam,25.8,313,67,7.1,Maize,18.8,High,Onion
+F00568,Yala,Kandy,,28.2,141,76,6.3,Tomato,27.4,Low,Tomato
+F00569,Yala,Nuwara Eliya,Silty Loam,21.1,151,84,7.1,Chili,9.2,Medium,Beans
+F00570,Maha,Anuradhapura,Clay Loam,26.4,246,78,6.8,Beans,2.9,High,Chili
+F00571,Yala,Kurunegala,Loam,32.3,140,87,5.8,Brinjal,4.8,Medium,Maize
+F00572,Maha,Nuwara Eliya,Silty Loam,,249,90,7.0,Potato,26.1,High,Carrot
+F00573,Maha,Hambantota,Sandy Loam,23.4,226,72,,Rice,4.3,Medium,Maize
+F00574,Maha,Kandy,Clay,26.9,184,80,5.9,Tomato,21.8,Low,Cabbage
+F00575,Maha,Matara,Loam,25.9,239,76,7.0,Maize,18.3,Medium,Brinjal
+F00576,Yala,Jaffna,Sandy Loam,29.0,126,78,5.5,Tomato,24.4,Medium,Carrot
+F00577,Yala,Kandy,Clay,34.0,233,84,6.8,Chili,26.6,High,Tomato
+F00578,Maha,Polonnaruwa,Clay Loam,30.4,414,69,5.4,Beans,5.0,Medium,Rice
+F00579,Yala,Batticaloa,Sandy,32.6,162,62,6.0,Tomato,19.7,Medium,Onion
+F00580,Maha,Nuwara Eliya,Silty Loam,17.0,292,77,5.7,Carrot,18.9,High,Potato
+F00581,Yala,Badulla,Loam,33.8,156,82,7.0,Beans,17.3,High,Onion
+F00582,Maha,Kandy,Clay,30.8,386,60,6.3,Brinjal,5.5,Medium,Rice
+F00583,Yala,Ampara,Clay Loam,30.2,167,91,5.5,Carrot,4.9,Medium,Maize
+F00584,Yala,Kandy,Clay,31.8,,87,6.8,Carrot,2.8,High,Chili
+F00585,Yala,Matara,Loam,30.1,240,81,5.4,Brinjal,8.2,Medium,Beans
+F00586,Yala,Hambantota,Sandy Loam,28.9,198,79,6.4,Onion,19.6,,Potato
+F00587,Yala,Badulla,Loam,29.1,148,91,7.3,Tomato,6.0,Medium,Rice
+F00588,Yala,Monaragala,Sandy Loam,30.2,228,69,6.8,Rice,29.7,High,Tomato
+F00589,Maha,Hambantota,Sandy Loam,30.3,360,66,5.3,Rice,2.9,High,Chili
+F00590,Yala,Nuwara Eliya,Silty Loam,,188,78,6.2,Maize,9.0,Medium,Beans
+F00591,Maha,Kurunegala,Loam,,244,82,7.0,Rice,1.6,Low,Chili
+F00592,Maha,Batticaloa,Sandy,29.9,246,61,5.5,Potato,20.8,High,Carrot
+F00593,Maha,Anuradhapura,Clay Loam,27.9,305,65,6.2,Onion,5.2,High,Rice
+F00594,Yala,Kandy,Clay,28.4,198,64,5.8,Cabbage,27.2,Medium,Tomato
+F00595,Yala,Jaffna,Sandy Loam,31.9,113,75,5.7,Chili,17.0,Medium,Onion
+F00596,Yala,Ampara,Clay Loam,29.9,168,71,6.9,Onion,23.8,High,Tomato
+F00597,Maha,Jaffna,Sandy Loam,26.8,274,72,5.5,Tomato,21.9,Low,Carrot
+F00598,Yala,Batticaloa,Sandy,31.6,200,79,,Brinjal,23.7,Medium,Carrot
+F00599,Yala,Polonnaruwa,Clay Loam,32.9,222,75,5.6,Onion,26.0,High,Tomato
+F00600,Maha,Hambantota,Sandy Loam,26.7,345,77,7.4,Carrot,4.6,High,Rice
+F00601,Yala,Kandy,Clay,28.2,154,78,5.8,Onion,23.2,High,Cabbage
+F00602,Maha,Batticaloa,Sandy,26.3,417,71,7.1,Chili,21.0,High,Potato
+F00603,Yala,Kandy,Clay,28.2,203,72,6.1,Rice,5.0,High,Maize
+F00604,Maha,Batticaloa,Sandy,26.0,363,83,5.7,,26.5,High,Tomato
+F00605,Yala,Anuradhapura,Clay Loam,33.7,217,,6.0,Maize,14.5,High,Onion
+F00606,Maha,Nuwara Eliya,Silty Loam,21.4,285,86,7.3,Onion,8.2,High,Beans
+F00607,Maha,Ampara,Clay Loam,26.4,369,82,5.4,Onion,4.9,High,Rice
+F00608,Yala,Nuwara Eliya,Silty Loam,21.7,,62,5.7,Carrot,7.9,Medium,Beans
+F00609,Maha,Monaragala,Sandy Loam,24.6,327,63,6.3,Maize,5.0,Medium,Maize
+F00610,Maha,Ampara,Clay Loam,26.6,227,84,,Cabbage,25.7,Medium,Tomato
+F00611,Yala,Badulla,Loam,29.4,202,83,6.2,Brinjal,4.5,Medium,Rice
+F00612,Yala,Kurunegala,Loam,32.4,130,72,6.8,Chili,4.2,Medium,Maize
+F00613,Yala,Kurunegala,Loam,32.8,151,61,5.6,Beans,1.4,High,Chili
+F00614,Yala,Kurunegala,Loam,29.4,219,87,6.6,Tomato,29.8,High,Tomato
+F00615,Yala,Hambantota,Sandy Loam,28.8,148,75,7.3,Tomato,23.1,Medium,Cabbage
+F00616,Yala,Nuwara Eliya,Silty Loam,14.5,216,70,7.2,Carrot,23.3,Low,Potato
+F00617,Maha,Kandy,,30.5,379,77,5.3,Beans,5.6,Medium,Rice
+F00618,Maha,Hambantota,Sandy Loam,30.0,367,59,7.3,Cabbage,24.0,High,Tomato
+F00619,Yala,Monaragala,Sandy Loam,30.9,240,94,6.6,Maize,15.8,Medium,Brinjal
+F00620,Maha,Matara,Loam,27.2,302,76,5.4,Cabbage,5.2,Low,Maize
+F00621,Maha,Batticaloa,Sandy,26.7,238,67,6.2,Onion,19.7,High,Potato
+F00622,Maha,Polonnaruwa,Clay Loam,30.3,185,93,6.8,Maize,21.8,High,Brinjal
+F00623,Yala,Kurunegala,Loam,32.4,218,93,6.6,,20.6,Medium,Brinjal
+F00624,Maha,Badulla,Loam,25.4,379,88,6.7,Chili,21.4,High,Brinjal
+F00625,Maha,Jaffna,Sandy Loam,29.7,338,77,5.6,Potato,21.9,Low,Brinjal
+F00626,Yala,Ampara,Clay Loam,31.4,235,82,5.5,Rice,30.1,Medium,Tomato
+F00627,Maha,Polonnaruwa,,30.1,384,69,5.9,Chili,5.9,Medium,Rice
+F00628,Yala,Jaffna,Sandy Loam,30.8,,80,5.6,Onion,19.3,High,Onion
+F00629,Yala,Kurunegala,Loam,33.9,207,75,6.6,Tomato,14.6,High,Onion
+F00630,Maha,Nuwara Eliya,Silty Loam,18.3,235,59,5.7,Potato,28.4,Low,Cabbage
+F00631,Maha,Ampara,Clay Loam,23.6,409,65,5.8,Onion,5.2,Medium,Rice
+F00632,Yala,Jaffna,Sandy Loam,30.7,215,85,5.8,Maize,6.0,High,Rice
+F00633,Yala,Polonnaruwa,Clay Loam,28.7,140,94,7.0,Potato,23.7,High,Tomato
+F00634,Yala,Nuwara Eliya,Silty Loam,15.8,207,85,6.5,Rice,23.1,Medium,Cabbage
+F00635,Maha,Hambantota,Sandy Loam,26.5,310,90,7.4,Tomato,5.5,Medium,Rice
+F00636,Maha,Monaragala,Sandy Loam,26.7,300,66,5.5,Tomato,26.3,Low,Carrot
+F00637,Maha,Hambantota,Sandy Loam,28.4,220,76,6.2,Onion,24.7,Medium,Tomato
+F00638,Maha,Hambantota,Sandy Loam,26.2,407,86,5.5,Chili,21.9,Medium,Brinjal
+F00639,Yala,Badulla,Loam,32.7,175,64,5.5,Carrot,22.2,High,Brinjal
+F00640,Yala,Polonnaruwa,Clay Loam,30.5,134,,6.8,Chili,4.0,High,Maize
+F00641,Maha,Kurunegala,Loam,27.2,368,88,6.8,Maize,17.9,Low,Brinjal
+F00642,Maha,Monaragala,Sandy Loam,24.4,286,79,6.6,Potato,8.8,High,Beans
+F00643,Maha,Jaffna,Sandy Loam,24.0,268,67,7.1,Tomato,20.6,Medium,Potato
+F00644,Maha,Polonnaruwa,Clay Loam,26.9,342,85,7.3,Rice,6.0,Low,Rice
+F00645,Maha,Jaffna,Sandy Loam,30.1,308,59,7.4,Onion,20.0,Medium,Brinjal
+F00646,Maha,Nuwara Eliya,Silty Loam,20.0,237,82,,Maize,9.1,High,Beans
+F00647,Yala,Polonnaruwa,Clay Loam,31.8,177,75,6.1,Maize,3.8,High,Maize
+F00648,Maha,Hambantota,Sandy Loam,29.1,406,62,5.6,Potato,17.7,High,Onion
+F00649,Maha,Ampara,Clay Loam,27.5,414,65,5.3,Maize,5.6,Medium,Rice
+F00650,Yala,Polonnaruwa,Clay Loam,32.9,118,62,5.8,Cabbage,4.1,,Maize
+F00651,Maha,Ampara,Clay Loam,26.4,278,82,5.4,Maize,15.2,High,Onion
+F00652,Maha,Monaragala,Sandy Loam,24.6,328,85,6.9,Carrot,22.2,Low,Brinjal
+F00653,Yala,Batticaloa,Sandy,31.0,192,83,7.3,Chili,16.6,,Brinjal
+F00654,Maha,Kurunegala,Loam,28.3,218,60,6.9,Potato,2.6,Medium,Chili
+F00655,Maha,Badulla,Loam,25.5,210,71,6.6,Maize,7.9,High,Beans
+F00656,Maha,Badulla,Loam,30.5,395,70,6.5,Onion,20.2,Low,Brinjal
+F00657,Yala,Ampara,Clay Loam,29.3,200,78,6.3,Cabbage,23.5,,Tomato
+F00658,Yala,Hambantota,Sandy Loam,29.0,160,93,6.8,Beans,6.1,Low,Rice
+F00659,Yala,Anuradhapura,Clay Loam,28.3,202,68,5.4,Onion,18.3,High,Potato
+F00660,Maha,Nuwara Eliya,Silty Loam,17.4,228,84,5.9,Maize,28.4,Medium,Cabbage
+F00661,Yala,Ampara,Clay Loam,28.3,184,91,6.0,Tomato,6.2,Medium,Rice
+F00662,Maha,Hambantota,Sandy Loam,,189,72,7.0,Brinjal,7.9,Low,Beans
+F00663,Maha,Batticaloa,Sandy,29.6,271,86,6.2,Onion,28.1,Medium,Tomato
+F00664,Yala,Nuwara Eliya,Silty Loam,20.1,262,89,6.4,Onion,8.6,High,Beans
+F00665,Maha,Jaffna,Sandy Loam,30.0,265,80,5.8,Chili,8.1,Medium,Beans
+F00666,Yala,Batticaloa,Sandy,32.2,112,74,5.6,Rice,4.2,High,Maize
+F00667,Yala,Batticaloa,Sandy,28.1,,89,5.5,Tomato,17.6,Medium,Brinjal
+F00668,Yala,Jaffna,Sandy Loam,29.0,188,,5.5,Beans,19.7,Low,Onion
+F00669,Yala,Jaffna,Sandy Loam,29.7,235,78,5.8,Cabbage,23.7,High,Potato
+F00670,Maha,Kurunegala,Loam,25.5,286,80,7.3,Rice,16.0,Medium,Brinjal
+F00671,Yala,Batticaloa,Sandy,28.3,165,65,6.1,Beans,24.5,Low,Tomato
+F00672,Maha,Badulla,Loam,29.4,273,68,6.6,Potato,22.1,Medium,Carrot
+F00673,Yala,Kurunegala,Loam,30.3,126,81,5.8,Chili,16.2,Medium,Onion
+F00674,Maha,Badulla,Loam,27.3,187,66,6.1,Rice,,,Beans
+F00675,Maha,Kurunegala,Loam,28.5,203,68,7.2,Potato,23.6,Medium,Cabbage
+F00676,Yala,Badulla,Loam,33.8,144,87,5.8,Tomato,3.8,Low,Maize
+F00677,Yala,Ampara,Clay Loam,31.6,209,89,6.3,Cabbage,4.7,High,Rice
+F00678,Yala,Kandy,Clay,31.5,211,71,,Carrot,20.0,High,Potato
+F00679,Yala,Polonnaruwa,Clay Loam,28.0,224,87,5.7,Tomato,24.9,Low,Tomato
+F00680,Maha,Polonnaruwa,Clay Loam,29.4,301,94,5.4,Rice,4.8,High,Rice
+F00681,Yala,Batticaloa,,30.6,125,58,5.6,Onion,21.3,High,Onion
+F00682,Yala,Jaffna,Sandy Loam,28.6,173,84,6.1,Cabbage,20.0,High,Brinjal
+F00683,Yala,Jaffna,Sandy Loam,33.7,137,71,6.9,Potato,1.8,Medium,Chili
+F00684,Yala,Nuwara Eliya,Silty Loam,18.7,217,66,5.6,Cabbage,20.7,Low,Carrot
+F00685,Yala,Anuradhapura,Clay Loam,31.7,175,62,7.4,Chili,15.5,Medium,Onion
+F00686,Maha,Ampara,Clay Loam,28.7,318,61,6.0,Brinjal,6.1,High,Rice
+F00687,Maha,Hambantota,Sandy Loam,31.0,282,81,6.9,Tomato,23.7,Low,Carrot
+F00688,Yala,Kandy,Clay,33.8,193,74,6.7,Beans,25.0,High,Cabbage
+F00689,Yala,Hambantota,Sandy Loam,32.3,185,87,6.7,Carrot,16.4,Medium,Brinjal
+F00690,Maha,Hambantota,Sandy Loam,23.1,333,80,6.8,Cabbage,23.3,Low,Carrot
+F00691,Yala,Ampara,Clay Loam,31.5,229,68,7.0,Carrot,16.7,High,Brinjal
+F00692,Yala,Kurunegala,Loam,28.9,207,88,7.3,Brinjal,5.6,High,Rice
+F00693,Maha,Badulla,Loam,26.8,199,66,7.4,,5.6,High,Rice
+F00694,Yala,Anuradhapura,Clay Loam,33.1,215,91,5.8,Onion,20.7,Medium,Brinjal
+F00695,Yala,Matara,Loam,32.7,198,80,5.9,Carrot,26.0,High,Carrot
+F00696,Yala,Kurunegala,Loam,32.2,148,88,5.7,Carrot,17.9,Medium,Onion
+F00697,Maha,Hambantota,Sandy Loam,25.0,318,69,5.9,Chili,6.3,Low,Rice
+F00698,Yala,Jaffna,Sandy Loam,29.8,209,86,7.2,Rice,4.9,Medium,Rice
+F00699,Yala,Hambantota,Sandy Loam,33.0,213,84,6.4,Chili,25.7,Low,Tomato
+F00700,Yala,Nuwara Eliya,Silty Loam,20.5,268,86,5.5,Chili,8.1,Medium,Beans
+F00701,Yala,Nuwara Eliya,Silty Loam,19.9,216,72,5.4,Tomato,18.3,Low,Potato
+F00702,Yala,Anuradhapura,Clay Loam,30.2,137,82,6.7,Onion,3.0,Medium,Chili
+F00703,Yala,Kurunegala,Loam,33.7,186,94,6.3,Tomato,5.8,High,Rice
+F00704,Maha,Kurunegala,Loam,26.0,266,81,5.6,Potato,23.3,High,Carrot
+F00705,Yala,Monaragala,Sandy Loam,28.2,125,74,5.3,Brinjal,4.3,High,Maize
+F00706,Yala,Polonnaruwa,Clay Loam,33.8,221,70,,Potato,5.0,High,Rice
+F00707,Yala,Badulla,Loam,31.5,124,84,5.8,Maize,2.5,Medium,Chili
+F00708,Maha,Matara,Loam,26.7,336,78,5.8,Onion,5.0,Low,Rice
+F00709,Yala,Kurunegala,Loam,32.8,164,65,5.9,Chili,2.9,Low,Chili
+F00710,Maha,Jaffna,Sandy Loam,28.6,349,80,6.2,Potato,5.7,Medium,Rice
+F00711,Maha,Kandy,Clay,26.7,248,60,6.9,Maize,15.8,High,Brinjal
+F00712,Yala,Badulla,Loam,28.4,155,,5.9,Tomato,5.3,Low,Maize
+F00713,Maha,Kurunegala,Loam,26.4,185,73,5.3,Tomato,5.8,High,Rice
+F00714,Maha,Hambantota,Sandy Loam,23.1,252,84,5.3,Cabbage,20.2,Low,Brinjal
+F00715,Yala,Nuwara Eliya,Silty Loam,17.5,195,92,6.4,Beans,23.4,Medium,Carrot
+F00716,Maha,Matara,Loam,24.3,299,69,5.3,Chili,5.0,Medium,Maize
+F00717,Yala,Nuwara Eliya,,16.4,147,63,5.6,Carrot,22.3,Medium,Potato
+F00718,Maha,Badulla,Loam,31.0,375,87,6.7,Carrot,17.5,Medium,Brinjal
+F00719,Yala,Monaragala,Sandy Loam,30.1,182,83,6.2,Maize,5.4,High,Rice
+F00720,Yala,Badulla,Loam,32.6,239,82,6.9,Rice,26.3,High,Tomato
+F00721,Yala,Hambantota,Sandy Loam,33.7,176,62,6.7,Maize,8.7,Medium,Beans
+F00722,Yala,Matara,Loam,30.5,186,,5.4,Tomato,22.6,Low,Cabbage
+F00723,Maha,Jaffna,Sandy Loam,24.4,285,64,6.7,Brinjal,20.9,Medium,Onion
+F00724,Maha,Polonnaruwa,Clay Loam,27.7,276,66,6.5,Beans,1.7,Medium,Chili
+F00725,Maha,Ampara,Clay Loam,36.5,374,63,5.4,Brinjal,6.0,Medium,Rice
+F00726,Maha,Batticaloa,Sandy,27.8,340,92,5.9,Beans,5.6,High,Rice
+F00727,Yala,Kandy,Clay,29.9,232,70,6.2,Maize,20.5,Medium,Carrot
+F00728,Yala,Jaffna,Sandy Loam,29.0,,94,7.2,Cabbage,15.7,Medium,Brinjal
+F00729,Yala,Polonnaruwa,Clay Loam,31.9,234,70,7.0,Beans,25.0,Medium,Cabbage
+F00730,Yala,Polonnaruwa,Clay Loam,33.8,175,90,5.4,Cabbage,22.3,Low,Brinjal
+F00731,Maha,Jaffna,Sandy Loam,23.2,342,94,6.2,Carrot,5.8,High,Rice
+F00732,Maha,Anuradhapura,Clay Loam,29.4,273,93,6.8,Rice,5.7,Medium,Rice
+F00733,Yala,Kurunegala,Loam,29.0,118,58,5.5,Rice,25.9,High,Tomato
+F00734,Maha,Ampara,Clay Loam,28.4,236,68,5.8,Carrot,20.5,High,Onion
+F00735,Yala,Nuwara Eliya,Silty Loam,19.4,267,82,7.3,Brinjal,26.8,High,Cabbage
+F00736,Maha,Badulla,Loam,24.9,,78,6.3,Chili,4.9,High,Rice
+F00737,Yala,Batticaloa,Sandy,30.9,236,68,6.4,Brinjal,3.8,Medium,Maize
+F00738,Maha,Ampara,Clay Loam,23.3,370,70,6.5,Carrot,4.8,Low,Rice
+F00739,Maha,Polonnaruwa,Clay Loam,23.4,389,,7.1,Chili,4.9,High,Rice
+F00740,Maha,Batticaloa,Sandy,30.0,235,65,6.5,Potato,18.7,High,Onion
+F00741,Maha,Batticaloa,Sandy,28.6,315,65,,Maize,24.0,High,Cabbage
+F00742,Yala,Kandy,Clay,33.8,,77,6.3,Beans,2.8,Low,Chili
+F00743,Maha,Nuwara Eliya,Silty Loam,20.3,197,81,6.5,Maize,9.0,Medium,Beans
+F00744,Yala,Kandy,Clay,32.9,114,82,,Brinjal,15.9,Low,Onion
+F00745,Yala,Nuwara Eliya,Silty Loam,18.9,213,64,7.4,Tomato,22.6,Low,Carrot
+F00746,Maha,Nuwara Eliya,Silty Loam,17.4,193,64,6.1,Chili,22.1,Medium,Potato
+F00747,Yala,Hambantota,,31.0,195,,7.1,Potato,22.0,Medium,Cabbage
+F00748,Yala,Badulla,Loam,31.0,126,87,6.2,Onion,1.9,High,Chili
+F00749,Maha,Polonnaruwa,Clay Loam,24.1,331,76,6.2,Brinjal,5.9,Medium,Rice
+F00750,Yala,Matara,Loam,31.1,205,71,7.1,Chili,19.4,Low,Onion
+F00751,Yala,Jaffna,Sandy Loam,31.2,165,75,5.9,Brinjal,4.8,High,Maize
+F00752,Maha,Monaragala,Sandy Loam,29.7,315,90,7.3,Carrot,18.1,Low,Brinjal
+F00753,Yala,Kurunegala,Loam,29.1,164,87,6.6,Onion,18.4,High,Brinjal
+F00754,Maha,Ampara,Clay Loam,29.8,237,82,5.5,Onion,26.8,High,Tomato
+F00755,Maha,Hambantota,Sandy Loam,29.0,355,65,6.1,Brinjal,27.6,Medium,Cabbage
+F00756,Yala,Matara,Loam,33.3,230,74,6.6,Maize,22.5,High,Brinjal
+F00757,Yala,Nuwara Eliya,Silty Loam,16.5,260,60,7.3,Potato,27.8,High,Cabbage
+F00758,Yala,Nuwara Eliya,Silty Loam,20.1,151,64,5.5,Onion,7.9,,Beans
+F00759,Yala,Ampara,Clay Loam,,120,90,7.3,Rice,20.1,Medium,Onion
+F00760,Maha,Batticaloa,Sandy,26.6,278,89,6.0,Brinjal,5.8,Low,Rice
+F00761,Yala,Ampara,Clay Loam,31.7,204,66,7.2,Maize,19.3,High,Onion
+F00762,Yala,Nuwara Eliya,Silty Loam,17.1,167,65,5.4,Potato,28.3,Low,Cabbage
+F00763,Maha,Hambantota,Sandy Loam,29.1,251,85,5.6,Beans,17.2,Medium,Brinjal
+F00764,Yala,Nuwara Eliya,Silty Loam,21.1,206,59,6.0,Cabbage,8.4,Low,Beans
+F00765,Yala,Badulla,Loam,32.6,132,60,6.0,Tomato,16.6,Medium,Onion
+F00766,Maha,Hambantota,Sandy Loam,24.4,454,82,5.9,Onion,5.1,Medium,Maize
+F00767,Yala,Kurunegala,Loam,28.6,203,94,5.5,Brinjal,25.1,,Tomato
+F00768,Yala,Ampara,Clay Loam,32.7,171,92,6.3,Carrot,6.2,Medium,Rice
+F00769,Maha,Kandy,Clay,24.0,188,83,7.1,Tomato,,High,Brinjal
+F00770,Maha,Polonnaruwa,Clay Loam,28.9,223,71,5.5,Carrot,4.3,Medium,Maize
+F00771,Maha,Anuradhapura,Clay Loam,30.8,300,80,5.7,Carrot,6.1,Low,Rice
+F00772,Maha,Kandy,Clay,23.0,247,67,6.9,Brinjal,7.8,High,Beans
+F00773,Yala,Matara,Loam,33.7,148,86,7.3,Brinjal,15.9,High,Onion
+F00774,Yala,Kandy,Clay,33.5,,94,6.5,Potato,23.9,High,Tomato
+F00775,Maha,Kurunegala,Loam,26.8,398,86,7.3,Potato,21.9,High,Brinjal
+F00776,Maha,Polonnaruwa,Clay Loam,29.5,411,86,6.2,Beans,5.8,Medium,Rice
+F00777,Maha,Batticaloa,Sandy,28.1,325,68,6.3,Maize,7.8,Medium,Beans
+F00778,Yala,Jaffna,Sandy Loam,30.9,229,61,,Rice,20.1,Low,Potato
+F00779,Maha,Anuradhapura,Clay Loam,26.0,417,74,6.2,Maize,5.5,High,Rice
+F00780,Maha,Kandy,Clay,27.1,271,92,6.9,Onion,23.8,Medium,Tomato
+F00781,Yala,Badulla,Loam,30.7,219,86,7.1,Carrot,30.1,Medium,Tomato
+F00782,Maha,Nuwara Eliya,Silty Loam,16.3,263,86,6.3,Brinjal,19.8,Medium,Carrot
+F00783,Maha,Kandy,Clay,26.7,364,58,5.7,Potato,5.1,Medium,Rice
+F00784,Maha,Batticaloa,Sandy,28.4,286,81,6.6,Brinjal,,High,Tomato
+F00785,Maha,Kandy,,27.8,295,72,6.9,Chili,4.9,High,Rice
+F00786,Yala,Polonnaruwa,Clay Loam,29.7,189,61,6.4,Beans,23.6,High,Tomato
+F00787,Yala,Jaffna,Sandy Loam,28.7,154,64,7.0,Maize,22.0,Low,Potato
+F00788,Maha,Kandy,Clay,28.7,369,86,5.8,Onion,4.9,Medium,Rice
+F00789,Yala,Hambantota,Sandy Loam,28.8,142,75,5.4,Carrot,4.9,Medium,Rice
+F00790,Maha,Jaffna,Sandy Loam,29.6,405,74,6.0,Rice,4.6,Medium,Maize
+F00791,Maha,Anuradhapura,Clay Loam,24.5,200,70,6.9,Potato,25.1,Low,Tomato
+F00792,Yala,Batticaloa,Sandy,32.9,226,71,6.6,Beans,21.0,High,Potato
+F00793,Maha,Kandy,Clay,25.3,314,92,6.0,Chili,6.3,Medium,Rice
+F00794,Yala,Batticaloa,Sandy,33.6,124,76,5.7,Carrot,1.3,Medium,Chili
+F00795,Maha,Batticaloa,Sandy,24.5,395,90,6.6,Chili,31.1,Medium,Brinjal
+F00796,Yala,Kandy,Clay,30.3,191,90,6.2,Potato,27.3,Low,Tomato
+F00797,Maha,Kandy,Clay,25.2,282,74,6.1,Chili,5.1,Medium,Rice
+F00798,Yala,Hambantota,Sandy Loam,33.5,137,76,,Potato,18.8,Low,Onion
+F00799,Maha,Badulla,Loam,23.5,282,83,6.5,Chili,29.0,Medium,Tomato
+F00800,Maha,Hambantota,Sandy Loam,,245,59,6.5,Carrot,23.4,Medium,Potato
+F00801,Maha,Matara,Loam,29.6,260,71,7.3,Chili,4.6,Medium,Rice
+F00802,Maha,Jaffna,Sandy Loam,27.2,279,75,6.0,Cabbage,2.9,Medium,Chili
+F00803,Yala,Ampara,Clay Loam,30.8,235,71,6.4,Carrot,16.1,Medium,Onion
+F00804,Maha,Matara,Loam,24.9,,69,5.8,Onion,24.3,Medium,Carrot
+F00805,Yala,Nuwara Eliya,Silty Loam,21.1,160,92,6.6,Cabbage,8.5,Medium,Beans
+F00806,Maha,Batticaloa,Sandy,26.0,314,93,5.7,Brinjal,17.1,Medium,Brinjal
+F00807,Maha,Jaffna,Sandy Loam,26.0,250,63,6.0,Rice,4.0,High,Maize
+F00808,Yala,Kandy,Clay,31.5,128,59,6.5,Beans,5.3,Medium,Maize
+F00809,Yala,Kurunegala,Loam,31.7,140,60,5.7,Brinjal,1.8,Medium,Chili
+F00810,Maha,Hambantota,Sandy Loam,28.1,394,73,5.4,Cabbage,24.6,Medium,Carrot
+F00811,Maha,Badulla,Loam,25.3,272,86,5.9,Tomato,5.0,Medium,Rice
+F00812,Maha,Ampara,Clay Loam,24.8,270,64,6.6,Rice,17.4,Medium,Brinjal
+F00813,Yala,Kandy,Clay,30.6,121,59,6.1,Cabbage,14.6,Medium,Onion
+F00814,Yala,Batticaloa,Sandy,29.0,166,74,6.3,Rice,23.3,Medium,Carrot
+F00815,Maha,Kurunegala,Loam,28.0,396,61,5.5,Maize,4.9,Medium,Maize
+F00816,Yala,Monaragala,Sandy Loam,28.3,168,68,6.4,Rice,5.7,Medium,Rice
+F00817,Maha,Badulla,,28.9,337,64,5.8,Carrot,24.6,Low,Carrot
+F00818,Yala,Polonnaruwa,Clay Loam,32.3,202,69,5.6,Rice,22.9,Low,Carrot
+F00819,Maha,Polonnaruwa,Clay Loam,29.2,280,78,7.3,Beans,24.2,Medium,Cabbage
+F00820,Yala,Badulla,Loam,29.8,203,87,6.3,Tomato,28.7,High,Tomato
+F00821,Yala,Kandy,,32.8,126,78,6.2,Onion,5.0,Medium,Maize
+F00822,Maha,Kurunegala,Loam,26.7,271,84,6.6,Carrot,5.4,Low,Rice
+F00823,Maha,Anuradhapura,Clay Loam,27.6,375,66,6.3,Rice,6.3,High,Rice
+F00824,Yala,Hambantota,Sandy Loam,,186,92,6.4,Potato,18.7,Medium,Brinjal
+F00825,Maha,Hambantota,,28.0,382,85,6.3,Tomato,19.0,Low,Brinjal
+F00826,Yala,Matara,Loam,28.2,188,83,7.0,Cabbage,5.6,Medium,Rice
+F00827,Yala,Matara,Loam,31.6,144,86,6.7,Maize,1.3,High,Chili
+F00828,Maha,Kurunegala,Loam,27.3,342,63,5.3,Carrot,24.4,Medium,Carrot
+F00829,Maha,Nuwara Eliya,Silty Loam,15.3,246,83,7.4,Tomato,20.0,Medium,Carrot
+F00830,Yala,Ampara,Clay Loam,31.8,204,92,7.1,Potato,20.3,Low,Brinjal
+F00831,Maha,Monaragala,Sandy Loam,,207,66,6.4,Carrot,1.6,Low,Chili
+F00832,Maha,Kandy,Clay,,352,91,7.4,Potato,5.4,High,Rice
+F00833,Maha,Hambantota,Sandy Loam,26.3,286,61,5.7,Potato,19.5,Medium,Potato
+F00834,Maha,Batticaloa,Sandy,28.6,184,70,5.5,Tomato,17.8,Medium,Onion
+F00835,Maha,Anuradhapura,Clay Loam,25.3,403,68,7.1,Beans,5.2,Medium,Rice
+F00836,Maha,Ampara,Clay Loam,27.1,365,90,6.0,Maize,4.9,Low,Rice
+F00837,Yala,Anuradhapura,Clay Loam,,217,68,5.7,Potato,22.0,High,Potato
+F00838,Yala,Polonnaruwa,Clay Loam,31.2,136,86,7.4,Onion,15.6,Medium,Onion
+F00839,Maha,Batticaloa,Sandy,30.7,197,89,5.8,Carrot,4.9,Low,Rice
+F00840,Maha,Badulla,Loam,29.0,261,73,6.3,Onion,4.6,Medium,Maize
+F00841,Yala,Batticaloa,Sandy,32.7,202,87,6.7,Cabbage,26.6,High,Tomato
+F00842,Yala,Batticaloa,Sandy,30.6,232,74,7.2,Brinjal,25.5,Medium,Carrot
+F00843,Yala,Anuradhapura,Clay Loam,32.4,174,92,7.0,Tomato,24.9,Low,Tomato
+F00844,Yala,Polonnaruwa,Clay Loam,33.4,235,92,7.3,Brinjal,25.2,Low,Tomato
+F00845,Maha,Nuwara Eliya,Silty Loam,14.5,175,77,6.1,Onion,25.2,High,Carrot
+F00846,Maha,Jaffna,Sandy Loam,23.5,360,88,5.4,Potato,27.0,Low,Tomato
+F00847,Maha,Monaragala,Sandy Loam,28.3,218,79,5.9,Carrot,5.3,Low,Rice
+F00848,Yala,Jaffna,Sandy Loam,31.8,202,72,6.0,Tomato,20.6,High,Brinjal
+F00849,Yala,Monaragala,Sandy Loam,32.6,227,91,5.9,Potato,22.5,Medium,Brinjal
+F00850,Maha,Badulla,Loam,26.6,220,87,6.6,Carrot,23.9,Medium,Tomato
+F00851,Yala,Ampara,Clay Loam,31.6,164,64,6.8,Cabbage,,Medium,Onion
+F00852,Maha,Anuradhapura,Clay Loam,25.9,266,65,6.9,Tomato,29.2,Medium,Tomato
+F00853,Maha,Jaffna,Sandy Loam,25.5,353,89,7.2,Onion,27.4,Low,Tomato
+F00854,Maha,Jaffna,Sandy Loam,30.3,258,77,6.6,Beans,26.4,Medium,Cabbage
+F00855,Maha,Kurunegala,Loam,27.3,182,88,6.2,Beans,5.1,Medium,Rice
+F00856,Yala,Kandy,Clay,28.2,120,85,6.5,Rice,30.4,Low,Tomato
+F00857,Yala,Matara,Loam,32.7,165,80,6.7,Onion,17.5,Medium,Onion
+F00858,Yala,Kandy,,33.4,130,61,5.8,Maize,15.8,Medium,Onion
+F00859,Yala,Monaragala,Sandy Loam,28.0,139,82,5.8,,,Medium,Maize
+F00860,Maha,Anuradhapura,Clay Loam,29.2,244,93,5.7,Carrot,4.5,Medium,Rice
+F00861,Maha,Matara,Loam,29.4,332,74,5.5,Onion,21.8,Low,Potato
+F00862,Yala,Kandy,Clay,29.8,185,81,5.4,Tomato,9.1,Medium,Beans
+F00863,Maha,Ampara,Clay Loam,30.4,220,72,5.5,Brinjal,6.2,High,Rice
+F00864,Maha,Ampara,Clay Loam,26.7,387,60,6.5,Brinjal,5.3,High,Rice
+F00865,Yala,Anuradhapura,Clay Loam,30.9,141,59,5.3,Chili,4.2,Low,Maize
+F00866,Maha,Hambantota,Sandy Loam,27.2,229,67,7.4,Rice,4.6,High,Rice
+F00867,Yala,Jaffna,Sandy Loam,31.3,133,76,6.4,Brinjal,,Medium,Chili
+F00868,Yala,Jaffna,Sandy Loam,32.9,173,74,5.4,Brinjal,7.9,Medium,Beans
+F00869,Yala,Jaffna,Sandy Loam,33.4,213,75,5.5,Carrot,22.3,High,Carrot
+F00870,Maha,Matara,Loam,24.3,202,89,6.8,Cabbage,4.5,High,Rice
+F00871,Maha,Kurunegala,Loam,26.1,301,63,7.1,Brinjal,6.2,High,Rice
+F00872,Yala,Jaffna,Sandy Loam,28.0,232,77,6.1,Maize,29.9,Medium,Tomato
+F00873,Maha,Badulla,Loam,25.1,367,66,5.9,Cabbage,4.2,Low,Maize
+F00874,Maha,Polonnaruwa,Clay Loam,23.0,245,65,5.5,Brinjal,23.4,High,Carrot
+F00875,Yala,Nuwara Eliya,Silty Loam,17.3,240,65,7.4,,26.2,Low,Cabbage
+F00876,Maha,Matara,Loam,25.4,286,70,6.6,Potato,14.6,High,Onion
+F00877,Maha,Jaffna,Sandy Loam,28.3,404,88,6.5,Carrot,17.1,High,Brinjal
+F00878,Yala,Jaffna,Sandy Loam,32.8,162,89,7.4,,1.5,Medium,Chili
+F00879,Yala,Nuwara Eliya,Silty Loam,18.4,155,83,6.2,Carrot,22.2,Medium,Potato
+F00880,Yala,Polonnaruwa,Clay Loam,,176,76,6.5,Tomato,4.8,Medium,Maize
+F00881,Yala,Nuwara Eliya,Silty Loam,14.3,262,67,6.4,Carrot,19.6,High,Potato
+F00882,Yala,Kurunegala,Loam,33.5,145,74,6.6,Maize,2.3,,Chili
+F00883,Yala,Monaragala,Sandy Loam,30.5,185,87,6.5,Onion,16.2,Medium,Brinjal
+F00884,Maha,Ampara,Clay Loam,29.5,573,73,7.1,Carrot,5.7,Medium,Rice
+F00885,Yala,Ampara,Clay Loam,28.8,184,73,7.0,Potato,3.0,Medium,Chili
+F00886,Yala,Kandy,Clay,31.1,172,70,6.3,Beans,4.7,High,Maize
+F00887,Yala,Kandy,,32.3,,65,6.3,Onion,1.9,High,Chili
+F00888,Maha,Hambantota,Sandy Loam,27.0,391,82,6.4,Beans,25.2,High,Tomato
+F00889,Maha,Nuwara Eliya,Silty Loam,21.6,184,77,6.1,Rice,9.2,Medium,Beans
+F00890,Maha,Nuwara Eliya,Silty Loam,19.0,286,71,6.1,Carrot,24.4,High,Carrot
+F00891,Maha,Hambantota,Sandy Loam,25.1,322,72,5.8,Brinjal,14.8,Medium,Onion
+F00892,Maha,Monaragala,Sandy Loam,28.8,186,69,6.8,Beans,20.8,Medium,Carrot
+F00893,Yala,Nuwara Eliya,,18.3,149,79,6.8,Brinjal,21.5,Medium,Carrot
+F00894,Yala,Kurunegala,Loam,28.5,116,83,6.9,Maize,27.1,Medium,Tomato
+F00895,Yala,Badulla,Loam,29.0,147,88,6.0,,23.7,Low,Tomato
+F00896,Maha,Polonnaruwa,Clay Loam,25.0,201,81,7.1,Chili,23.9,Medium,Tomato
+F00897,Yala,Badulla,Loam,30.6,160,67,5.7,Carrot,4.3,Medium,Maize
+F00898,Yala,Kurunegala,Loam,29.4,136,92,5.4,Carrot,6.2,Medium,Rice
+F00899,Yala,Batticaloa,Sandy,31.5,170,74,5.4,Carrot,19.8,Medium,Carrot
+F00900,Yala,Jaffna,Sandy Loam,28.7,194,79,5.7,Beans,15.8,Medium,Onion
+F00901,Yala,Batticaloa,Sandy,33.9,162,74,7.1,,2.6,Medium,Chili
+F00902,Maha,Hambantota,Sandy Loam,35.3,383,67,6.0,,19.3,Low,Potato
+F00903,Maha,Jaffna,Sandy Loam,26.7,268,71,6.4,Carrot,24.1,High,Potato
+F00904,Yala,Polonnaruwa,Clay Loam,33.1,178,71,6.4,Rice,1.7,Medium,Chili
+F00905,Maha,Badulla,Loam,24.3,396,77,6.2,Maize,25.5,Low,Tomato
+F00906,Maha,Jaffna,Sandy Loam,28.2,416,70,7.1,Beans,23.7,High,Tomato
+F00907,Maha,Polonnaruwa,Clay Loam,23.5,220,82,7.0,,2.5,Medium,Chili
+F00908,Yala,Jaffna,Sandy Loam,30.1,124,79,5.4,Tomato,3.8,Low,Maize
+F00909,Maha,Polonnaruwa,Clay Loam,29.2,365,68,5.5,Potato,6.1,Medium,Rice
+F00910,Yala,Matara,Loam,30.9,204,73,6.7,Beans,18.1,Medium,Potato
+F00911,Maha,Monaragala,Sandy Loam,26.3,318,81,5.5,Maize,15.4,High,Onion
+F00912,Maha,Matara,Loam,24.2,391,62,6.3,Onion,1.4,Low,Chili
+F00913,Maha,Monaragala,Sandy Loam,29.5,375,81,5.8,Carrot,5.1,High,Rice
+F00914,Maha,Batticaloa,Sandy,30.8,187,75,6.9,Rice,4.8,Medium,Rice
+F00915,Maha,Anuradhapura,Clay Loam,25.5,198,64,6.5,Chili,4.6,High,Rice
+F00916,Yala,Badulla,Loam,33.3,129,78,6.6,Onion,5.1,High,Maize
+F00917,Yala,Matara,Loam,29.3,167,63,6.2,Beans,21.8,Medium,Potato
+F00918,Maha,Monaragala,Sandy Loam,26.1,374,65,7.0,Cabbage,6.1,Medium,Rice
+F00919,Yala,Monaragala,Sandy Loam,29.7,131,74,5.6,Rice,7.6,High,Beans
+F00920,Yala,Polonnaruwa,Clay Loam,33.8,140,81,7.1,Brinjal,20.4,Low,Onion
+F00921,Yala,Anuradhapura,Clay Loam,29.6,166,72,7.1,Cabbage,19.4,,Onion
+F00922,Maha,Nuwara Eliya,Silty Loam,18.6,146,74,6.3,Maize,20.3,Medium,Potato
+F00923,Yala,Monaragala,Sandy Loam,31.9,172,88,6.1,Carrot,21.3,Medium,Brinjal
+F00924,Maha,Polonnaruwa,Clay Loam,23.4,220,86,5.4,Beans,19.8,Low,Brinjal
+F00925,Maha,Polonnaruwa,Clay Loam,29.0,417,80,5.9,Maize,6.1,Low,Rice
+F00926,Maha,Monaragala,Sandy Loam,23.9,351,65,7.4,Brinjal,18.4,Low,Onion
+F00927,Yala,Hambantota,Sandy Loam,33.3,223,92,7.3,Tomato,29.1,Medium,Tomato
+F00928,Maha,Batticaloa,Sandy,29.8,415,90,6.0,Tomato,18.2,High,Brinjal
+F00929,Maha,Polonnaruwa,Clay Loam,25.7,325,78,6.7,Cabbage,5.7,Medium,Rice
+F00930,Yala,Anuradhapura,Clay Loam,30.8,189,72,6.6,Rice,25.8,Low,Tomato
+F00931,Maha,Polonnaruwa,Clay Loam,23.1,281,74,6.7,Tomato,5.5,Low,Rice
+F00932,Yala,Anuradhapura,Clay Loam,32.7,164,63,6.2,Potato,18.2,High,Onion
+F00933,Yala,Polonnaruwa,Clay Loam,30.0,132,69,5.3,Carrot,19.9,High,Carrot
+F00934,Maha,Kandy,Clay,30.0,315,75,6.9,Carrot,5.8,Low,Rice
+F00935,Maha,Ampara,Clay Loam,24.3,279,58,5.6,Onion,20.3,High,Carrot
+F00936,Yala,Hambantota,Sandy Loam,29.3,171,81,6.8,Chili,23.3,High,Carrot
+F00937,Maha,Batticaloa,Sandy,27.4,416,94,,Maize,5.9,Medium,Rice
+F00938,Yala,Badulla,Loam,31.1,183,72,6.4,Carrot,22.1,Low,Carrot
+F00939,Maha,Badulla,Loam,26.0,221,85,6.7,Chili,20.9,High,Brinjal
+F00940,Yala,Kurunegala,Loam,28.3,145,92,6.6,Tomato,5.8,Medium,Rice
+F00941,Maha,Batticaloa,Sandy,26.6,315,63,6.3,Cabbage,4.4,Medium,Maize
+F00942,Maha,Ampara,Clay Loam,28.6,300,66,6.4,Rice,4.8,Low,Rice
+F00943,Maha,Badulla,Loam,27.8,235,74,6.7,Potato,15.9,Medium,Brinjal
+F00944,Yala,Anuradhapura,Clay Loam,30.3,240,81,6.7,Onion,30.0,Medium,Tomato
+F00945,Maha,Ampara,Clay Loam,28.8,342,62,5.8,Onion,4.7,High,Rice
+F00946,Yala,Batticaloa,Sandy,30.2,142,93,5.8,Cabbage,2.7,High,Chili
+F00947,Maha,Jaffna,Sandy Loam,29.0,368,62,6.0,,4.5,Medium,Rice
+F00948,Yala,Batticaloa,Sandy,28.0,181,58,5.7,Onion,4.2,Medium,Maize
+F00949,Yala,Monaragala,Sandy Loam,30.5,138,76,7.3,Tomato,1.4,Medium,Chili
+F00950,Yala,Monaragala,Sandy Loam,31.7,238,88,7.1,Rice,5.3,High,Rice
+F00951,Maha,Jaffna,Sandy Loam,27.8,356,93,6.4,Beans,26.7,High,Tomato
+F00952,Yala,Ampara,Clay Loam,29.6,163,63,6.7,Potato,23.3,Low,Cabbage
+F00953,Maha,Kurunegala,Loam,24.3,193,74,6.7,Cabbage,15.6,High,Onion
+F00954,Yala,Anuradhapura,Clay Loam,32.3,179,90,5.5,Chili,,Medium,Tomato
+F00955,Yala,Batticaloa,Sandy,31.3,190,74,6.4,Potato,3.1,High,Chili
+F00956,Yala,Kandy,Clay,29.8,161,61,7.3,Rice,21.5,Medium,Potato
+F00957,Yala,Monaragala,Sandy Loam,28.5,145,94,,Cabbage,4.9,Medium,Rice
+F00958,Yala,Ampara,Clay Loam,31.3,235,,6.1,Brinjal,26.2,Medium,Tomato
+F00959,Yala,Nuwara Eliya,Silty Loam,16.3,227,93,6.2,Maize,18.6,Medium,Potato
+F00960,Yala,Ampara,,28.7,237,74,5.3,Cabbage,8.8,High,Beans
+F00961,Maha,Kandy,Clay,26.3,203,86,5.9,Brinjal,27.8,High,Tomato
+F00962,Yala,Ampara,Clay Loam,31.9,120,65,5.5,Cabbage,5.2,Medium,Maize
+F00963,Yala,Jaffna,Sandy Loam,30.2,174,72,5.3,Brinjal,22.4,High,Carrot
+F00964,Yala,Polonnaruwa,Clay Loam,29.4,180,74,5.7,Tomato,4.9,Low,Rice
+F00965,Maha,Kurunegala,Loam,27.0,185,69,5.7,Beans,4.1,Medium,Maize
+F00966,Yala,Matara,Loam,30.1,,93,7.0,Rice,5.7,High,Rice
+F00967,Maha,Monaragala,Sandy Loam,30.4,236,85,7.0,Chili,5.8,Low,Rice
+F00968,Yala,Ampara,Clay Loam,30.6,207,82,6.4,,19.9,High,Onion
+F00969,Yala,Hambantota,Sandy Loam,29.0,209,84,7.0,Carrot,6.0,High,Rice
+F00970,Maha,Nuwara Eliya,Silty Loam,18.3,219,78,7.3,Cabbage,21.9,High,Cabbage
+F00971,Maha,Badulla,Loam,26.4,389,61,7.4,Chili,16.4,Medium,Brinjal
+F00972,Yala,Kandy,Clay,33.6,163,65,6.1,Maize,21.4,Medium,Onion
+F00973,Maha,Badulla,Loam,27.6,295,70,7.3,Brinjal,8.9,High,Beans
+F00974,Maha,Matara,Loam,27.3,341,62,5.4,Carrot,18.6,Low,Potato
+F00975,Yala,Monaragala,Sandy Loam,29.6,173,64,6.1,Tomato,20.0,Medium,Brinjal
+F00976,Maha,Polonnaruwa,Clay Loam,30.6,191,67,5.4,Rice,30.2,High,Tomato
+F00977,Maha,Hambantota,Sandy Loam,25.4,188,82,7.1,Rice,26.0,High,Tomato
+F00978,Maha,Anuradhapura,Clay Loam,30.4,187,69,7.0,Tomato,4.7,Medium,Maize
+F00979,Yala,Badulla,Loam,32.0,206,81,6.5,Brinjal,51.5,Low,Cabbage
+F00980,Yala,Kurunegala,Loam,33.6,222,60,6.0,Onion,22.5,Medium,Carrot
+F00981,Yala,Hambantota,Sandy Loam,31.7,189,62,6.5,Rice,1.3,High,Chili
+F00982,Maha,Nuwara Eliya,Silty Loam,21.0,158,81,6.8,Cabbage,8.9,Medium,Beans
+F00983,Maha,Ampara,Clay Loam,23.6,238,65,6.1,Potato,5.0,Low,Rice
+F00984,Maha,Kandy,Clay,24.7,267,83,5.9,,26.5,Medium,Tomato
+F00985,Maha,Matara,Loam,27.3,377,71,5.3,Tomato,17.4,High,Onion
+F00986,Yala,Nuwara Eliya,Silty Loam,15.7,181,62,7.4,Carrot,27.6,High,Cabbage
+F00987,Maha,Badulla,Loam,26.6,402,85,6.2,Potato,21.4,Low,Brinjal
+F00988,Yala,Matara,Loam,30.0,166,75,7.4,Maize,26.3,Low,Tomato
+F00989,Yala,Anuradhapura,Clay Loam,33.8,226,60,6.2,Potato,29.0,High,Tomato
+F00990,Maha,Jaffna,Sandy Loam,30.1,388,80,7.2,Cabbage,2.1,High,Chili
+F00991,Yala,Jaffna,Sandy Loam,32.4,186,62,7.0,Rice,24.5,Medium,Carrot
+F00992,Yala,Monaragala,Sandy Loam,32.5,158,71,5.7,Rice,16.6,Medium,Onion
+F00993,Maha,Monaragala,Sandy Loam,28.1,403,92,6.7,Chili,5.9,Low,Rice
+F00994,Maha,Anuradhapura,Clay Loam,30.4,243,79,7.1,Chili,8.1,Medium,Beans
+F00995,Yala,Anuradhapura,Clay Loam,31.6,238,89,5.6,Tomato,6.2,,Rice
+F00996,Maha,Hambantota,Sandy Loam,30.6,266,93,6.7,Chili,29.5,High,Tomato
+F00997,Yala,Kurunegala,Loam,29.7,233,93,5.8,Onion,21.5,Low,Brinjal
+F00998,Yala,Ampara,Clay Loam,28.1,158,82,5.4,Potato,22.0,High,Potato
+F00999,Yala,Kurunegala,Loam,30.7,110,84,5.7,Maize,3.0,,Chili
+F01000,Maha,Anuradhapura,Clay Loam,24.1,341,59,7.1,Chili,5.8,High,Rice
+F01001,Yala,Kandy,Clay,32.0,235,65,6.9,Tomato,8.1,Low,Beans
+F01002,Maha,Badulla,Loam,26.8,343,87,5.7,Maize,25.9,High,Tomato
+F01003,Yala,Kandy,Clay,31.2,641,82,6.2,Brinjal,4.0,Medium,Maize
+F01004,Yala,Hambantota,Sandy Loam,28.5,123,73,7.1,Maize,8.5,High,Beans
+F01005,Yala,Badulla,Loam,30.8,147,59,5.6,Carrot,18.2,High,Onion
+F01006,Maha,Polonnaruwa,Clay Loam,,201,83,5.6,Rice,15.9,Low,Brinjal
+F01007,Yala,Batticaloa,Sandy,33.3,227,73,5.9,Rice,21.3,Medium,Onion
+F01008,Yala,Polonnaruwa,Clay Loam,32.4,226,89,5.8,Rice,26.6,High,Tomato
+F01009,Maha,Ampara,Clay Loam,25.6,263,79,5.7,,2.5,Medium,Chili
+F01010,Maha,Monaragala,Sandy Loam,27.0,256,79,5.9,Cabbage,26.8,Medium,Cabbage
+F01011,Maha,Nuwara Eliya,Silty Loam,17.6,162,93,5.4,Tomato,21.5,Low,Cabbage
+F01012,Maha,Nuwara Eliya,Silty Loam,18.6,254,70,7.2,Potato,22.6,Medium,Carrot
+F01013,Maha,Kandy,Clay,29.6,190,82,7.4,Potato,22.3,High,Cabbage
+F01014,Yala,Monaragala,Sandy Loam,33.6,210,90,6.7,Onion,4.9,Low,Rice
+F01015,Maha,Monaragala,Sandy Loam,25.6,387,63,5.5,Carrot,5.7,Low,Rice
+F01016,Maha,Ampara,Clay Loam,29.7,195,78,7.0,Potato,26.5,High,Carrot
+F01017,Maha,Jaffna,Sandy Loam,30.2,315,73,6.5,Beans,4.0,Low,Maize
+F01018,Maha,Kurunegala,Loam,,332,71,6.7,Brinjal,1.9,High,Chili
+F01019,Yala,Nuwara Eliya,Silty Loam,21.5,213,73,7.1,Carrot,9.1,Medium,Beans
+F01020,Yala,Badulla,Loam,34.0,180,78,5.6,Brinjal,25.4,Medium,Carrot
+F01021,Maha,Nuwara Eliya,Silty Loam,20.2,177,69,6.1,Brinjal,9.3,High,Beans
+F01022,Maha,Polonnaruwa,Clay Loam,23.5,210,67,7.0,Cabbage,,Medium,Beans
+F01023,Maha,Anuradhapura,Clay Loam,25.0,238,66,6.2,Beans,26.5,Low,Tomato
+F01024,Maha,Hambantota,Sandy Loam,28.2,202,66,6.1,,25.6,Medium,Carrot
+F01025,Maha,Matara,,24.8,205,60,5.7,Rice,5.1,Medium,Maize
+F01026,Yala,Matara,Loam,31.6,214,70,5.5,Potato,22.2,High,Potato
+F01027,Yala,Jaffna,Sandy Loam,33.6,212,82,7.2,Chili,,High,Carrot
+F01028,Maha,Anuradhapura,Clay Loam,28.7,356,71,7.2,Chili,5.7,Medium,Rice
+F01029,Maha,Batticaloa,Sandy,28.9,246,73,7.1,Brinjal,1.6,High,Chili
+F01030,Yala,Batticaloa,Sandy,31.7,148,69,5.7,Cabbage,5.2,Medium,Maize
+F01031,Maha,Ampara,Clay Loam,,205,87,7.2,Cabbage,5.7,Medium,Rice
+F01032,Maha,Polonnaruwa,Clay Loam,29.0,310,89,6.0,Onion,5.7,Medium,Rice
+F01033,Yala,Monaragala,Sandy Loam,31.4,130,66,6.1,Tomato,2.3,Low,Chili
+F01034,Yala,Batticaloa,,33.4,190,72,7.0,Cabbage,28.5,Low,Tomato
+F01035,Yala,Ampara,Clay Loam,30.0,117,85,5.6,Brinjal,,Medium,Brinjal
+F01036,Maha,Kandy,Clay,26.4,228,83,7.0,Cabbage,5.7,High,Rice
+F01037,Maha,Ampara,Clay Loam,26.3,406,77,7.1,Potato,5.5,High,Rice
+F01038,Yala,Batticaloa,Sandy,30.3,204,78,7.0,Rice,9.2,Low,Beans
+F01039,Maha,Badulla,Loam,23.2,387,86,6.3,Tomato,30.2,Medium,Tomato
+F01040,Yala,Monaragala,,31.0,216,79,6.8,Carrot,4.7,High,Maize
+F01041,Maha,Jaffna,Sandy Loam,23.3,,,6.6,Cabbage,26.9,High,Tomato
+F01042,Maha,Jaffna,Sandy Loam,30.2,305,71,5.7,Rice,28.1,Low,Cabbage
+F01043,Yala,Anuradhapura,Clay Loam,28.8,153,90,5.7,Maize,6.0,Low,Rice
+F01044,Yala,Nuwara Eliya,Silty Loam,17.1,143,74,6.9,Cabbage,23.0,Low,Carrot
+F01045,Maha,Batticaloa,Sandy,25.4,384,94,,Potato,16.7,Medium,Brinjal
+F01046,Maha,Nuwara Eliya,Silty Loam,16.4,,89,5.8,Carrot,26.2,Medium,Carrot
+F01047,Yala,Matara,Loam,31.5,185,84,6.5,Cabbage,27.6,Low,Tomato
+F01048,Maha,Monaragala,Sandy Loam,26.8,244,78,5.9,Beans,5.1,High,Rice
+F01049,Maha,Badulla,Loam,28.0,217,63,5.8,Beans,29.5,High,Tomato
+F01050,Yala,Badulla,Loam,32.6,219,59,6.0,Maize,18.5,Low,Brinjal
+F01051,Maha,Nuwara Eliya,Silty Loam,15.4,291,67,6.0,Carrot,18.4,Medium,Potato
+F01052,Yala,Badulla,Loam,30.5,158,87,7.4,,4.6,High,Maize
+F01053,Maha,Jaffna,Sandy Loam,24.8,237,84,6.5,Brinjal,23.9,High,Tomato
+F01054,Yala,Badulla,Loam,31.5,172,93,,Brinjal,24.0,Medium,Tomato
+F01055,Yala,Kurunegala,Loam,33.9,179,90,6.1,Beans,5.9,Low,Rice
+F01056,Maha,Kandy,,24.9,286,65,7.0,Carrot,4.8,High,Rice
+F01057,Maha,Batticaloa,Sandy,28.7,296,90,6.0,Beans,19.4,Medium,Brinjal
+F01058,Maha,Hambantota,Sandy Loam,29.9,233,85,6.8,Potato,6.0,High,Rice
+F01059,Yala,Matara,Loam,29.2,,88,7.3,Rice,28.4,High,Tomato
+F01060,Yala,Monaragala,Sandy Loam,31.8,198,65,6.2,Potato,16.4,Medium,Onion
+F01061,Maha,Hambantota,Sandy Loam,30.3,334,88,6.8,Rice,28.2,High,Tomato
+F01062,Yala,Nuwara Eliya,Silty Loam,17.1,258,70,6.8,Beans,25.4,Medium,Cabbage
+F01063,Yala,Matara,Loam,32.5,149,90,6.5,Tomato,1.5,Low,Chili
+F01064,Maha,Batticaloa,Sandy,23.3,332,63,7.2,Maize,27.0,Medium,Cabbage
+F01065,Maha,Badulla,Loam,,354,78,5.5,Rice,27.3,Medium,Cabbage
+F01066,Maha,Hambantota,Sandy Loam,25.4,311,58,6.3,Chili,18.0,High,Potato
+F01067,Yala,Ampara,Clay Loam,31.0,129,83,6.6,Brinjal,14.8,Medium,Onion
+F01068,Maha,Batticaloa,Sandy,29.5,,73,6.8,Chili,5.2,Medium,Maize
+F01069,Maha,Batticaloa,Sandy,26.8,388,76,5.6,Beans,24.6,Medium,Tomato
+F01070,Maha,Nuwara Eliya,Silty Loam,15.5,,70,5.6,Onion,21.6,Medium,Carrot
+F01071,Maha,Ampara,Clay Loam,26.6,297,81,6.8,Brinjal,5.8,Low,Rice
+F01072,Yala,Polonnaruwa,Clay Loam,30.0,239,78,5.3,,18.0,,Brinjal
+F01073,Yala,Monaragala,Sandy Loam,32.4,113,72,6.6,Carrot,20.7,Medium,Onion
+F01074,Yala,Anuradhapura,Clay Loam,29.2,236,71,5.9,Carrot,,Medium,Tomato
+F01075,Maha,Ampara,Clay Loam,30.8,310,91,7.4,Maize,5.3,Medium,Rice
+F01076,Yala,Nuwara Eliya,Silty Loam,21.2,190,90,6.1,Maize,9.2,,Beans
+F01077,Yala,Kurunegala,Loam,32.1,223,94,7.0,Potato,,High,Rice
+F01078,Maha,Badulla,Loam,28.6,247,84,5.5,Cabbage,15.8,High,Brinjal
+F01079,Yala,Polonnaruwa,Clay Loam,29.8,126,80,6.8,Tomato,2.8,High,Chili
+F01080,Maha,Kurunegala,Loam,28.6,360,66,5.5,Potato,15.8,Medium,Onion
+F01081,Yala,Badulla,Loam,28.7,209,59,5.9,Tomato,4.3,High,Maize
+F01082,Maha,Matara,Loam,29.1,390,61,7.1,Maize,9.3,Medium,Beans
+F01083,Yala,Batticaloa,Sandy,32.1,181,77,,Brinjal,21.1,Low,Onion
+F01084,Yala,Anuradhapura,Clay Loam,29.5,147,65,7.3,Cabbage,19.7,Medium,Potato
+F01085,Yala,Batticaloa,Sandy,31.0,177,86,5.5,Onion,28.0,High,Tomato
+F01086,Maha,Monaragala,Sandy Loam,23.5,300,93,6.6,Maize,29.7,High,Tomato
+F01087,Yala,Monaragala,Sandy Loam,32.0,157,,5.4,Onion,,Medium,Onion
+F01088,Yala,Monaragala,Sandy Loam,29.5,226,66,5.5,Brinjal,18.7,Medium,Potato
+F01089,Yala,Hambantota,Sandy Loam,33.3,190,90,6.1,Rice,24.4,Medium,Tomato
+F01090,Maha,Jaffna,Sandy Loam,24.3,272,86,5.6,Tomato,18.4,High,Brinjal
+F01091,Maha,Kurunegala,Loam,29.1,340,86,6.5,Cabbage,5.6,,Rice
+F01092,Maha,Nuwara Eliya,Silty Loam,18.8,204,84,5.5,Carrot,25.3,Medium,Cabbage
+F01093,Maha,Batticaloa,Sandy,25.9,386,74,6.4,,20.9,Medium,Carrot
+F01094,Maha,Polonnaruwa,Clay Loam,28.5,382,75,5.7,Brinjal,5.1,High,Rice
+F01095,Maha,Kandy,Clay,30.7,418,81,6.7,Maize,5.1,Low,Rice
+F01096,Maha,Hambantota,Sandy Loam,25.0,267,92,5.5,Onion,30.4,Medium,Tomato
+F01097,Maha,Ampara,Clay Loam,30.7,313,73,6.0,Onion,,High,Rice
+F01098,Maha,Matara,Loam,23.4,264,92,5.7,Beans,15.8,Low,Brinjal
+F01099,Maha,Hambantota,Sandy Loam,28.8,306,62,6.8,Onion,19.6,Medium,Onion
+F01100,Maha,Badulla,Loam,28.1,221,79,6.8,Potato,8.2,Medium,Beans
+F01101,Maha,Monaragala,Sandy Loam,28.5,394,62,,Rice,18.7,Medium,Potato
+F01102,Yala,Polonnaruwa,Clay Loam,,205,72,6.9,Brinjal,5.0,High,Rice
+F01103,Yala,Kurunegala,Loam,33.1,221,76,5.9,Rice,2.9,Medium,Chili
+F01104,Maha,Batticaloa,Sandy,28.5,202,67,5.9,Beans,5.6,Low,Maize
+F01105,Maha,Anuradhapura,Clay Loam,25.6,,,6.6,Onion,5.6,High,Rice
+F01106,Maha,Badulla,Loam,27.0,267,79,6.9,Tomato,20.4,,Brinjal
+F01107,Maha,Kurunegala,Loam,30.6,295,81,6.6,Potato,9.2,Medium,Beans
+F01108,Yala,Ampara,Clay Loam,32.5,215,72,5.8,Brinjal,4.6,Medium,Rice
+F01109,Yala,Anuradhapura,Clay Loam,31.1,161,60,6.6,Chili,4.3,High,Maize
+F01110,Yala,Kurunegala,Loam,28.2,169,58,5.8,Cabbage,24.2,High,Tomato
+F01111,Maha,Badulla,Loam,26.1,203,73,6.7,Brinjal,17.2,Medium,Onion
+F01112,Maha,Anuradhapura,Clay Loam,25.0,244,70,6.7,,9.1,High,Beans
+F01113,Maha,Badulla,Loam,29.9,352,73,5.6,Chili,9.2,High,Beans
+F01114,Maha,Nuwara Eliya,Silty Loam,15.2,226,64,5.5,Cabbage,24.3,High,Cabbage
+F01115,Yala,Polonnaruwa,Clay Loam,28.8,159,75,6.2,,20.9,Medium,Potato
+F01116,Yala,Monaragala,,29.6,139,,5.4,Chili,29.7,Medium,Tomato
+F01117,Maha,Matara,Loam,29.3,269,77,6.2,Onion,24.7,Medium,Carrot
+F01118,Yala,Matara,Loam,31.5,120,83,7.0,Carrot,16.4,High,Onion
+F01119,Maha,Nuwara Eliya,Silty Loam,19.2,,71,6.0,Cabbage,25.5,High,Cabbage
+F01120,Yala,Kurunegala,Loam,31.0,117,74,5.8,Brinjal,1.7,Medium,Chili
+F01121,Yala,Kurunegala,Loam,33.1,111,88,5.5,Beans,,Medium,Chili
+F01122,Maha,Kandy,Clay,29.8,260,78,5.6,Brinjal,9.0,Medium,Beans
+F01123,Maha,Batticaloa,Sandy,25.7,258,77,6.3,Cabbage,24.9,Medium,Tomato
+F01124,Yala,Hambantota,Sandy Loam,32.8,166,58,6.5,Cabbage,1.5,Low,Chili
+F01125,Yala,Badulla,Loam,31.6,183,90,6.4,Onion,28.8,High,Tomato
+F01126,Maha,Batticaloa,Sandy,24.4,228,84,5.5,Brinjal,21.0,High,Brinjal
+F01127,Yala,Kurunegala,Loam,32.2,218,94,6.8,Tomato,5.0,Medium,Rice
+F01128,Yala,Batticaloa,Sandy,31.7,170,82,7.1,Potato,19.6,Medium,Potato
+F01129,Yala,Hambantota,Sandy Loam,30.6,191,63,5.6,Onion,21.2,Low,Potato
+F01130,Yala,Matara,Loam,30.6,229,72,6.9,Beans,3.0,Medium,Chili
+F01131,Maha,Batticaloa,Sandy,28.5,316,65,5.5,Rice,8.7,High,Beans
+F01132,Yala,Polonnaruwa,Clay Loam,30.9,189,75,5.5,Cabbage,6.2,Medium,Rice
+F01133,Yala,Matara,Loam,32.8,185,,7.2,Onion,17.2,High,Brinjal
+F01134,Yala,Nuwara Eliya,Silty Loam,17.4,,62,7.1,Onion,23.4,Medium,Carrot
+F01135,Maha,Badulla,Loam,24.6,304,85,6.9,Onion,5.6,Medium,Rice
+F01136,Maha,Ampara,Clay Loam,26.4,248,65,6.7,Carrot,5.8,High,Rice
+F01137,Maha,Nuwara Eliya,Silty Loam,17.6,202,69,5.5,Onion,20.5,Medium,Carrot
+F01138,Yala,Jaffna,Sandy Loam,32.4,143,67,5.9,Cabbage,1.9,High,Chili
+F01139,Yala,Jaffna,Sandy Loam,28.7,161,83,6.7,Tomato,6.2,Low,Rice
+F01140,Maha,Nuwara Eliya,Silty Loam,18.7,235,62,5.9,Chili,23.5,Medium,Cabbage
+F01141,Maha,Kurunegala,Loam,27.7,304,74,6.3,Tomato,30.4,Medium,Tomato
+F01142,Maha,Hambantota,Sandy Loam,,207,85,5.6,Rice,28.1,High,Tomato
+F01143,Yala,Nuwara Eliya,Silty Loam,14.1,236,72,6.4,Carrot,19.5,Medium,Carrot
+F01144,Yala,Nuwara Eliya,Silty Loam,20.3,244,65,5.8,Potato,8.4,Low,Beans
+F01145,Maha,Jaffna,Sandy Loam,24.1,339,,6.1,Brinjal,7.8,Medium,Beans
+F01146,Maha,Ampara,Clay Loam,24.1,259,62,6.1,,8.0,Medium,Beans
+F01147,Yala,Monaragala,Sandy Loam,34.0,233,67,7.3,Maize,19.0,High,Onion
+F01148,Yala,Monaragala,Sandy Loam,31.4,165,71,6.5,Onion,20.6,Medium,Onion
+F01149,Yala,Nuwara Eliya,Silty Loam,17.6,148,71,6.9,Brinjal,,High,Cabbage
+F01150,Maha,Polonnaruwa,Clay Loam,30.5,,59,5.6,Brinjal,25.1,High,Tomato
+F01151,Maha,Nuwara Eliya,Silty Loam,17.9,227,80,5.7,Brinjal,21.8,Low,Potato
+F01152,Yala,Badulla,Loam,,136,65,6.4,Brinjal,1.7,Medium,Chili
+F01153,Maha,Batticaloa,Sandy,27.5,246,92,6.1,Tomato,22.3,High,Brinjal
+F01154,Yala,Polonnaruwa,Clay Loam,29.2,128,90,6.9,Potato,18.1,Medium,Brinjal
+F01155,Maha,Kandy,Clay,30.0,345,89,,Maize,5.4,Medium,Rice
+F01156,Maha,Ampara,Clay Loam,26.9,340,68,5.6,Maize,6.2,High,Rice
+F01157,Yala,Anuradhapura,Clay Loam,29.0,170,89,5.8,Tomato,19.9,Medium,Brinjal
+F01158,Yala,Kurunegala,Loam,33.6,152,86,6.2,Brinjal,5.0,High,Maize
+F01159,Maha,Badulla,Loam,26.4,184,66,7.4,Maize,1.8,Low,Chili
+F01160,Maha,Kurunegala,Loam,26.3,194,86,6.7,Brinjal,5.6,Medium,Rice
+F01161,Maha,Kandy,Clay,29.3,295,64,5.5,Maize,5.0,Medium,Rice
+F01162,Yala,Monaragala,Sandy Loam,30.1,209,82,7.3,Cabbage,21.5,Low,Potato
+F01163,Yala,Kurunegala,Loam,31.4,204,63,6.8,Brinjal,27.7,,Tomato
+F01164,Maha,Kurunegala,Loam,25.6,191,72,,Carrot,5.9,High,Rice
+F01165,Maha,Hambantota,Sandy Loam,25.1,335,59,5.7,Tomato,1.9,High,Chili
+F01166,Yala,Monaragala,Sandy Loam,,145,59,7.1,Chili,5.0,High,Maize
+F01167,Maha,Kurunegala,Loam,26.8,231,59,6.2,Cabbage,8.9,High,Beans
+F01168,Maha,Batticaloa,Sandy,29.2,254,64,7.3,Brinjal,22.6,Medium,Carrot
+F01169,Maha,Kurunegala,Loam,29.0,239,62,6.0,Chili,6.3,Medium,Rice
+F01170,Yala,Kurunegala,Loam,28.8,224,72,7.1,Maize,26.9,High,Cabbage
+F01171,Yala,Nuwara Eliya,Silty Loam,16.3,155,91,5.5,Tomato,22.0,Medium,Cabbage
+F01172,Yala,Hambantota,Sandy Loam,31.0,158,76,5.9,Onion,16.8,Medium,Onion
+F01173,Yala,Batticaloa,Sandy,30.5,194,80,6.7,Chili,14.6,Medium,Onion
+F01174,Yala,Ampara,Clay Loam,30.0,237,63,5.3,Carrot,22.6,Medium,Cabbage
+F01175,Maha,Badulla,Loam,29.9,385,85,6.8,Carrot,5.6,Medium,Rice
+F01176,Yala,Badulla,Loam,33.5,133,66,6.1,Brinjal,4.1,Low,Maize
+F01177,Yala,Kandy,Clay,32.8,226,61,6.1,Maize,8.4,Medium,Beans
+F01178,Yala,Badulla,Loam,33.3,138,92,5.5,Cabbage,19.9,Medium,Onion
+F01179,Maha,Ampara,Clay Loam,24.5,334,69,5.8,Carrot,5.4,Medium,Rice
+F01180,Maha,Jaffna,Sandy Loam,30.2,315,62,6.0,Beans,1.7,Medium,Chili
+F01181,Maha,Monaragala,Sandy Loam,27.7,289,64,6.8,Beans,16.4,Medium,Onion
+F01182,Maha,Batticaloa,Sandy,30.9,220,86,6.5,Chili,19.6,,Brinjal
+F01183,Maha,Batticaloa,Sandy,26.2,255,65,6.8,Cabbage,1.7,Medium,Chili
+F01184,Yala,Hambantota,Sandy Loam,33.0,239,69,6.1,Onion,5.3,Low,Maize
+F01185,Maha,Matara,Loam,27.7,229,69,6.8,Beans,8.0,Medium,Beans
+F01186,Yala,Kurunegala,Loam,31.5,166,87,7.0,Potato,19.8,Medium,Onion
+F01187,Yala,Batticaloa,Sandy,34.0,118,73,6.9,Onion,4.9,Low,Maize
+F01188,Yala,Kandy,,29.8,124,66,7.0,Cabbage,5.4,Medium,Rice
+F01189,Maha,Kurunegala,Loam,27.2,298,76,5.3,Potato,5.3,Medium,Rice
+F01190,Yala,Nuwara Eliya,Silty Loam,17.0,160,88,6.6,Potato,21.4,Medium,Potato
+F01191,Maha,Batticaloa,Sandy,23.3,294,72,5.7,Onion,5.0,High,Maize
+F01192,Maha,Batticaloa,Sandy,26.5,196,82,5.8,Tomato,1.6,Medium,Chili
+F01193,Yala,Monaragala,Sandy Loam,33.1,227,64,6.7,Brinjal,21.2,Medium,Onion
+F01194,Maha,Badulla,Loam,29.0,255,70,5.7,Beans,26.6,Low,Cabbage
+F01195,Maha,Nuwara Eliya,Silty Loam,19.2,173,91,7.3,Rice,23.1,Medium,Carrot
+F01196,Maha,Matara,Loam,24.7,,89,6.5,Onion,5.3,Medium,Rice
+F01197,Maha,Matara,Loam,24.4,356,63,7.2,Maize,18.3,High,Potato
+F01198,Yala,Hambantota,Sandy Loam,30.0,175,58,6.5,Cabbage,1.8,,Chili
+F01199,Maha,Jaffna,Sandy Loam,29.1,,75,6.3,Tomato,8.5,Low,Beans
+F01200,Yala,Anuradhapura,Clay Loam,29.1,164,90,5.7,Onion,,Medium,Brinjal
+F01201,Maha,Kurunegala,Loam,26.2,312,84,5.7,Tomato,24.8,Low,Tomato
+F01202,Maha,Jaffna,Sandy Loam,28.8,363,59,6.2,Beans,5.0,Medium,Rice
+F01203,Yala,Badulla,Loam,32.9,146,61,6.8,Potato,5.0,Medium,Maize
+F01204,Yala,Ampara,Clay Loam,28.8,232,68,5.9,Beans,3.9,Medium,Maize
+F01205,Yala,Kurunegala,Loam,28.1,208,92,6.4,Maize,5.5,High,Rice
+F01206,Yala,Badulla,Loam,28.3,240,89,5.8,Rice,16.0,High,Brinjal
+F01207,Maha,Kandy,Clay,23.3,293,86,6.2,Beans,4.6,Medium,Rice
+F01208,Maha,Kurunegala,Loam,30.2,405,64,5.5,Rice,1.6,Medium,Chili
+F01209,Yala,Kandy,Clay,31.4,117,61,6.7,Cabbage,4.5,Low,Maize
+F01210,Maha,Matara,Loam,23.8,310,81,6.2,Tomato,14.7,Low,Onion
+F01211,Yala,Kurunegala,Loam,33.5,186,71,7.0,Maize,23.2,Medium,Potato
+F01212,Yala,Anuradhapura,Clay Loam,32.6,192,91,7.2,Chili,5.6,Medium,Rice
+F01213,Maha,Batticaloa,Sandy,28.4,408,72,5.7,Onion,7.7,High,Beans
+F01214,Maha,Anuradhapura,Clay Loam,30.8,392,76,6.4,Cabbage,6.1,Low,Rice
+F01215,Maha,Ampara,Clay Loam,26.7,331,68,5.8,Onion,6.0,Medium,Rice
+F01216,Yala,Nuwara Eliya,Silty Loam,20.5,290,67,6.0,Maize,8.8,Low,Beans
+F01217,Yala,Kandy,Clay,31.9,180,89,6.8,Beans,26.3,Low,Tomato
+F01218,Yala,Monaragala,Sandy Loam,31.8,173,92,6.5,Carrot,21.9,High,Brinjal
+F01219,Yala,Monaragala,Sandy Loam,31.2,116,,6.2,Onion,2.4,Low,Chili
+F01220,Yala,Matara,Loam,29.3,134,83,5.9,Chili,24.2,Medium,Tomato
+F01221,Yala,Kandy,Clay,31.9,240,63,7.0,Tomato,4.5,Low,Maize
+F01222,Maha,Kandy,Clay,25.9,303,92,5.8,Cabbage,4.6,High,Rice
+F01223,Maha,Polonnaruwa,Clay Loam,26.9,321,87,6.2,Rice,5.0,High,Rice
+F01224,Maha,Kurunegala,Loam,28.3,261,60,7.2,Chili,8.4,Medium,Beans
+F01225,Yala,Ampara,Clay Loam,30.1,218,80,5.7,Rice,28.1,High,Cabbage
+F01226,Yala,Polonnaruwa,Clay Loam,32.9,127,58,7.3,Brinjal,15.5,Medium,Onion
+F01227,Yala,Jaffna,Sandy Loam,32.5,208,73,5.7,Chili,20.6,,Potato
+F01228,Maha,Kurunegala,Loam,29.2,399,,6.3,Tomato,14.7,Medium,Onion
+F01229,Maha,Hambantota,Sandy Loam,23.7,329,80,6.1,Carrot,2.3,High,Chili
+F01230,Maha,Kandy,Clay,30.6,335,83,5.6,Potato,6.2,Medium,Rice
+F01231,Maha,Hambantota,Sandy Loam,24.4,280,68,5.9,,4.7,Low,Maize
+F01232,Yala,Jaffna,Sandy Loam,29.6,119,89,6.2,Potato,4.8,High,Rice
+F01233,Yala,Polonnaruwa,Clay Loam,31.1,205,66,7.1,Cabbage,4.2,Low,Maize
+F01234,Yala,Anuradhapura,Clay Loam,29.8,184,90,6.5,Potato,30.5,Medium,Tomato
+F01235,Yala,Kandy,Clay,32.7,193,93,6.7,,20.6,Low,Brinjal
+F01236,Maha,Monaragala,Sandy Loam,25.7,325,89,6.6,Maize,5.4,Low,Rice
+F01237,Maha,Matara,Loam,26.3,252,82,6.7,Rice,19.3,Low,Brinjal
+F01238,Maha,Matara,Loam,26.9,414,70,6.5,Potato,21.3,High,Onion
+F01239,Maha,Kandy,Clay,26.1,337,87,6.2,Tomato,,Medium,Rice
+F01240,Maha,Ampara,Clay Loam,23.7,341,,6.4,Carrot,4.8,Low,Rice
+F01241,Yala,Polonnaruwa,Clay Loam,31.9,173,85,7.3,Potato,21.5,Medium,Brinjal
+F01242,Maha,Anuradhapura,Clay Loam,24.5,343,88,7.0,Chili,6.3,Low,Rice
+F01243,Maha,Badulla,Loam,26.6,309,77,6.5,Cabbage,5.6,Medium,Chili
+F01244,Yala,Badulla,Loam,29.9,187,81,6.4,Maize,1.3,Low,Chili
+F01245,Maha,Ampara,Clay Loam,29.2,298,65,6.7,Beans,6.1,Medium,Rice
+F01246,Maha,Hambantota,Sandy Loam,25.5,288,60,6.6,Tomato,28.4,Medium,Tomato
+F01247,Yala,Nuwara Eliya,Silty Loam,,202,72,5.8,Potato,24.5,Low,Cabbage
+F01248,Maha,Nuwara Eliya,Silty Loam,18.4,292,63,6.9,Chili,20.4,High,Potato
+F01249,Yala,Monaragala,Sandy Loam,29.9,111,80,5.5,Maize,18.9,Low,Onion
+F01250,Maha,Hambantota,Sandy Loam,28.2,288,68,5.7,Brinjal,23.6,Low,Tomato
+F01251,Maha,Nuwara Eliya,Silty Loam,21.2,286,,6.0,Rice,8.2,Low,Beans
+F01252,Yala,Batticaloa,Sandy,28.3,197,66,7.1,Cabbage,5.6,Medium,Rice
+F01253,Yala,Badulla,Loam,32.3,120,94,7.0,Tomato,19.3,Low,Onion
+F01254,Maha,Jaffna,Sandy Loam,23.4,383,94,5.8,Beans,25.1,Medium,Tomato
+F01255,Maha,Jaffna,Sandy Loam,28.1,325,68,5.3,Potato,24.4,High,Potato
+F01256,Yala,Nuwara Eliya,Silty Loam,16.4,158,76,6.0,Maize,22.5,High,Potato
+F01257,Maha,Ampara,Clay Loam,23.4,316,90,7.1,Carrot,5.1,Low,Rice
+F01258,Yala,Batticaloa,Sandy,32.6,176,94,5.5,,27.6,Medium,Tomato
+F01259,Maha,Badulla,Loam,30.8,255,70,5.4,Rice,21.8,High,Carrot
+F01260,Maha,Jaffna,Sandy Loam,24.7,294,94,5.9,Potato,29.0,Medium,Tomato
+F01261,Maha,Jaffna,Sandy Loam,23.6,299,61,5.6,Chili,22.2,Medium,Potato
+F01262,Maha,Batticaloa,Sandy,28.1,351,87,6.0,Beans,19.1,High,Brinjal
+F01263,Maha,Batticaloa,Sandy,24.0,411,,6.3,Maize,7.9,High,Beans
+F01264,Yala,Kandy,,32.5,148,73,5.6,Tomato,1.9,Medium,Chili
+F01265,Maha,Kurunegala,Loam,23.0,369,85,6.1,Chili,25.4,High,Tomato
+F01266,Maha,Batticaloa,Sandy,26.0,346,91,6.4,Potato,18.8,,Brinjal
+F01267,Yala,Matara,Loam,33.0,175,82,5.7,Brinjal,2.7,Medium,Chili
+F01268,Yala,Batticaloa,Sandy,33.6,167,65,7.3,Maize,1.4,Medium,Chili
+F01269,Yala,Polonnaruwa,Clay Loam,33.4,141,79,7.3,Onion,4.0,Medium,Maize
+F01270,Maha,Anuradhapura,Clay Loam,28.3,294,59,,Maize,5.7,Medium,Rice
+F01271,Yala,Ampara,Clay Loam,30.2,136,62,6.8,Potato,14.7,Medium,Onion
+F01272,Maha,Monaragala,Sandy Loam,25.8,191,83,6.5,Maize,20.0,Medium,Brinjal
+F01273,Maha,Anuradhapura,Clay Loam,30.9,396,70,5.6,Carrot,5.0,Medium,Rice
+F01274,Yala,Kurunegala,Loam,28.6,143,85,7.1,Tomato,18.8,High,Brinjal
+F01275,Yala,Monaragala,Sandy Loam,29.9,235,65,5.6,Maize,2.4,Low,Chili
+F01276,Maha,Anuradhapura,Clay Loam,25.2,406,89,7.2,Beans,5.4,Medium,Rice
+F01277,Yala,Badulla,Loam,33.3,205,88,6.4,Tomato,25.3,Medium,Tomato
+F01278,Maha,Jaffna,Sandy Loam,24.2,220,58,7.1,Onion,27.3,High,Cabbage
+F01279,Yala,Badulla,Loam,34.0,130,63,7.2,Potato,5.2,High,Maize
+F01280,Maha,Jaffna,Sandy Loam,25.0,351,,5.7,Carrot,5.7,High,Rice
+F01281,Maha,Jaffna,Sandy Loam,23.1,,79,5.8,Rice,3.9,Medium,Maize
+F01282,Maha,Anuradhapura,Clay Loam,26.3,386,65,5.7,Chili,5.7,Medium,Rice
+F01283,Maha,Kandy,Clay,26.9,212,63,7.0,Maize,8.3,Low,Beans
+F01284,Yala,Hambantota,Sandy Loam,34.0,188,58,5.7,Chili,30.0,Medium,Tomato
+F01285,Yala,Anuradhapura,Clay Loam,28.9,185,86,7.0,Rice,19.6,Low,Brinjal
+F01286,Yala,Monaragala,Sandy Loam,33.3,235,76,6.4,Cabbage,20.7,Medium,Carrot
+F01287,Yala,Kurunegala,Loam,29.6,170,76,5.4,Brinjal,8.7,Medium,Beans
+F01288,Maha,Ampara,Clay Loam,26.8,346,94,6.0,Maize,5.5,High,Rice
+F01289,Yala,Badulla,Loam,30.9,129,89,6.6,Maize,21.1,Medium,Onion
+F01290,Maha,Kandy,Clay,28.6,402,62,5.4,Carrot,4.9,High,Rice
+F01291,Maha,Batticaloa,Sandy,26.3,282,58,7.2,Beans,1.8,Medium,Chili
+F01292,Maha,Matara,Loam,28.3,,83,7.0,Tomato,5.9,Medium,Rice
+F01293,Maha,Jaffna,Sandy Loam,30.6,270,73,,Brinjal,26.0,High,Tomato
+F01294,Maha,Jaffna,Sandy Loam,24.2,367,58,6.6,Maize,25.3,Medium,Tomato
+F01295,Maha,Jaffna,,23.2,264,72,6.5,Beans,3.9,Medium,Maize
+F01296,Maha,Matara,Loam,30.5,232,94,6.0,Carrot,4.7,Low,Rice
+F01297,Maha,Anuradhapura,Clay Loam,28.3,368,65,6.7,Potato,5.2,High,Rice
+F01298,Maha,Hambantota,Sandy Loam,30.4,280,82,5.4,Rice,29.1,Low,Tomato
+F01299,Maha,Nuwara Eliya,Silty Loam,18.1,143,68,7.0,Tomato,26.2,Medium,Carrot
+F01300,Maha,Polonnaruwa,Clay Loam,25.1,347,85,6.3,Brinjal,6.1,Medium,Rice
+F01301,Yala,Nuwara Eliya,Silty Loam,18.8,183,87,6.9,Onion,20.0,High,Carrot
+F01302,Yala,Anuradhapura,Clay Loam,30.2,117,87,5.8,Brinjal,1.6,High,Chili
+F01303,Yala,Batticaloa,Sandy,31.3,113,58,7.0,Onion,4.5,,Maize
+F01304,Maha,Monaragala,Sandy Loam,28.5,208,87,7.1,Tomato,18.0,High,Brinjal
+F01305,Yala,Nuwara Eliya,Silty Loam,20.8,265,,6.1,Rice,9.0,Medium,Beans
+F01306,Yala,Monaragala,Sandy Loam,29.7,236,83,7.0,Cabbage,4.7,High,Rice
+F01307,Maha,Ampara,Clay Loam,29.0,321,66,,Beans,5.7,Medium,Rice
+F01308,Maha,Hambantota,Sandy Loam,26.6,184,72,5.7,Cabbage,16.6,Low,Onion
+F01309,Maha,Kandy,Clay,27.0,328,88,5.4,Tomato,4.5,High,Rice
+F01310,Yala,Monaragala,Sandy Loam,33.0,,64,7.1,Beans,26.3,Medium,Carrot
+F01311,Yala,Badulla,Loam,,158,73,5.3,Carrot,4.6,High,Maize
+F01312,Maha,Badulla,Loam,23.2,250,69,5.4,Potato,18.8,Low,Onion
+F01313,Maha,Kurunegala,Loam,30.9,358,64,5.5,Carrot,18.4,Medium,Potato
+F01314,Yala,Anuradhapura,Clay Loam,33.0,180,90,7.4,Brinjal,19.3,High,Brinjal
+F01315,Maha,Kandy,Clay,29.3,278,74,5.8,Rice,29.2,High,Tomato
+F01316,Yala,Monaragala,Sandy Loam,32.4,127,83,7.3,Rice,4.7,High,Maize
+F01317,Yala,Badulla,Loam,33.0,115,72,6.4,Maize,4.1,High,Maize
+F01318,Yala,Kandy,Clay,31.6,113,66,5.7,Tomato,19.9,High,Onion
+F01319,Yala,Batticaloa,Sandy,30.5,187,78,5.6,Cabbage,21.9,High,Potato
+F01320,Yala,Nuwara Eliya,Silty Loam,19.0,192,69,7.3,Maize,23.1,Low,Cabbage
+F01321,Maha,Jaffna,Sandy Loam,27.2,367,66,5.9,Tomato,17.5,Low,Brinjal
+F01322,Maha,Kandy,Clay,29.9,300,,7.2,Tomato,5.2,High,Rice
+F01323,Maha,Jaffna,Sandy Loam,24.2,374,64,7.2,Cabbage,25.2,Low,Tomato
+F01324,Yala,Monaragala,Sandy Loam,32.2,144,91,7.2,Onion,3.0,Low,Chili
+F01325,Yala,Ampara,Clay Loam,31.8,151,,6.1,,4.4,Medium,Maize
+F01326,Yala,Badulla,Loam,30.8,239,74,6.5,Chili,17.7,High,Onion
+F01327,Yala,Batticaloa,Sandy,31.0,199,65,5.6,Onion,22.7,Medium,Cabbage
+F01328,Yala,Kurunegala,Loam,33.9,113,93,6.0,Onion,,Medium,Onion
+F01329,Maha,Kandy,Clay,26.4,323,64,5.7,Rice,4.8,Low,Rice
+F01330,Maha,Polonnaruwa,Clay Loam,26.2,381,82,5.5,Brinjal,6.3,Medium,Rice
+F01331,Yala,Nuwara Eliya,Silty Loam,20.5,190,69,6.5,Tomato,9.1,Low,Beans
+F01332,Maha,Monaragala,Sandy Loam,30.0,253,78,6.1,Brinjal,26.5,Low,Tomato
+F01333,Yala,Monaragala,Sandy Loam,33.1,205,70,5.4,Carrot,19.2,Low,Onion
+F01334,Maha,Nuwara Eliya,Silty Loam,20.6,215,79,7.2,Carrot,8.9,Low,Beans
+F01335,Maha,Jaffna,Sandy Loam,24.6,226,66,5.5,Onion,8.5,Medium,Beans
+F01336,Maha,Kurunegala,Loam,30.5,248,78,7.2,Brinjal,5.2,Medium,Maize
+F01337,Yala,Nuwara Eliya,Silty Loam,,256,72,,Chili,21.0,High,Potato
+F01338,Yala,Batticaloa,Sandy,31.7,127,59,5.4,Brinjal,4.9,Medium,Maize
+F01339,Yala,Ampara,Clay Loam,33.4,184,91,6.9,Maize,20.1,Medium,Brinjal
+F01340,Yala,Ampara,Clay Loam,29.8,181,68,5.8,Chili,16.5,Low,Brinjal
+F01341,Yala,Hambantota,Sandy Loam,29.2,121,75,6.1,Carrot,9.0,Low,Beans
+F01342,Yala,Monaragala,Sandy Loam,33.4,146,64,6.2,Carrot,18.7,Medium,Onion
+F01343,Yala,Hambantota,Sandy Loam,,110,82,7.3,Onion,5.3,High,Maize
+F01344,Yala,Matara,Loam,30.3,158,59,6.4,Cabbage,5.1,Medium,Maize
+F01345,Maha,Jaffna,Sandy Loam,23.9,279,82,6.0,Carrot,5.5,High,Maize
+F01346,Yala,Ampara,Clay Loam,29.8,210,93,5.5,Tomato,4.6,High,Rice
+F01347,Maha,Kurunegala,Loam,30.1,345,66,5.6,Potato,29.9,Medium,Tomato
+F01348,Maha,Matara,Loam,27.2,278,67,6.8,Beans,3.9,Low,Maize
+F01349,Yala,Polonnaruwa,Clay Loam,29.0,238,64,5.6,Maize,2.8,Medium,Chili
+F01350,Maha,Ampara,Clay Loam,28.4,325,71,6.1,Carrot,5.5,Medium,Rice
+F01351,Yala,Jaffna,Sandy Loam,30.7,138,79,7.3,Chili,2.5,High,Chili
+F01352,Yala,Batticaloa,Sandy,30.2,207,,5.6,Onion,21.8,Medium,Carrot
+F01353,Yala,Matara,Loam,29.5,221,67,5.5,Beans,1.4,Low,Chili
+F01354,Maha,Kandy,Clay,,368,62,6.2,Brinjal,5.1,Low,Rice
+F01355,Yala,Kandy,Clay,31.9,219,61,5.4,Tomato,5.4,Medium,Maize
+F01356,Maha,Polonnaruwa,Clay Loam,26.6,195,70,6.6,Carrot,21.7,Low,Brinjal
+F01357,Yala,Hambantota,Sandy Loam,28.0,162,74,6.3,Cabbage,7.9,High,Beans
+F01358,Maha,Jaffna,Sandy Loam,24.0,288,80,6.7,Chili,15.1,Medium,Onion
+F01359,Yala,Jaffna,Sandy Loam,29.3,125,63,6.4,Beans,16.2,High,Onion
+F01360,Maha,Kandy,Clay,29.3,303,62,7.3,Onion,4.7,High,Rice
+F01361,Maha,Ampara,Clay Loam,27.8,230,93,6.0,Potato,29.3,High,Tomato
+F01362,Maha,Badulla,Loam,24.1,222,63,6.3,Tomato,8.0,Medium,Beans
+F01363,Maha,Matara,Loam,29.5,372,84,6.4,Beans,18.4,Medium,Brinjal
+F01364,Maha,Matara,Loam,25.6,247,69,5.8,Potato,29.3,Low,Tomato
+F01365,Yala,Badulla,Loam,32.1,181,67,6.1,Cabbage,5.0,Medium,Rice
+F01366,Yala,Batticaloa,Sandy,29.4,231,65,6.9,Maize,1.7,,Chili
+F01367,Maha,Batticaloa,Sandy,28.4,345,71,5.5,Beans,20.0,Medium,Carrot
+F01368,Yala,Polonnaruwa,Clay Loam,30.6,135,75,5.6,Tomato,3.9,Medium,Maize
+F01369,Maha,Batticaloa,Sandy,27.5,215,90,5.7,Carrot,26.9,High,Tomato
+F01370,Yala,Anuradhapura,Clay Loam,30.5,125,76,6.7,Potato,1.5,Low,Chili
+F01371,Maha,Nuwara Eliya,Silty Loam,14.7,190,81,6.3,Brinjal,26.3,High,Carrot
+F01372,Maha,Monaragala,Sandy Loam,28.4,381,64,6.1,Rice,7.7,Medium,Beans
+F01373,Maha,Batticaloa,Sandy,28.9,355,72,5.4,Potato,21.5,Medium,Potato
+F01374,Maha,Hambantota,Sandy Loam,27.3,417,85,7.0,Brinjal,19.9,High,Brinjal
+F01375,Maha,Badulla,Loam,25.7,291,58,6.4,Chili,,High,Potato
+F01376,Yala,Jaffna,Sandy Loam,28.2,166,93,7.3,Maize,27.9,Low,Tomato
+F01377,Maha,Kandy,Clay,29.1,197,91,5.6,Rice,21.7,Medium,Brinjal
+F01378,Maha,Kandy,Clay,,380,65,7.1,Beans,5.6,Medium,Rice
+F01379,Maha,Polonnaruwa,Clay Loam,29.5,288,81,6.6,Onion,6.0,Medium,Rice
+F01380,Yala,Kurunegala,Loam,30.8,190,80,6.7,Tomato,28.0,Medium,Cabbage
+F01381,Maha,Anuradhapura,Clay Loam,29.2,202,90,,Onion,5.0,Medium,Rice
+F01382,Yala,Nuwara Eliya,Silty Loam,16.1,156,88,6.4,Carrot,17.8,Medium,Potato
+F01383,Maha,Kandy,Clay,26.9,254,93,7.1,Tomato,19.3,Medium,Brinjal
+F01384,Maha,Matara,Loam,28.9,379,64,6.8,Tomato,24.1,Medium,Carrot
+F01385,Maha,Nuwara Eliya,Silty Loam,20.8,160,84,6.0,,8.3,High,Beans
+F01386,Yala,Hambantota,Sandy Loam,33.3,163,79,5.8,Carrot,21.3,Low,Onion
+F01387,Yala,Monaragala,Sandy Loam,30.5,232,61,6.7,Beans,5.0,Low,Maize
+F01388,Maha,Batticaloa,Sandy,30.3,285,72,5.4,Potato,9.4,High,Beans
+F01389,Yala,Badulla,Loam,31.2,130,78,5.6,Maize,1.5,High,Chili
+F01390,Yala,Kurunegala,Loam,28.6,157,93,6.6,Chili,27.7,Medium,Tomato
+F01391,Yala,Hambantota,Sandy Loam,32.1,128,71,6.9,,14.8,High,Onion
+F01392,Maha,Kurunegala,Loam,24.6,345,58,6.0,Tomato,21.3,Medium,Potato
+F01393,Yala,Jaffna,Sandy Loam,32.9,152,88,6.6,Onion,,High,Onion
+F01394,Maha,Badulla,Loam,27.5,248,63,7.3,Tomato,5.1,High,Maize
+F01395,Maha,Monaragala,Sandy Loam,23.7,407,60,5.5,Chili,5.4,High,Maize
+F01396,Yala,Nuwara Eliya,Silty Loam,21.2,245,86,6.1,Maize,9.3,Medium,Beans
+F01397,Yala,Nuwara Eliya,Silty Loam,19.0,263,93,7.2,Maize,23.4,Medium,Carrot
+F01398,Yala,Batticaloa,Sandy,29.4,200,88,6.1,Onion,,High,Brinjal
+F01399,Yala,Anuradhapura,Clay Loam,32.1,181,64,6.2,Chili,7.8,Medium,Beans
+F01400,Yala,Anuradhapura,Clay Loam,29.9,,92,6.4,Onion,5.1,Medium,Rice
+F01401,Maha,Hambantota,Sandy Loam,26.5,202,59,7.1,Onion,5.0,Medium,Maize
+F01402,Maha,Anuradhapura,Clay Loam,24.2,401,,6.8,Onion,4.8,High,Rice
+F01403,Yala,Anuradhapura,Clay Loam,28.0,164,84,7.0,Beans,20.2,Medium,Brinjal
+F01404,Maha,Anuradhapura,Clay Loam,24.1,218,63,5.7,Rice,18.4,High,Potato
+F01405,Maha,Anuradhapura,Clay Loam,37.3,310,70,5.3,Rice,5.4,,Rice
+F01406,Maha,Anuradhapura,Clay Loam,29.9,297,76,6.7,Chili,6.1,Medium,Rice
+F01407,Maha,Hambantota,Sandy Loam,24.8,227,58,6.8,Potato,1.4,Medium,Chili
+F01408,Yala,Badulla,Loam,34.0,133,75,5.6,Maize,16.2,Medium,Onion
+F01409,Maha,Polonnaruwa,Clay Loam,29.0,298,77,7.2,Maize,4.7,High,Rice
+F01410,Yala,Nuwara Eliya,Silty Loam,20.9,221,66,5.3,Chili,9.1,Medium,Beans
+F01411,Maha,Hambantota,Sandy Loam,27.9,322,81,6.2,Onion,2.6,Medium,Chili
+F01412,Maha,Batticaloa,Sandy,23.4,295,58,5.3,Onion,9.3,Medium,Beans
+F01413,Maha,Batticaloa,Sandy,24.6,184,81,6.4,Tomato,5.3,Low,Maize
+F01414,Maha,Ampara,Clay Loam,24.5,213,84,7.1,Rice,6.0,High,Rice
+F01415,Yala,Badulla,Loam,29.6,216,92,6.0,Tomato,15.5,Medium,Brinjal
+F01416,Yala,Matara,Loam,31.6,132,82,6.8,Carrot,16.6,High,Onion
+F01417,Maha,Matara,Loam,29.3,265,67,5.7,Potato,24.9,Low,Carrot
+F01418,Maha,Kandy,Clay,26.3,211,84,,Onion,18.5,Medium,Brinjal
+F01419,Maha,Kurunegala,Loam,27.5,189,65,6.8,Chili,9.4,High,Beans
+F01420,Maha,Ampara,Clay Loam,26.2,217,65,5.4,Tomato,20.8,High,Potato
+F01421,Yala,Matara,Loam,31.4,159,78,7.1,Potato,5.2,Medium,Maize
+F01422,Maha,Kandy,Clay,25.7,184,80,5.8,,2.5,Medium,Chili
+F01423,Maha,Polonnaruwa,Clay Loam,30.9,305,68,6.6,Beans,5.8,High,Rice
+F01424,Yala,Monaragala,Sandy Loam,30.0,203,83,6.6,Maize,26.5,High,Tomato
+F01425,Maha,Kandy,Clay,25.6,395,94,5.5,Maize,5.3,Medium,Rice
+F01426,Yala,Kandy,Clay,33.2,113,65,6.8,Maize,16.5,High,Onion
+F01427,Maha,Jaffna,Sandy Loam,26.1,209,76,7.3,Onion,5.5,Low,Maize
+F01428,Yala,Kurunegala,Loam,29.5,237,59,6.6,Brinjal,4.9,Medium,Rice
+F01429,Yala,Kurunegala,Loam,33.7,181,79,6.4,Carrot,21.6,High,Carrot
+F01430,Yala,Matara,Loam,32.8,220,93,5.4,Potato,29.0,,Tomato
+F01431,Maha,Badulla,Loam,26.7,341,,6.0,Chili,8.8,Medium,Beans
+F01432,Yala,Batticaloa,Sandy,29.5,222,72,6.2,Rice,24.2,High,Carrot
+F01433,Maha,Polonnaruwa,Clay Loam,26.6,253,67,5.5,Beans,9.4,Medium,Beans
+F01434,Yala,Monaragala,Sandy Loam,28.4,158,83,7.2,Rice,5.5,Medium,Rice
+F01435,Maha,Nuwara Eliya,Silty Loam,14.5,152,78,5.8,Onion,23.8,Low,Cabbage
+F01436,Yala,Matara,Loam,29.5,134,62,7.2,Beans,8.0,Medium,Beans
+F01437,Maha,Batticaloa,Sandy,24.8,266,70,6.6,Chili,4.9,Medium,Maize
+F01438,Maha,Monaragala,Sandy Loam,28.2,272,66,6.5,Tomato,18.6,Medium,Onion
+F01439,Maha,Monaragala,Sandy Loam,30.1,409,92,6.0,Potato,20.8,Medium,Brinjal
+F01440,Yala,Polonnaruwa,Clay Loam,32.0,122,71,5.5,Onion,2.3,Medium,Chili
+F01441,Maha,Batticaloa,Sandy,28.8,286,81,6.5,Brinjal,9.4,Medium,Beans
+F01442,Yala,Kandy,Clay,29.6,151,82,5.3,Cabbage,2.7,High,Chili
+F01443,Yala,Kurunegala,Loam,32.6,136,64,6.4,,4.1,High,Maize
+F01444,Maha,Kurunegala,Loam,30.2,330,64,7.1,Tomato,27.7,High,Cabbage
+F01445,Maha,Ampara,Clay Loam,28.9,284,67,5.4,Cabbage,5.5,Low,Rice
+F01446,Yala,Kandy,Clay,30.0,230,59,7.2,Maize,26.3,Medium,Carrot
+F01447,Maha,Monaragala,Sandy Loam,30.0,307,93,5.9,Cabbage,27.1,Low,Tomato
+F01448,Maha,Polonnaruwa,Clay Loam,24.9,399,67,5.6,Rice,5.2,Medium,Rice
+F01449,Yala,Kandy,Clay,32.4,138,75,5.4,Rice,2.1,,Chili
+F01450,Yala,Anuradhapura,Clay Loam,31.4,135,79,7.0,Chili,3.9,Low,Maize
+F01451,Yala,Badulla,Loam,28.8,200,89,5.8,Rice,24.2,High,Tomato
+F01452,Maha,Kandy,Clay,25.3,294,83,7.0,Cabbage,5.8,High,Rice
+F01453,Maha,Matara,Loam,25.4,248,63,5.9,Chili,4.4,Low,Maize
+F01454,Maha,Anuradhapura,Clay Loam,28.0,269,58,6.2,Chili,2.7,Medium,Chili
+F01455,Yala,Matara,Loam,28.4,237,80,5.3,Potato,21.4,High,Brinjal
+F01456,Yala,Kandy,Clay,32.4,134,60,7.2,Brinjal,1.7,Low,Chili
+F01457,Maha,Badulla,Loam,25.3,363,62,6.7,Chili,5.5,High,Maize
+F01458,Yala,Hambantota,Sandy Loam,28.5,228,64,7.2,Brinjal,7.6,Medium,Beans
+F01459,Maha,Kurunegala,Loam,28.8,221,67,6.0,Potato,9.0,Medium,Beans
+F01460,Maha,Kurunegala,,28.8,307,71,5.3,Brinjal,1.7,High,Chili
+F01461,Maha,Monaragala,Sandy Loam,24.3,317,89,7.4,Rice,19.3,Low,Brinjal
+F01462,Maha,Nuwara Eliya,Silty Loam,14.1,275,58,6.2,Maize,20.4,Low,Carrot
+F01463,Yala,Kurunegala,Loam,32.7,171,67,6.0,Chili,17.7,Medium,Potato
+F01464,Maha,Jaffna,Sandy Loam,24.2,192,80,7.3,Maize,8.0,Medium,Beans
+F01465,Maha,Hambantota,Sandy Loam,23.7,371,68,,Brinjal,5.2,Medium,Rice
+F01466,Yala,Badulla,Loam,31.4,215,82,,Carrot,18.0,Medium,Onion
+F01467,Maha,Jaffna,Sandy Loam,23.9,187,70,7.2,Rice,4.6,Medium,Maize
+F01468,Yala,Batticaloa,Sandy,32.0,229,75,6.8,Cabbage,18.3,Medium,Onion
+F01469,Maha,Badulla,Loam,27.6,419,89,6.6,Beans,21.7,High,Brinjal
+F01470,Maha,Polonnaruwa,Clay Loam,29.5,318,83,6.9,Cabbage,5.1,Medium,Rice
+F01471,Yala,Kurunegala,Loam,31.3,200,90,6.0,Cabbage,17.9,Medium,Brinjal
+F01472,Maha,Kurunegala,Loam,24.7,394,88,5.4,Tomato,,Medium,Brinjal
+F01473,Yala,Monaragala,Sandy Loam,28.9,143,76,6.4,Maize,25.5,High,Tomato
+F01474,Yala,Badulla,Loam,32.5,239,91,6.9,Brinjal,24.9,Medium,Tomato
+F01475,Yala,Monaragala,Sandy Loam,29.1,142,93,6.4,Rice,19.3,Medium,Brinjal
+F01476,Maha,Hambantota,,25.1,183,90,6.2,Maize,5.5,High,Rice
+F01477,Yala,Matara,Loam,33.2,208,91,6.4,Chili,24.6,Medium,Tomato
+F01478,Yala,Nuwara Eliya,Silty Loam,37.5,150,64,7.2,Chili,22.3,High,Potato
+F01479,Maha,Anuradhapura,Clay Loam,27.9,416,76,7.0,Carrot,5.8,Low,Rice
+F01480,Yala,Badulla,Loam,38.2,143,67,6.0,,1.4,High,Chili
+F01481,Yala,Kandy,Clay,32.5,179,92,6.7,Cabbage,17.4,Medium,Brinjal
+F01482,Yala,Hambantota,Sandy Loam,32.5,130,73,5.4,Onion,5.1,Low,Maize
+F01483,Yala,Ampara,Clay Loam,33.2,113,83,6.5,,3.1,Medium,Chili
+F01484,Yala,Kurunegala,Loam,30.3,166,65,6.0,Chili,4.9,High,Maize
+F01485,Maha,Anuradhapura,Clay Loam,24.8,420,74,6.3,Beans,4.5,High,Rice
+F01486,Yala,Badulla,Loam,32.6,112,59,7.1,Maize,5.2,High,Maize
+F01487,Yala,Anuradhapura,Clay Loam,31.9,184,60,6.2,Rice,27.6,High,Tomato
+F01488,Maha,Ampara,,23.4,397,87,5.7,Rice,4.7,High,Rice
+F01489,Yala,Batticaloa,Sandy,33.2,134,75,6.6,Carrot,3.9,Medium,Maize
+F01490,Maha,Matara,Loam,27.5,401,90,6.5,Beans,5.0,Low,Rice
+F01491,Maha,Kurunegala,Loam,25.2,,76,7.2,Chili,19.6,Medium,Brinjal
+F01492,Yala,Batticaloa,Sandy,29.3,114,66,6.4,Maize,21.0,Medium,Onion
+F01493,Yala,Anuradhapura,Clay Loam,28.2,147,94,7.2,Beans,5.1,Medium,Rice
+F01494,Yala,Badulla,Loam,29.8,215,69,5.8,Tomato,28.3,Medium,Tomato
+F01495,Maha,Anuradhapura,Clay Loam,36.8,299,59,5.7,Carrot,4.7,Medium,Rice
+F01496,Maha,Ampara,Clay Loam,29.1,286,60,6.5,Onion,6.2,Medium,Rice
+F01497,Yala,Ampara,Clay Loam,33.6,143,63,7.4,Brinjal,5.6,High,Maize
+F01498,Yala,Kurunegala,Loam,28.2,156,94,5.3,Beans,4.5,High,Rice
+F01499,Yala,Ampara,Clay Loam,33.4,128,83,6.9,Chili,2.3,Medium,Chili
+F01500,Maha,Polonnaruwa,Clay Loam,24.9,210,90,7.1,Cabbage,25.5,Medium,Tomato
+F01252,Yala,Batticaloa,Sandy,28.3,197,66,7.1,Cabbage,5.6,Medium,Rice
+F00490,Yala,Polonnaruwa,Clay Loam,,194,84,,Tomato,26.0,Medium,Tomato
+F00874,Maha,Polonnaruwa,Clay Loam,23.0,245,65,5.5,Brinjal,23.4,High,Carrot
+F00460,Yala,Anuradhapura,Clay Loam,30.9,189,91,5.4,Beans,20.4,Medium,Brinjal
+F00796,Yala,Kandy,Clay,30.3,191,90,6.2,Potato,27.3,Low,Tomato
+F00944,Yala,Anuradhapura,Clay Loam,30.3,240,81,6.7,Onion,30.0,Medium,Tomato
+F01340,Yala,Ampara,Clay Loam,29.8,181,68,5.8,Chili,16.5,Low,Brinjal
+F00730,Yala,Polonnaruwa,Clay Loam,33.8,175,90,5.4,Cabbage,22.3,Low,Brinjal
+F00134,Maha,Hambantota,Sandy Loam,29.1,228,81,6.3,Tomato,21.9,Medium,Potato
+F01421,Yala,Matara,Loam,31.4,159,78,7.1,Potato,5.2,Medium,Maize
+F00914,Maha,Batticaloa,Sandy,30.8,187,75,6.9,Rice,4.8,Medium,Rice
+F00473,Yala,Ampara,Clay Loam,,240,61,6.1,Onion,4.9,Medium,Rice
+F01076,Yala,Nuwara Eliya,Silty Loam,21.2,190,90,6.1,Maize,9.2,,Beans
+F00929,Maha,Polonnaruwa,Clay Loam,25.7,325,78,6.7,Cabbage,5.7,Medium,Rice
+F00791,Maha,Anuradhapura,Clay Loam,24.5,200,70,6.9,Potato,25.1,Low,Tomato
+F01224,Maha,Kurunegala,Loam,28.3,261,60,7.2,Chili,8.4,Medium,Beans
+F00086,Yala,Ampara,Clay Loam,33.5,178,63,5.8,Chili,5.8,Medium,Rice
+F00842,Yala,Batticaloa,Sandy,30.6,232,74,7.2,Brinjal,25.5,Medium,Carrot
+F00572,Maha,Nuwara Eliya,Silty Loam,,249,90,7.0,Potato,26.1,High,Carrot
+F00245,Maha,Nuwara Eliya,Silty Loam,15.4,208,91,6.4,Rice,24.0,Low,Potato
+F00082,Maha,Kandy,Clay,26.9,190,69,6.2,Potato,4.7,Medium,Maize
+F00473,Yala,Ampara,Clay Loam,,240,61,6.1,Onion,4.9,Medium,Rice
