@@ -61,4 +61,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Farm::class);
     }
+    public function harvestListings()
+    {
+        return $this->hasMany(HarvestListing::class);
+    }
 }

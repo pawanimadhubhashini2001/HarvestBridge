@@ -12,7 +12,79 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('harvest_listings', function (Blueprint $table) {
+
             $table->id();
+
+            /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->foreignId('farm_id')
+                ->constrained('farms')
+                ->cascadeOnDelete();
+
+            $table->foreignId('crop_id')
+                ->constrained('crops')
+                ->cascadeOnDelete();
+
+            /*
+    |--------------------------------------------------------------------------
+    | Harvest Information
+    |--------------------------------------------------------------------------
+    */
+
+            $table->decimal('quantity', 10, 2);
+
+            $table->string('unit')->default('kg');
+
+            $table->decimal('price_per_unit', 10, 2);
+
+            /*
+    |--------------------------------------------------------------------------
+    | Quality
+    |--------------------------------------------------------------------------
+    */
+
+            $table->string('quality_grade')->nullable();
+
+            /*
+    |--------------------------------------------------------------------------
+    | Dates
+    |--------------------------------------------------------------------------
+    */
+
+            $table->date('harvest_date');
+
+            $table->date('available_until')->nullable();
+
+            /*
+    |--------------------------------------------------------------------------
+    | Status
+    |--------------------------------------------------------------------------
+    */
+
+            $table->enum('status', [
+                'available',
+                'reserved',
+                'sold',
+                'expired',
+                'donated'
+            ])->default('available');
+
+            /*
+    |--------------------------------------------------------------------------
+    | Description
+    |--------------------------------------------------------------------------
+    */
+
+            $table->text('description')->nullable();
+
             $table->timestamps();
         });
     }

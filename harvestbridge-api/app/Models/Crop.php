@@ -31,4 +31,9 @@ class Crop extends Model
         'is_active'
 
     ];
+
+    public function harvestListings()
+    {
+        return $this->hasMany(HarvestListing::class);
+    }
 }
