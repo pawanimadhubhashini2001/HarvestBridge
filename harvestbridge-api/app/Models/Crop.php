@@ -40,4 +40,8 @@ class Crop extends Model
     {
         return $this->hasMany(Prediction::class, 'recommended_crop_id');
     }
+    public function marketPrices()
+    {
+        return $this->hasMany(MarketPrice::class);
+    }
 }
