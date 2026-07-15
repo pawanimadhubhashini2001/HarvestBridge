@@ -69,4 +69,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'consumer_id');
     }
+    public function donations()
+    {
+        return $this->hasMany(Donation::class, 'farmer_id');
+    }
+
+    public function ngoDonations()
+    {
+        return $this->hasMany(Donation::class, 'ngo_id');
+    }
 }

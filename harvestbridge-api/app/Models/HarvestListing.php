@@ -50,4 +50,8 @@ class HarvestListing extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+    public function donation()
+    {
+        return $this->hasOne(Donation::class);
+    }
 }
