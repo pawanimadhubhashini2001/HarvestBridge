@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -38,7 +39,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Admin'
             ]);
         });
-
     });
 
     /*
@@ -54,7 +54,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Farmer'
             ]);
         });
-
     });
 
     /*
@@ -70,7 +69,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Consumer'
             ]);
         });
-
     });
 
     /*
@@ -86,7 +84,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome NGO'
             ]);
         });
-
     });
 
     /*
@@ -102,7 +99,9 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Compost Business'
             ]);
         });
-
     });
 
+    Route::get('/profile', [ProfileController::class, 'show']);
+
+    Route::put('/profile', [ProfileController::class, 'update']);
 });
