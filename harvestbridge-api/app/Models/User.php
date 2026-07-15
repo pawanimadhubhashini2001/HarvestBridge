@@ -65,4 +65,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(HarvestListing::class);
     }
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'consumer_id');
+    }
 }

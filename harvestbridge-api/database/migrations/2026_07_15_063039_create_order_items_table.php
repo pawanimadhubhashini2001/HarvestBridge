@@ -12,7 +12,35 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_items', function (Blueprint $table) {
+
             $table->id();
+
+            /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+            $table->foreignId('order_id')
+                ->constrained('orders')
+                ->cascadeOnDelete();
+
+            $table->foreignId('harvest_listing_id')
+                ->constrained('harvest_listings')
+                ->cascadeOnDelete();
+
+            /*
+    |--------------------------------------------------------------------------
+    | Item Details
+    |--------------------------------------------------------------------------
+    */
+
+            $table->decimal('quantity', 10, 2);
+
+            $table->decimal('price', 10, 2);
+
+            $table->decimal('subtotal', 10, 2);
+
             $table->timestamps();
         });
     }

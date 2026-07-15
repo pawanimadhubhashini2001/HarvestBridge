@@ -34,7 +34,7 @@ class HarvestListing extends Model
 
     public function farmer()
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function farm()
@@ -45,5 +45,9 @@ class HarvestListing extends Model
     public function crop()
     {
         return $this->belongsTo(Crop::class);
+    }
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }
