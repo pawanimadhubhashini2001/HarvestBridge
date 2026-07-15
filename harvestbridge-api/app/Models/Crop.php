@@ -36,4 +36,8 @@ class Crop extends Model
     {
         return $this->hasMany(HarvestListing::class);
     }
+    public function predictions()
+    {
+        return $this->hasMany(Prediction::class, 'recommended_crop_id');
+    }
 }

@@ -87,4 +87,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(CompostRequest::class, 'business_id');
     }
+    public function predictions()
+    {
+        return $this->hasMany(Prediction::class, 'farmer_id');
+    }
 }

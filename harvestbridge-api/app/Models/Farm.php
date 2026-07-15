@@ -28,4 +28,8 @@ class Farm extends Model
     {
         return $this->hasMany(HarvestListing::class);
     }
+    public function predictions()
+    {
+        return $this->hasMany(Prediction::class);
+    }
 }
