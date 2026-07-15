@@ -39,9 +39,6 @@ return new class extends Migration
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
 
-            // Farmer Information
-            $table->string('farm_name')->nullable();
-
             // Organization Information
             $table->string('organization_name')->nullable();
 

@@ -57,4 +57,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function farms()
+    {
+        return $this->hasMany(Farm::class);
+    }
 }
