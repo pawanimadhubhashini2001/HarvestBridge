@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FarmController;
 
 // Public routes
 Route::post('/register', [AuthController::class, 'register']);
@@ -104,4 +105,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
 
     Route::put('/profile', [ProfileController::class, 'update']);
+
+    Route::middleware('role:farmer')->group(function () {
+
+    Route::get('/farms', [FarmController::class, 'index']);
+
+    Route::post('/farms', [FarmController::class, 'store']);
+
+    Route::put('/farms/{farm}', [FarmController::class, 'update']);
+
+    Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
+    });
 });
