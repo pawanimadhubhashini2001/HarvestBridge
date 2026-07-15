@@ -28,11 +28,15 @@ class Order extends Model
 
     public function consumer()
     {
-        return $this->belongsTo(User::class,'consumer_id');
+        return $this->belongsTo(User::class, 'consumer_id');
     }
 
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+    public function review()
+    {
+        return $this->hasOne(Review::class);
     }
 }

@@ -91,4 +91,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Prediction::class, 'farmer_id');
     }
+    public function reviewsWritten()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewed_user_id');
+    }
 }
