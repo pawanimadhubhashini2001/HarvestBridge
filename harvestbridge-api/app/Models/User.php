@@ -78,4 +78,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Donation::class, 'ngo_id');
     }
+    public function compostListings()
+    {
+        return $this->hasMany(CompostListing::class, 'farmer_id');
+    }
+
+    public function compostRequests()
+    {
+        return $this->hasMany(CompostRequest::class, 'business_id');
+    }
 }

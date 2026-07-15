@@ -54,4 +54,8 @@ class HarvestListing extends Model
     {
         return $this->hasOne(Donation::class);
     }
+    public function compostListing()
+    {
+        return $this->hasOne(CompostListing::class);
+    }
 }
