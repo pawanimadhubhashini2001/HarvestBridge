@@ -12,12 +12,54 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
+
             $table->id();
+
+            // Basic Information
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // User Role
+            $table->enum('role', [
+                'admin',
+                'farmer',
+                'consumer',
+                'ngo',
+                'compost_business'
+            ])->default('consumer');
+
+            // Contact Information
+            $table->string('phone')->nullable();
+            $table->string('district')->nullable();
+            $table->text('address')->nullable();
+
+            // Location
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+
+            // Farmer Information
+            $table->string('farm_name')->nullable();
+
+            // Organization Information
+            $table->string('organization_name')->nullable();
+
+            // Business Information
+            $table->string('company_name')->nullable();
+
+            // Profile
+            $table->string('profile_photo')->nullable();
+
+            // Account Status
+            $table->enum('status', [
+                'active',
+                'inactive',
+                'blocked'
+            ])->default('active');
+
             $table->rememberToken();
+
             $table->timestamps();
         });
 
