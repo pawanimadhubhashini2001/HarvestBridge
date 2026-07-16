@@ -1,16 +1,22 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CropController;
 use App\Http\Controllers\FarmController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\Route;
 
-// Public routes
+// =============================
+// Public Routes
+// =============================
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Protected routes
+// =============================
+// Protected Routes
+// =============================
+
 Route::middleware('auth:sanctum')->group(function () {
 
     /*
@@ -19,12 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/profile', function (Request $request) {
-        return response()->json([
-            'user' => $request->user()
-        ]);
-    });
-
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     /*
@@ -40,6 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Admin'
             ]);
         });
+
+        // Crop Management
+        Route::post('/crops', [CropController::class, 'store']);
+        Route::put('/crops/{crop}', [CropController::class, 'update']);
+        Route::delete('/crops/{crop}', [CropController::class, 'destroy']);
     });
 
     /*
@@ -55,6 +62,11 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Farmer'
             ]);
         });
+
+        Route::get('/farms', [FarmController::class, 'index']);
+        Route::post('/farms', [FarmController::class, 'store']);
+        Route::put('/farms/{farm}', [FarmController::class, 'update']);
+        Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
     });
 
     /*
@@ -70,6 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Consumer'
             ]);
         });
+
     });
 
     /*
@@ -85,6 +98,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome NGO'
             ]);
         });
+
     });
 
     /*
@@ -100,20 +114,15 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Compost Business'
             ]);
         });
+
     });
 
-    Route::get('/profile', [ProfileController::class, 'show']);
+    /*
+    |--------------------------------------------------------------------------
+    | Crops (Viewable by all authenticated users)
+    |--------------------------------------------------------------------------
+    */
 
-    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::get('/crops', [CropController::class, 'index']);
 
-    Route::middleware('role:farmer')->group(function () {
-
-    Route::get('/farms', [FarmController::class, 'index']);
-
-    Route::post('/farms', [FarmController::class, 'store']);
-
-    Route::put('/farms/{farm}', [FarmController::class, 'update']);
-
-    Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
-    });
 });
