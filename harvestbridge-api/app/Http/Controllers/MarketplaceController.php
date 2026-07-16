@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ApiResponse;
 use App\Http\Resources\HarvestListingResource;
 use App\Services\MarketplaceService;
+use App\Http\Requests\MarketplaceFilterRequest;
 
 class MarketplaceController extends Controller
 {
@@ -12,9 +13,11 @@ class MarketplaceController extends Controller
         protected MarketplaceService $service
     ) {}
 
-    public function index()
+    public function index(MarketplaceFilterRequest $request)
     {
-        $harvests = $this->service->getAvailableHarvests();
+        $harvests = $this->service->getAvailableHarvests(
+            $request->validated()
+        );
 
         return ApiResponse::success(
             HarvestListingResource::collection($harvests),
