@@ -138,4 +138,38 @@ class CompostRequestController extends Controller
 
         );
     }
+    public function dashboard(Request $request)
+    {
+        return ApiResponse::success(
+
+            $this->service->businessDashboard(
+
+                $request->user()
+
+            ),
+
+            'Dashboard retrieved successfully.'
+
+        );
+    }
+    public function businessRequests(Request $request)
+    {
+        return ApiResponse::success(
+
+            CompostRequestResource::collection(
+
+                $this->service->businessRequests(
+
+                    $request->user(),
+
+                    $request->query('status')
+
+                )
+
+            ),
+
+            'Business requests retrieved successfully.'
+
+        );
+    }
 }

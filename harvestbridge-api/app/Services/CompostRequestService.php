@@ -189,4 +189,74 @@ class CompostRequestService
 
         return $request->compostListing->fresh();
     }
+    public function businessDashboard(User $business)
+    {
+        return [
+
+            'statistics' => [
+
+                'total_requests' => CompostRequest::where(
+                    'business_id',
+                    $business->id
+                )->count(),
+
+                'pending_requests' => CompostRequest::where(
+                    'business_id',
+                    $business->id
+                )
+                    ->where('status', 'pending')
+                    ->count(),
+
+                'approved_requests' => CompostRequest::where(
+                    'business_id',
+                    $business->id
+                )
+                    ->where('status', 'approved')
+                    ->count(),
+
+                'completed_requests' => CompostRequest::where(
+                    'business_id',
+                    $business->id
+                )
+                    ->where('status', 'completed')
+                    ->count()
+
+            ],
+
+            'requests' => CompostRequest::with([
+                'compostListing'
+            ])
+                ->where(
+                    'business_id',
+                    $business->id
+                )
+                ->latest()
+                ->get()
+
+        ];
+    }
+    public function businessRequests(
+        User $business,
+        ?string $status = null
+    ) {
+        $query = CompostRequest::with([
+            'compostListing'
+        ])
+            ->where(
+                'business_id',
+                $business->id
+            );
+
+        if ($status) {
+
+            $query->where(
+                'status',
+                $status
+            );
+        }
+
+        return $query
+            ->latest()
+            ->get();
+    }
 }

@@ -244,6 +244,15 @@ Route::middleware('auth:sanctum')->group(function () {
             '/compost-requests/{compostRequest}/collect',
             [CompostRequestController::class, 'collect']
         );
+        Route::get(
+            '/compost/dashboard',
+            [CompostRequestController::class, 'dashboard']
+        );
+
+        Route::get(
+            '/my-compost-requests',
+            [CompostRequestController::class, 'businessRequests']
+        );
     });
 
     /*
