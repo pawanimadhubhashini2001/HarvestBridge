@@ -85,6 +85,16 @@ Route::middleware('auth:sanctum')->group(function () {
             '/orders/{order}/status',
             [OrderController::class, 'updateStatus']
         );
+
+        Route::get(
+            '/farmer/orders',
+            [OrderController::class, 'farmerOrders']
+        );
+
+        Route::patch(
+            '/orders/{order}/status',
+            [OrderController::class, 'updateStatus']
+        );
     });
 
     /*

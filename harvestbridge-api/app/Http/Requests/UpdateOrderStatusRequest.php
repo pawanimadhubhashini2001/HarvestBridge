@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateOrderStatusRequest extends FormRequest
@@ -12,18 +11,21 @@ class UpdateOrderStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * Validation rules.
      */
     public function rules(): array
     {
         return [
-            //
+
+            'status' => [
+                'required',
+                'in:accepted,rejected,completed'
+            ]
+
         ];
     }
 }

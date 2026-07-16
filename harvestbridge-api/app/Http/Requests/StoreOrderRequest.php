@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreOrderRequest extends FormRequest
@@ -12,21 +11,23 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * Validation rules.
      */
     public function rules(): array
     {
         return [
 
-            'status' =>
+            'harvest_listing_id' => 'required|exists:harvest_listings,id',
 
-            'required|in:accepted,rejected,completed,cancelled'
+            'quantity' => 'required|numeric|min:0.01',
+
+            'delivery_address' => 'required|string|max:1000',
+
+            'notes' => 'nullable|string'
 
         ];
     }
