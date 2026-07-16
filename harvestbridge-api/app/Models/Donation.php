@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DonationRequest;
 
 class Donation extends Model
 {
@@ -36,16 +37,21 @@ class Donation extends Model
 
     public function farmer()
     {
-        return $this->belongsTo(User::class,'farmer_id');
+        return $this->belongsTo(User::class, 'farmer_id');
     }
 
     public function ngo()
     {
-        return $this->belongsTo(User::class,'ngo_id');
+        return $this->belongsTo(User::class, 'ngo_id');
     }
 
     public function harvestListing()
     {
         return $this->belongsTo(HarvestListing::class);
+    }
+
+    public function requests()
+    {
+        return $this->hasMany(DonationRequest::class);
     }
 }

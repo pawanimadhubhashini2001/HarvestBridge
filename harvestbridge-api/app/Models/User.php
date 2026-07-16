@@ -115,4 +115,12 @@ class User extends Authenticatable
             'farmer_id'
         );
     }
+
+    public function donationRequests()
+    {
+        return $this->hasMany(
+            DonationRequest::class,
+            'ngo_id'
+        );
+    }
 }
