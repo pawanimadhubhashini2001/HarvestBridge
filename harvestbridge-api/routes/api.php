@@ -117,6 +117,16 @@ Route::middleware('auth:sanctum')->group(function () {
             '/donations/{donation}',
             [DonationController::class, 'destroy']
         );
+
+        Route::get(
+            '/farmer/donation-requests',
+            [DonationRequestController::class, 'farmerRequests']
+        );
+
+        Route::patch(
+            '/donation-requests/{donationRequest}/status',
+            [DonationRequestController::class, 'updateStatus']
+        );
     });
 
     /*
@@ -169,6 +179,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post(
             '/donation-requests',
             [DonationRequestController::class, 'store']
+        );
+        Route::patch(
+            '/donations/{donation}/pickup',
+            [DonationController::class, 'schedulePickup']
+        );
+
+        Route::patch(
+            '/donations/{donation}/complete',
+            [DonationController::class, 'complete']
         );
     });
 

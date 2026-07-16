@@ -15,9 +15,9 @@ class DonationService
             'harvestListing',
             'ngo'
         ])
-        ->where('farmer_id', $farmer->id)
-        ->latest()
-        ->get();
+            ->where('farmer_id', $farmer->id)
+            ->latest()
+            ->get();
     }
 
     public function create(User $farmer, array $data)
@@ -37,7 +37,6 @@ class DonationService
             throw new Exception(
                 'You can only donate your own harvest listings.'
             );
-
         }
 
         /*
@@ -51,7 +50,6 @@ class DonationService
             throw new Exception(
                 'Harvest listing is not available.'
             );
-
         }
 
         /*
@@ -65,7 +63,6 @@ class DonationService
             throw new Exception(
                 'This harvest has already been donated.'
             );
-
         }
 
         /*
@@ -79,7 +76,6 @@ class DonationService
             throw new Exception(
                 'Donation quantity exceeds available stock.'
             );
-
         }
 
         $data['farmer_id'] = $farmer->id;
@@ -102,5 +98,63 @@ class DonationService
         Donation $donation
     ) {
         $donation->delete();
+    }
+    public function schedulePickup(
+        Donation $donation,
+        array $data,
+        User $ngo
+    ) {
+        if ($donation->ngo_id != $ngo->id) {
+
+            throw new \Exception(
+                'This donation is not assigned to you.'
+            );
+        }
+
+        if ($donation->status !== 'approved') {
+
+            throw new \Exception(
+                'Donation is not ready for pickup.'
+            );
+        }
+
+        $donation->update([
+
+            'pickup_date' => $data['pickup_date'],
+
+            'pickup_time' => $data['pickup_time'],
+
+            'status' => 'picked_up'
+
+        ]);
+
+        return $donation;
+    }
+
+    public function complete(
+        Donation $donation,
+        User $ngo
+    ) {
+        if ($donation->ngo_id != $ngo->id) {
+
+            throw new \Exception(
+                'Unauthorized.'
+            );
+        }
+
+        if ($donation->status !== 'picked_up') {
+
+            throw new \Exception(
+                'Donation has not been picked up.'
+            );
+        }
+
+        $donation->update([
+
+            'status' => 'completed'
+
+        ]);
+
+        return $donation;
     }
 }

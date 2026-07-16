@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
 use App\Http\Requests\StoreDonationRequest;
+use App\Http\Requests\UpdateDonationPickupRequest;
 use App\Http\Requests\UpdateDonationRequest;
 use App\Http\Resources\DonationResource;
 use App\Models\Donation;
@@ -130,6 +131,55 @@ class DonationController extends Controller
             ),
 
             'Available donations.'
+
+        );
+    }
+    public function schedulePickup(
+
+        UpdateDonationPickupRequest $request,
+
+        Donation $donation
+
+    ) {
+        $donation = $this->service->schedulePickup(
+
+            $donation,
+
+            $request->validated(),
+
+            $request->user()
+
+        );
+
+        return ApiResponse::success(
+
+            new DonationResource($donation),
+
+            'Pickup scheduled successfully.'
+
+        );
+    }
+
+    public function complete(
+
+        Request $request,
+
+        Donation $donation
+
+    ) {
+        $donation = $this->service->complete(
+
+            $donation,
+
+            $request->user()
+
+        );
+
+        return ApiResponse::success(
+
+            new DonationResource($donation),
+
+            'Donation completed successfully.'
 
         );
     }

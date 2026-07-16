@@ -9,8 +9,6 @@ class DonationResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
      */
     public function toArray($request): array
     {
@@ -18,29 +16,69 @@ class DonationResource extends JsonResource
 
             'id' => $this->id,
 
-            'harvest_listing_id'
-            => $this->harvest_listing_id,
+            /*
+            |--------------------------------------------------------------------------
+            | Farmer
+            |--------------------------------------------------------------------------
+            */
 
-            'quantity'
-            => $this->quantity,
+            'farmer' => $this->whenLoaded('farmer', function () {
+                return [
+                    'id' => $this->farmer->id,
+                    'name' => $this->farmer->name,
+                    'email' => $this->farmer->email,
+                ];
+            }),
 
-            'unit'
-            => $this->unit,
+            /*
+            |--------------------------------------------------------------------------
+            | NGO
+            |--------------------------------------------------------------------------
+            */
 
-            'pickup_date'
-            => $this->pickup_date,
+            'ngo' => $this->whenLoaded('ngo', function () {
+                return [
+                    'id' => $this->ngo->id,
+                    'name' => $this->ngo->name,
+                    'email' => $this->ngo->email,
+                ];
+            }),
 
-            'pickup_time'
-            => $this->pickup_time,
+            /*
+            |--------------------------------------------------------------------------
+            | Harvest Listing
+            |--------------------------------------------------------------------------
+            */
 
-            'status'
-            => $this->status,
+            'harvest_listing_id' => $this->harvest_listing_id,
 
-            'notes'
-            => $this->notes,
+            /*
+            |--------------------------------------------------------------------------
+            | Donation Details
+            |--------------------------------------------------------------------------
+            */
 
-            'created_at'
-            => $this->created_at
+            'quantity' => $this->quantity,
+
+            'unit' => $this->unit,
+
+            'status' => $this->status,
+
+            'pickup_date' => $this->pickup_date,
+
+            'pickup_time' => $this->pickup_time,
+
+            'notes' => $this->notes,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Timestamps
+            |--------------------------------------------------------------------------
+            */
+
+            'created_at' => $this->created_at,
+
+            'updated_at' => $this->updated_at,
 
         ];
     }

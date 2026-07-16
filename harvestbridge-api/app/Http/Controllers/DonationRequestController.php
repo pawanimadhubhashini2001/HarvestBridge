@@ -7,6 +7,8 @@ use App\Http\Requests\StoreDonationRequestRequest;
 use App\Http\Resources\DonationRequestResource;
 use App\Services\DonationRequestService;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateDonationRequestStatusRequest;
+use App\Models\DonationRequest;
 
 class DonationRequestController extends Controller
 {
@@ -54,6 +56,50 @@ class DonationRequestController extends Controller
             201
 
         );
+    }
 
+    public function farmerRequests(Request $request)
+    {
+        return ApiResponse::success(
+
+            DonationRequestResource::collection(
+
+                $this->service->getFarmerRequests(
+
+                    $request->user()
+
+                )
+
+            ),
+
+            'Donation requests retrieved successfully.'
+
+        );
+    }
+
+    public function updateStatus(
+
+        UpdateDonationRequestStatusRequest $request,
+
+        DonationRequest $donationRequest
+
+    ) {
+        $updated = $this->service->updateStatus(
+
+            $donationRequest,
+
+            $request->validated()['status'],
+
+            $request->user()
+
+        );
+
+        return ApiResponse::success(
+
+            new DonationRequestResource($updated),
+
+            'Donation request updated successfully.'
+
+        );
     }
 }
