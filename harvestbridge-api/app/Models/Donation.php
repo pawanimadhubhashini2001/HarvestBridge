@@ -28,6 +28,12 @@ class Donation extends Model
 
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function farmer()
     {
         return $this->belongsTo(User::class,'farmer_id');

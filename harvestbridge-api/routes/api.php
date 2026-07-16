@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DonationController;
 
 // =============================
 // Public Routes
@@ -94,6 +95,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch(
             '/orders/{order}/status',
             [OrderController::class, 'updateStatus']
+        );
+
+        Route::get(
+            '/donations',
+            [DonationController::class, 'index']
+        );
+
+        Route::post(
+            '/donations',
+            [DonationController::class, 'store']
+        );
+
+        Route::put(
+            '/donations/{donation}',
+            [DonationController::class, 'update']
+        );
+
+        Route::delete(
+            '/donations/{donation}',
+            [DonationController::class, 'destroy']
         );
     });
 
