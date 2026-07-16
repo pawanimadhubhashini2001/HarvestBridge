@@ -161,6 +161,36 @@ class OrderService
             );
         }
 
+        $current = $order->order_status;
+
+        $allowedTransitions = [
+
+            'pending' => [
+                'accepted',
+                'rejected'
+            ],
+
+            'accepted' => [
+                'completed'
+            ],
+
+            'completed' => [],
+
+            'rejected' => []
+
+        ];
+
+        if (
+            ! in_array(
+                $status,
+                $allowedTransitions[$current]
+            )
+        ) {
+            throw new Exception(
+                "Cannot change order from {$current} to {$status}."
+            );
+        }
+
         $order->update([
             'order_status' => $status
         ]);

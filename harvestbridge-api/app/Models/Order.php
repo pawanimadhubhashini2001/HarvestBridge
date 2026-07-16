@@ -39,4 +39,23 @@ class Order extends Model
     {
         return $this->hasOne(Review::class);
     }
+    public function isPending()
+    {
+        return $this->order_status === 'pending';
+    }
+
+    public function isAccepted()
+    {
+        return $this->order_status === 'accepted';
+    }
+
+    public function isCompleted()
+    {
+        return $this->order_status === 'completed';
+    }
+
+    public function isRejected()
+    {
+        return $this->order_status === 'rejected';
+    }
 }
