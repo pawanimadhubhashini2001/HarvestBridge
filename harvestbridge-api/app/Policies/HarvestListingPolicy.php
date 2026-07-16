@@ -4,52 +4,52 @@ namespace App\Policies;
 
 use App\Models\HarvestListing;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class HarvestListingPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * View all harvest listings.
+     * Farmers can only view their own listings.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->role === 'farmer';
     }
 
     /**
-     * Determine whether the user can view the model.
+     * View a specific harvest listing.
      */
     public function view(User $user, HarvestListing $harvestListing): bool
     {
-        return false;
+        return $user->id === $harvestListing->user_id;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Create a harvest listing.
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->role === 'farmer';
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Update a harvest listing.
      */
     public function update(User $user, HarvestListing $harvestListing): bool
     {
-        return false;
+        return $user->id === $harvestListing->user_id;
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Delete a harvest listing.
      */
     public function delete(User $user, HarvestListing $harvestListing): bool
     {
-        return false;
+        return $user->id === $harvestListing->user_id;
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Restore a deleted harvest listing.
      */
     public function restore(User $user, HarvestListing $harvestListing): bool
     {
@@ -57,7 +57,7 @@ class HarvestListingPolicy
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Permanently delete a harvest listing.
      */
     public function forceDelete(User $user, HarvestListing $harvestListing): bool
     {

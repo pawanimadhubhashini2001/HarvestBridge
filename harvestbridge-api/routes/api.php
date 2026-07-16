@@ -6,6 +6,7 @@ use App\Http\Controllers\FarmController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
+use App\Http\Controllers\MarketplaceController;
 
 // =============================
 // Public Routes
@@ -127,4 +128,8 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/crops', [CropController::class, 'index']);
+    Route::get(
+        '/marketplace',
+        [MarketplaceController::class, 'index']
+    );
 });

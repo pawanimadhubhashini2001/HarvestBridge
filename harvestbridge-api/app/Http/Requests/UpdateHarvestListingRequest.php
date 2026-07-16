@@ -12,7 +12,7 @@ class UpdateHarvestListingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,25 @@ class UpdateHarvestListingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+
+            'farm_id' => 'sometimes|required|exists:farms,id',
+
+            'crop_id' => 'sometimes|required|exists:crops,id',
+
+            'quantity' => 'sometimes|required|numeric|min:0.01',
+
+            'unit' => 'sometimes|required|string|max:20',
+
+            'price_per_unit' => 'sometimes|required|numeric|min:0',
+
+            'quality_grade' => 'nullable|string|max:50',
+
+            'harvest_date' => 'sometimes|required|date',
+
+            'available_until' => 'nullable|date|after_or_equal:harvest_date',
+
+            'description' => 'nullable|string',
+
         ];
     }
 }
