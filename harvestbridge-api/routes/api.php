@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
 use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\OrderController;
 
 // =============================
 // Public Routes
@@ -74,6 +75,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/harvest-listings', [HarvestListingController::class, 'store']);
         Route::put('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'update']);
         Route::delete('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'destroy']);
+
+        Route::get(
+            '/farmer/orders',
+            [OrderController::class, 'farmerOrders']
+        );
+
+        Route::patch(
+            '/orders/{order}/status',
+            [OrderController::class, 'updateStatus']
+        );
     });
 
     /*
@@ -89,6 +100,15 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Consumer'
             ]);
         });
+        Route::post(
+            '/orders',
+            [OrderController::class, 'store']
+        );
+
+        Route::get(
+            '/orders',
+            [OrderController::class, 'index']
+        );
     });
 
     /*

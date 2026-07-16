@@ -100,4 +100,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'reviewed_user_id');
     }
+    public function consumerOrders()
+    {
+        return $this->hasMany(
+            Order::class,
+            'consumer_id'
+        );
+    }
+
+    public function farmerOrders()
+    {
+        return $this->hasMany(
+            Order::class,
+            'farmer_id'
+        );
+    }
 }

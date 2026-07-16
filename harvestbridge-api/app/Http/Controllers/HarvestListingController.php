@@ -43,8 +43,7 @@ class HarvestListingController extends Controller
     public function update(
         UpdateHarvestListingRequest $request,
         HarvestListing $harvestListing
-    )
-    {
+    ) {
         $this->authorize('update', $harvestListing);
 
         $listing = $this->service->update(
