@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompostListingController;
 use App\Http\Controllers\CompostRequestController;
@@ -151,6 +152,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch(
             '/compost-requests/{compostRequest}/complete',
             [CompostRequestController::class, 'complete']
+        );
+
+        Route::get(
+            '/analytics/compost',
+            [AnalyticsController::class, 'compost']
         );
     });
 
