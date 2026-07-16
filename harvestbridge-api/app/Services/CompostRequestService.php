@@ -132,4 +132,63 @@ class CompostRequestService
 
             ->get();
     }
+    public function collect(
+        CompostRequest $request,
+        array $data,
+        User $business
+    ) {
+        if ($request->business_id != $business->id) {
+
+            throw new Exception(
+                'Unauthorized.'
+            );
+        }
+
+        if ($request->status != 'approved') {
+
+            throw new Exception(
+                'Request has not been approved.'
+            );
+        }
+
+        $request->update([
+
+            'pickup_date' => $data['pickup_date'],
+
+            'pickup_time' => $data['pickup_time'],
+
+            'status' => 'completed'
+
+        ]);
+
+        $request->compostListing->update([
+
+            'status' => 'collected'
+
+        ]);
+
+        return $request->fresh();
+    }
+    public function complete(
+        CompostRequest $request,
+        User $farmer
+    ) {
+        if (
+            $request->compostListing->farmer_id !=
+            $farmer->id
+        ) {
+
+            throw new Exception(
+                'Unauthorized.'
+            );
+        }
+
+        $request->compostListing->update([
+
+            'status' => 'completed'
+
+        ]);
+
+        return $request->compostListing->fresh();
+    }
 }

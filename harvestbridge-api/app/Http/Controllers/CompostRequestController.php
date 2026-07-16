@@ -10,6 +10,7 @@ use App\Models\CompostRequest;
 use App\Http\Requests\UpdateCompostRequestStatusRequest;
 use App\Http\Resources\DonationRequestResource;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateCompostPickupRequest;
 
 class CompostRequestController extends Controller
 {
@@ -86,6 +87,54 @@ class CompostRequestController extends Controller
             ),
 
             'Compost requests retrieved successfully.'
+
+        );
+    }
+    public function collect(
+
+        UpdateCompostPickupRequest $request,
+
+        CompostRequest $compostRequest
+
+    ) {
+        $updated = $this->service->collect(
+
+            $compostRequest,
+
+            $request->validated(),
+
+            $request->user()
+
+        );
+
+        return ApiResponse::success(
+
+            new CompostRequestResource($updated),
+
+            'Pickup confirmed successfully.'
+
+        );
+    }
+    public function complete(
+
+        Request $request,
+
+        CompostRequest $compostRequest
+
+    ) {
+        $listing = $this->service->complete(
+
+            $compostRequest,
+
+            $request->user()
+
+        );
+
+        return ApiResponse::success(
+
+            $listing,
+
+            'Compost transaction completed.'
 
         );
     }

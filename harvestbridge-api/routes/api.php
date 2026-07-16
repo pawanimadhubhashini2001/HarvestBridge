@@ -147,6 +147,11 @@ Route::middleware('auth:sanctum')->group(function () {
             '/compost-requests/{compostRequest}/status',
             [CompostRequestController::class, 'updateStatus']
         );
+
+        Route::patch(
+            '/compost-requests/{compostRequest}/complete',
+            [CompostRequestController::class, 'complete']
+        );
     });
 
     /*
@@ -233,6 +238,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post(
             '/compost-requests',
             [CompostRequestController::class, 'store']
+        );
+
+        Route::patch(
+            '/compost-requests/{compostRequest}/collect',
+            [CompostRequestController::class, 'collect']
         );
     });
 
