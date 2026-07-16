@@ -137,6 +137,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/compost-listings/{compostListing}', [CompostListingController::class, 'update']);
 
         Route::delete('/compost-listings/{compostListing}', [CompostListingController::class, 'destroy']);
+
+        Route::get(
+            '/farmer/compost-requests',
+            [CompostRequestController::class, 'farmerRequests']
+        );
+
+        Route::patch(
+            '/compost-requests/{compostRequest}/status',
+            [CompostRequestController::class, 'updateStatus']
+        );
     });
 
     /*
