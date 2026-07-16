@@ -5,6 +5,7 @@ use App\Http\Controllers\CropController;
 use App\Http\Controllers\FarmController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HarvestListingController;
 
 // =============================
 // Public Routes
@@ -67,6 +68,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/farms', [FarmController::class, 'store']);
         Route::put('/farms/{farm}', [FarmController::class, 'update']);
         Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
+
+        Route::get('/harvest-listings', [HarvestListingController::class, 'index']);
+        Route::post('/harvest-listings', [HarvestListingController::class, 'store']);
+        Route::put('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'update']);
+        Route::delete('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'destroy']);
     });
 
     /*
@@ -82,7 +88,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Consumer'
             ]);
         });
-
     });
 
     /*
@@ -98,7 +103,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome NGO'
             ]);
         });
-
     });
 
     /*
@@ -114,7 +118,6 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Compost Business'
             ]);
         });
-
     });
 
     /*
@@ -124,5 +127,4 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/crops', [CropController::class, 'index']);
-
 });

@@ -14,7 +14,15 @@ class HarvestListing extends Model
 
         'crop_id',
 
+        'title',
+
+        'description',
+
+        'harvest_date',
+
         'quantity',
+
+        'available_quantity',
 
         'unit',
 
@@ -22,13 +30,11 @@ class HarvestListing extends Model
 
         'quality_grade',
 
-        'harvest_date',
+        'donation_available',
 
-        'available_until',
+        'compost_available',
 
-        'status',
-
-        'description'
+        'status'
 
     ];
 
