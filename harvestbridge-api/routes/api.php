@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CompostListingController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\FarmController;
 use App\Http\Controllers\ProfileController;
@@ -127,6 +128,14 @@ Route::middleware('auth:sanctum')->group(function () {
             '/donation-requests/{donationRequest}/status',
             [DonationRequestController::class, 'updateStatus']
         );
+
+        Route::get('/compost-listings', [CompostListingController::class, 'index']);
+
+        Route::post('/compost-listings', [CompostListingController::class, 'store']);
+
+        Route::put('/compost-listings/{compostListing}', [CompostListingController::class, 'update']);
+
+        Route::delete('/compost-listings/{compostListing}', [CompostListingController::class, 'destroy']);
     });
 
     /*
@@ -204,6 +213,11 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome Compost Business'
             ]);
         });
+
+        Route::get(
+            '/available-compost',
+            [CompostListingController::class, 'marketplace']
+        );
     });
 
     /*

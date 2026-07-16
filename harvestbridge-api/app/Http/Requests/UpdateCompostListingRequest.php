@@ -12,7 +12,7 @@ class UpdateCompostListingRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,8 +22,6 @@ class UpdateCompostListingRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            //
-        ];
+        return (new StoreCompostListingRequest())->rules();
     }
 }
