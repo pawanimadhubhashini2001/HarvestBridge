@@ -38,11 +38,18 @@ class CompostListing extends Model
 
     public function farmer()
     {
-        return $this->belongsTo(User::class,'farmer_id');
+        return $this->belongsTo(User::class, 'farmer_id');
     }
 
     public function harvestListing()
     {
         return $this->belongsTo(HarvestListing::class);
+    }
+
+    public function requests()
+    {
+        return $this->hasMany(
+            CompostRequest::class
+        );
     }
 }

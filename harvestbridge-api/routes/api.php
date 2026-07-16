@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompostListingController;
+use App\Http\Controllers\CompostRequestController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\FarmController;
 use App\Http\Controllers\ProfileController;
@@ -217,6 +218,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get(
             '/available-compost',
             [CompostListingController::class, 'marketplace']
+        );
+
+        Route::post(
+            '/compost-requests',
+            [CompostRequestController::class, 'store']
         );
     });
 

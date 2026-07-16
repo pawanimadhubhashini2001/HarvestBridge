@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('compost_requests', function (Blueprint $table) {
@@ -16,13 +13,13 @@ return new class extends Migration
             $table->id();
 
             /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Relationships
+            |--------------------------------------------------------------------------
+            */
 
             $table->foreignId('compost_listing_id')
-                ->constrained('compost_listings')
+                ->constrained()
                 ->cascadeOnDelete();
 
             $table->foreignId('business_id')
@@ -30,43 +27,33 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             /*
-    |--------------------------------------------------------------------------
-    | Pickup
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Request
+            |--------------------------------------------------------------------------
+            */
 
-            $table->date('pickup_date')->nullable();
+            $table->decimal('quantity',10,2);
 
-            $table->time('pickup_time')->nullable();
+            $table->text('message')->nullable();
 
             /*
-    |--------------------------------------------------------------------------
-    | Status
-    |--------------------------------------------------------------------------
-    */
+            |--------------------------------------------------------------------------
+            | Status
+            |--------------------------------------------------------------------------
+            */
 
-            $table->enum('status', [
+            $table->enum('status',[
                 'pending',
                 'approved',
                 'rejected',
+                'cancelled',
                 'completed'
             ])->default('pending');
-
-            /*
-    |--------------------------------------------------------------------------
-    | Notes
-    |--------------------------------------------------------------------------
-    */
-
-            $table->text('notes')->nullable();
 
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('compost_requests');

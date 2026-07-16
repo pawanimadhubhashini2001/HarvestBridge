@@ -16,19 +16,30 @@ class CompostRequest extends Model
 
         'pickup_time',
 
-        'status',
+        'notes',
 
-        'notes'
+        'status'
 
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function compostListing()
     {
-        return $this->belongsTo(CompostListing::class);
+        return $this->belongsTo(
+            CompostListing::class
+        );
     }
 
     public function business()
     {
-        return $this->belongsTo(User::class,'business_id');
+        return $this->belongsTo(
+            User::class,
+            'business_id'
+        );
     }
 }
