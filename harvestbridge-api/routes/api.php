@@ -13,6 +13,7 @@ use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationRequestController;
+use App\Http\Controllers\AIPredictionController;
 
 // =============================
 // Public Routes
@@ -271,5 +272,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get(
         '/marketplace',
         [MarketplaceController::class, 'index']
+    );
+    Route::post(
+        '/ai/predict',
+        [AIPredictionController::class, 'predict']
     );
 });
