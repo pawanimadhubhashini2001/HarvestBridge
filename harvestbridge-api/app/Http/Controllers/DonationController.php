@@ -114,4 +114,23 @@ class DonationController extends Controller
 
         );
     }
+    public function available()
+    {
+        return ApiResponse::success(
+
+            DonationResource::collection(
+
+                Donation::where(
+                    'status',
+                    'available'
+                )
+                    ->latest()
+                    ->get()
+
+            ),
+
+            'Available donations.'
+
+        );
+    }
 }

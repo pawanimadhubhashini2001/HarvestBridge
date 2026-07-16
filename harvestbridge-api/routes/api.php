@@ -9,6 +9,7 @@ use App\Http\Controllers\HarvestListingController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\DonationRequestController;
 
 // =============================
 // Public Routes
@@ -155,6 +156,20 @@ Route::middleware('auth:sanctum')->group(function () {
                 'message' => 'Welcome NGO'
             ]);
         });
+        Route::get(
+            '/available-donations',
+            [DonationController::class, 'available']
+        );
+
+        Route::get(
+            '/donation-requests',
+            [DonationRequestController::class, 'index']
+        );
+
+        Route::post(
+            '/donation-requests',
+            [DonationRequestController::class, 'store']
+        );
     });
 
     /*
