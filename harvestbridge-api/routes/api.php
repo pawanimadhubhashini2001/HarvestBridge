@@ -277,4 +277,8 @@ Route::middleware('auth:sanctum')->group(function () {
         '/ai/predict',
         [AIPredictionController::class, 'predict']
     );
+    Route::get(
+        '/ai/history',
+        [AIPredictionController::class, 'history']
+    );
 });
