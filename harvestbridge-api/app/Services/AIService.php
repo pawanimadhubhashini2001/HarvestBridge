@@ -2,13 +2,18 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use App\Models\PredictionHistory;
+use Illuminate\Support\Facades\Http;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AIService
 {
+    public function __construct(
+        protected AuditLogService $auditLogService
+    ) {}
+
     public function predict(array $data)
     {
         $response = Http::timeout(30)
@@ -28,9 +33,10 @@ class AIService
     public function savePrediction(
         User $user,
         array $input,
-        array $prediction
+        array $prediction,
+        ?Request $request = null
     ) {
-        return PredictionHistory::create([
+        $history = PredictionHistory::create([
 
             'user_id' => $user->id,
 
@@ -59,6 +65,21 @@ class AIService
             'confidence' => $prediction['confidence']
 
         ]);
+
+        $this->auditLogService->log(
+            'ai.prediction.saved',
+            $user->id,
+            $history,
+            [
+                'district' => $history->district,
+                'season' => $history->season,
+                'recommended_crop' => $history->recommended_crop,
+                'confidence' => $history->confidence,
+            ],
+            $request
+        );
+
+        return $history;
     }
     public function dashboard(User $user)
     {

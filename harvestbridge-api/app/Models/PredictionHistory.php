@@ -42,4 +42,12 @@ class PredictionHistory extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    protected function casts(): array
+    {
+        return [
+            'confidence' => 'float',
+            'is_favorite' => 'boolean',
+        ];
+    }
 }

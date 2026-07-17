@@ -41,5 +41,10 @@ return [
         'url' => env('WEATHER_API_URL'),
         'key' => env('WEATHER_API_KEY'),
     ],
+    'sms' => [
+        'endpoint' => env('SMS_API_URL'),
+        'token' => env('SMS_API_TOKEN'),
+        'sender' => env('SMS_SENDER', 'HarvestBridge'),
+    ],
 
 ];

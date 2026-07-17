@@ -33,7 +33,8 @@ class AIPredictionController extends Controller
         $this->service->savePrediction(
             $request->user(),
             $request->validated(),
-            $prediction
+            $prediction,
+            $request
         );
 
         return ApiResponse::success(
@@ -130,7 +131,8 @@ class AIPredictionController extends Controller
         $this->service->savePrediction(
             $request->user(),
             $input,
-            $prediction
+            $prediction,
+            $request
         );
 
         return response()->json([

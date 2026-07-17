@@ -21,4 +21,13 @@ class MarketPrice extends Model
     {
         return $this->belongsTo(Crop::class);
     }
+
+    protected function casts(): array
+    {
+        return [
+            'price_per_unit' => 'float',
+            'price_date' => 'date',
+            'is_active' => 'boolean',
+        ];
+    }
 }
