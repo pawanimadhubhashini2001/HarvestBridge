@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
@@ -46,5 +47,20 @@ class AuthService
     public function logout(User $user)
     {
         $user->currentAccessToken()?->delete();
+    }
+
+    public function forgotPassword(string $email): string
+    {
+        $status = Password::sendResetLink([
+            'email' => $email,
+        ]);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => [__($status)],
+            ]);
+        }
+
+        return __($status);
     }
 }

@@ -55,6 +55,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function checkAuthentication() {
+    try {
+      const storedToken = await loadPersistedToken();
+
+      if (!storedToken) {
+        setToken(null);
+        setUser(null);
+        delete apiClient.defaults.headers.common.Authorization;
+        return false;
+      }
+
+      setToken(storedToken);
+      apiClient.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
+      const profile = await fetchProfile();
+      setUser(profile);
+
+      return true;
+    } catch {
+      await clearPersistedSession();
+      setToken(null);
+      setUser(null);
+      delete apiClient.defaults.headers.common.Authorization;
+
+      return false;
+    }
+  }
+
   async function setSession(session: AuthSession, options?: SessionOptions) {
     setToken(session.token);
     setUser(session.user);
@@ -67,22 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function bootstrap() {
       try {
-        const storedToken = await loadPersistedToken();
-
-        if (!storedToken) {
-          setIsHydrating(false);
-          return;
-        }
-
-        setToken(storedToken);
-        apiClient.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
-        const profile = await fetchProfile();
-        setUser(profile);
-      } catch {
-        await clearPersistedSession();
-        setToken(null);
-        setUser(null);
-        delete apiClient.defaults.headers.common.Authorization;
+        await checkAuthentication();
       } finally {
         setIsHydrating(false);
       }
@@ -101,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession,
     clearSession,
     refreshProfile,
+    checkAuthentication,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

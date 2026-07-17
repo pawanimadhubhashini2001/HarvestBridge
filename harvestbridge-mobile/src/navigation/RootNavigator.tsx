@@ -1,14 +1,17 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as SplashScreen from 'expo-splash-screen';
+import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 
 import { AuthNavigator } from '@/navigation/AuthNavigator';
 import { AppNavigator } from '@/navigation/AppNavigator';
+import { GuestRoute } from '@/navigation/GuestRoute';
+import { ProtectedRoute } from '@/navigation/ProtectedRoute';
 import { useAuth } from '@/hooks/use-auth';
 import { linking } from '@/navigation/types';
 import type { RootStackParamList } from '@/navigation/types';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { SplashScreen } from '@/screens/auth/splash-screen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -18,7 +21,7 @@ export function RootNavigator() {
 
   useEffect(() => {
     if (!isHydrating) {
-      void SplashScreen.hideAsync();
+      void ExpoSplashScreen.hideAsync();
     }
   }, [isHydrating]);
 
@@ -38,18 +41,27 @@ export function RootNavigator() {
     [theme],
   );
 
+  if (isHydrating) {
+    return <SplashScreen />;
+  }
+
   return (
     <NavigationContainer linking={linking} theme={navigationTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <Stack.Screen name="App" component={AppNavigator} />
+          <Stack.Screen name="App">
+            {() => (
+              <ProtectedRoute fallback={<AuthNavigator initialRouteName="Login" />}>
+                <AppNavigator />
+              </ProtectedRoute>
+            )}
+          </Stack.Screen>
         ) : (
           <Stack.Screen name="Auth">
             {() => (
-              <AuthNavigator
-                key={isHydrating ? 'auth-hydrating' : 'auth-ready'}
-                initialRouteName={isHydrating ? 'Splash' : 'Login'}
-              />
+              <GuestRoute fallback={<AppNavigator />}>
+                <AuthNavigator initialRouteName="Login" />
+              </GuestRoute>
             )}
           </Stack.Screen>
         )}

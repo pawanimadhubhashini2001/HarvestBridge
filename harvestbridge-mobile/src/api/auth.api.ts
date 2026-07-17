@@ -15,6 +15,10 @@ export interface RegisterPayload {
   role: Exclude<UserRole, 'admin'>;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
 export async function login(payload: LoginPayload) {
   const response = await apiClient.post<ApiSuccessResponse<AuthSession>>('/login', payload);
 
@@ -29,6 +33,12 @@ export async function register(payload: RegisterPayload) {
 
 export async function logout() {
   const response = await apiClient.post<ApiSuccessResponse<null>>('/logout');
+
+  return response.data;
+}
+
+export async function forgotPassword(payload: ForgotPasswordPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<null>>('/forgot-password', payload);
 
   return response.data;
 }

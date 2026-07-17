@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
@@ -36,6 +37,18 @@ class AuthController extends Controller
         return ApiResponse::success(
             $result,
             'Login successful'
+        );
+    }
+
+    public function forgotPassword(ForgotPasswordRequest $request)
+    {
+        $message = $this->authService->forgotPassword(
+            $request->validated('email')
+        );
+
+        return ApiResponse::success(
+            null,
+            $message
         );
     }
 

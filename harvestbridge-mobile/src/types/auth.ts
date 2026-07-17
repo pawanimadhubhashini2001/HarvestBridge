@@ -35,4 +35,5 @@ export interface AuthContextValue {
   setSession: (session: AuthSession, options?: SessionOptions) => Promise<void>;
   clearSession: () => Promise<void>;
   refreshProfile: () => Promise<AuthUser | null>;
+  checkAuthentication: () => Promise<boolean>;
 }
