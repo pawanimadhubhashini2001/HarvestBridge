@@ -106,4 +106,23 @@ class AIService
             ->take(5)
             ->get();
     }
+    public function smartPredict(
+        array $data,
+        WeatherService $weatherService
+    ) {
+        $weather = $weatherService->getWeather(
+            $data['District']
+        );
+
+        $payload = array_merge(
+            $data,
+            [
+                'Temperature_C' => $weather['temperature'],
+                'Rainfall_mm' => $weather['rainfall'],
+                'Humidity_pct' => $weather['humidity'],
+            ]
+        );
+
+        return $this->predict($payload);
+    }
 }

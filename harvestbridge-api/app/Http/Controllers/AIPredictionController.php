@@ -8,6 +8,8 @@ use App\Services\AIService;
 use App\Http\Resources\PredictionHistoryResource;
 use App\Models\PredictionHistory;
 use Illuminate\Http\Request;
+use App\Http\Requests\SmartPredictionRequest;
+use App\Services\WeatherService;
 
 class AIPredictionController extends Controller
 {
@@ -83,5 +85,35 @@ class AIPredictionController extends Controller
             'AI dashboard retrieved successfully.'
 
         );
+    }
+    public function smartPredict(
+        SmartPredictionRequest $request,
+        WeatherService $weatherService
+    ) {
+        $weather = $weatherService->getWeather(
+            $request->District
+        );
+
+        $input = array_merge(
+            $request->validated(),
+            [
+                'Temperature_C' => $weather['temperature'],
+                'Rainfall_mm' => $weather['rainfall'],
+                'Humidity_pct' => $weather['humidity']
+            ]
+        );
+
+        $prediction = $this->service->predict($input);
+
+        $this->service->savePrediction(
+            $request->user(),
+            $input,
+            $prediction
+        );
+
+        return response()->json([
+            'weather' => $weather,
+            'prediction' => $prediction
+        ]);
     }
 }

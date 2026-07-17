@@ -290,4 +290,8 @@ Route::middleware('auth:sanctum')->group(function () {
         '/weather/current',
         [WeatherController::class, 'current']
     );
+    Route::post(
+        '/ai/smart-predict',
+        [AIPredictionController::class, 'smartPredict']
+    );
 });
