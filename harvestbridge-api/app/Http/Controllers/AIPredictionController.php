@@ -9,6 +9,7 @@ use App\Http\Resources\PredictionHistoryResource;
 use App\Models\PredictionHistory;
 use Illuminate\Http\Request;
 use App\Http\Requests\SmartPredictionRequest;
+use App\Services\MarketPriceService;
 use App\Services\WeatherService;
 
 class AIPredictionController extends Controller
@@ -88,7 +89,8 @@ class AIPredictionController extends Controller
     }
     public function smartPredict(
         SmartPredictionRequest $request,
-        WeatherService $weatherService
+        WeatherService $weatherService,
+        MarketPriceService $marketService
     ) {
         $weather = $weatherService->getWeather(
             $request->District
@@ -105,6 +107,10 @@ class AIPredictionController extends Controller
 
         $prediction = $this->service->predict($input);
 
+        $market = $marketService->latestPrice(
+            $prediction['recommended_crop']
+        );
+
         $this->service->savePrediction(
             $request->user(),
             $input,
@@ -112,8 +118,13 @@ class AIPredictionController extends Controller
         );
 
         return response()->json([
+
             'weather' => $weather,
-            'prediction' => $prediction
+
+            'prediction' => $prediction,
+
+            'market_price' => $market
+
         ]);
     }
 }
