@@ -25,6 +25,8 @@ class RecommendationHistoryResource extends JsonResource
 
             'market_demand' => $this->market_demand,
 
+            'is_favorite' => $this->is_favorite,
+
             'created_at' => $this->created_at->format('Y-m-d H:i'),
 
         ];

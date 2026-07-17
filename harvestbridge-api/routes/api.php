@@ -299,6 +299,15 @@ Route::middleware('auth:sanctum')->group(function () {
         '/reports/recommendation',
         [RecommendationReportController::class, 'download']
     );
+    Route::get(
+        '/recommendations/favorites',
+        [AIPredictionController::class, 'favorites']
+    );
+
+    Route::patch(
+        '/recommendations/{history}/favorite',
+        [AIPredictionController::class, 'toggleFavorite']
+    );
 
     Route::middleware('auth:sanctum')->group(function () {
 

@@ -176,4 +176,22 @@ class AIService
             ->latest()
             ->paginate(10);
     }
+    public function favoriteRecommendations($user)
+    {
+        return PredictionHistory::where(
+            'user_id',
+            $user->id
+        )
+            ->where('is_favorite', true)
+            ->latest()
+            ->paginate(10);
+    }
+    public function toggleFavorite(PredictionHistory $history)
+    {
+        $history->update([
+            'is_favorite' => !$history->is_favorite,
+        ]);
+
+        return $history;
+    }
 }

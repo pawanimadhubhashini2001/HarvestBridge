@@ -222,4 +222,46 @@ class AIPredictionController extends Controller
 
         );
     }
+    public function favorites(Request $request)
+    {
+        return ApiResponse::success(
+
+            RecommendationHistoryResource::collection(
+
+                $this->service->favoriteRecommendations(
+                    $request->user()
+                )
+
+            ),
+
+            'Favorite recommendations retrieved successfully.'
+
+        );
+    }
+    public function toggleFavorite(
+        Request $request,
+        PredictionHistory $history
+    ) {
+        if ($history->user_id !== $request->user()->id) {
+
+            return ApiResponse::error(
+                'Unauthorized.',
+                403
+            );
+        }
+
+        $history = $this->service->toggleFavorite(
+            $history
+        );
+
+        return ApiResponse::success(
+
+            new RecommendationHistoryResource(
+                $history
+            ),
+
+            'Favorite status updated successfully.'
+
+        );
+    }
 }

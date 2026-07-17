@@ -32,7 +32,9 @@ class PredictionHistory extends Model
 
         'recommended_crop',
 
-        'confidence'
+        'confidence',
+
+        'is_favorite'
 
     ];
 
