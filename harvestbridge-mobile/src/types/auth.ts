@@ -23,12 +23,16 @@ export interface AuthSession {
   user: AuthUser;
 }
 
+export interface SessionOptions {
+  persist?: boolean;
+}
+
 export interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
   isHydrating: boolean;
-  setSession: (session: AuthSession) => Promise<void>;
+  setSession: (session: AuthSession, options?: SessionOptions) => Promise<void>;
   clearSession: () => Promise<void>;
   refreshProfile: () => Promise<AuthUser | null>;
 }

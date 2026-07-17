@@ -9,7 +9,7 @@ import {
   persistSession,
 } from '@/services/session-service';
 import { registerUnauthorizedHandler } from '@/services/auth-session-events';
-import type { AuthContextValue, AuthSession, AuthUser } from '@/types/auth';
+import type { AuthContextValue, AuthSession, AuthUser, SessionOptions } from '@/types/auth';
 import { normalizeApiError } from '@/utils/api-error';
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -55,11 +55,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  async function setSession(session: AuthSession) {
+  async function setSession(session: AuthSession, options?: SessionOptions) {
     setToken(session.token);
     setUser(session.user);
     apiClient.defaults.headers.common.Authorization = `Bearer ${session.token}`;
-    await persistSession(session);
+    await persistSession(session, options);
     const profile = await fetchProfile();
     setUser(profile);
   }
