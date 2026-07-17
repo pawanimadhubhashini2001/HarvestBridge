@@ -1,0 +1,218 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\PredictionHistory;
+use Illuminate\Support\Facades\Http;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class AIService
+{
+    public function __construct(
+        protected AuditLogService $auditLogService
+    ) {}
+
+    public function predict(array $data)
+    {
+        $response = Http::timeout(30)
+            ->post(
+                config('services.ai.url') . '/predict',
+                $data
+            );
+
+        if ($response->failed()) {
+            throw new \Exception(
+                'Unable to connect to AI service.'
+            );
+        }
+
+        return $response->json();
+    }
+    public function savePrediction(
+        User $user,
+        array $input,
+        array $prediction,
+        ?Request $request = null
+    ) {
+        $history = PredictionHistory::create([
+
+            'user_id' => $user->id,
+
+            'district' => $input['District'],
+
+            'season' => $input['Season'],
+
+            'soil_type' => $input['Soil_Type'],
+
+            'temperature' => $input['Temperature_C'],
+
+            'rainfall' => $input['Rainfall_mm'],
+
+            'humidity' => $input['Humidity_pct'],
+
+            'ph' => $input['pH'],
+
+            'previous_crop' => $input['Previous_Crop'],
+
+            'previous_yield' => $input['Previous_Yield_t_ha'],
+
+            'market_demand' => $input['Market_Demand'],
+
+            'recommended_crop' => $prediction['recommended_crop'],
+
+            'confidence' => $prediction['confidence']
+
+        ]);
+
+        $this->auditLogService->log(
+            'ai.prediction.saved',
+            $user->id,
+            $history,
+            [
+                'district' => $history->district,
+                'season' => $history->season,
+                'recommended_crop' => $history->recommended_crop,
+                'confidence' => $history->confidence,
+            ],
+            $request
+        );
+
+        return $history;
+    }
+    public function dashboard(User $user)
+    {
+        return [
+
+            'total_predictions' => PredictionHistory::where(
+                'user_id',
+                $user->id
+            )->count(),
+
+            'average_confidence' => round(
+                PredictionHistory::where(
+                    'user_id',
+                    $user->id
+                )->avg('confidence'),
+                4
+            ),
+
+            'most_recommended_crop' => PredictionHistory::select(
+                'recommended_crop',
+                DB::raw('COUNT(*) as total')
+            )
+                ->where('user_id', $user->id)
+                ->groupBy('recommended_crop')
+                ->orderByDesc('total')
+                ->first()
+
+        ];
+    }
+    public function monthlyPredictions(User $user)
+    {
+        return PredictionHistory::selectRaw(
+            "DATE_TRUNC('month', created_at) as month,
+         COUNT(*) as total"
+        )
+            ->where('user_id', $user->id)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+    public function recentPredictions(User $user)
+    {
+        return PredictionHistory::latest()
+            ->where('user_id', $user->id)
+            ->take(5)
+            ->get();
+    }
+    public function smartPredict(
+        array $data,
+        WeatherService $weatherService
+    ) {
+        $weather = $weatherService->getWeather(
+            $data['District']
+        );
+
+        $payload = array_merge(
+            $data,
+            [
+                'Temperature_C' => $weather['temperature'],
+                'Rainfall_mm' => $weather['rainfall'],
+                'Humidity_pct' => $weather['humidity'],
+            ]
+        );
+
+        return $this->predict($payload);
+    }
+    public function history($user)
+    {
+        return PredictionHistory::where(
+            'user_id',
+            $user->id
+        )
+            ->latest()
+            ->paginate(10);
+    }
+    public function searchHistory($user, array $filters)
+    {
+        $query = PredictionHistory::where(
+            'user_id',
+            $user->id
+        );
+
+        if (!empty($filters['crop'])) {
+            $query->where(
+                'recommended_crop',
+                'ILIKE',
+                '%' . $filters['crop'] . '%'
+            );
+        }
+
+        if (!empty($filters['season'])) {
+            $query->where(
+                'season',
+                $filters['season']
+            );
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate(
+                'created_at',
+                '>=',
+                $filters['from']
+            );
+        }
+
+        if (!empty($filters['to'])) {
+            $query->whereDate(
+                'created_at',
+                '<=',
+                $filters['to']
+            );
+        }
+
+        return $query
+            ->latest()
+            ->paginate(10);
+    }
+    public function favoriteRecommendations($user)
+    {
+        return PredictionHistory::where(
+            'user_id',
+            $user->id
+        )
+            ->where('is_favorite', true)
+            ->latest()
+            ->paginate(10);
+    }
+    public function toggleFavorite(PredictionHistory $history)
+    {
+        $history->update([
+            'is_favorite' => !$history->is_favorite,
+        ]);
+
+        return $history;
+    }
+}

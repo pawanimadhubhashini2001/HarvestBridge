@@ -24,10 +24,12 @@ class Farm extends Model
     {
         return $this->belongsTo(User::class);
     }
+
     public function harvestListings()
     {
         return $this->hasMany(HarvestListing::class);
     }
+
     public function predictions()
     {
         return $this->hasMany(Prediction::class);

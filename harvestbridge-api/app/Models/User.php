@@ -123,4 +123,19 @@ class User extends Authenticatable
             'ngo_id'
         );
     }
+
+    public function predictionHistories()
+    {
+        return $this->hasMany(PredictionHistory::class);
+    }
+
+    public function weatherAlerts()
+    {
+        return $this->hasMany(WeatherAlert::class);
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
+    }
 }

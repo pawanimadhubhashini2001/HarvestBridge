@@ -1,18 +1,25 @@
 <?php
 
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AIAnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompostListingController;
 use App\Http\Controllers\CompostRequestController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\FarmController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationRequestController;
+use App\Http\Controllers\AIPredictionController;
+use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\RecommendationReportController;
 
 // =============================
 // Public Routes
@@ -45,11 +52,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:admin')->group(function () {
 
-        Route::get('/admin/dashboard', function () {
-            return response()->json([
-                'message' => 'Welcome Admin'
-            ]);
-        });
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/admin/users', [AdminController::class, 'users']);
+        Route::patch('/admin/users/{user}/status', [AdminController::class, 'updateUserStatus']);
+        Route::get('/admin/farms', [AdminController::class, 'farms']);
+        Route::get('/admin/crops', [AdminController::class, 'crops']);
+        Route::get('/admin/ai-logs', [AdminController::class, 'aiLogs']);
+        Route::get('/admin/weather-logs', [AdminController::class, 'weatherLogs']);
+        Route::get('/admin/market-prices', [AdminController::class, 'marketPrices']);
+        Route::post('/admin/market-prices', [AdminController::class, 'storeMarketPrice']);
+        Route::put('/admin/market-prices/{marketPrice}', [AdminController::class, 'updateMarketPrice']);
+        Route::get('/admin/analytics', [AdminController::class, 'analytics']);
+        Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs']);
+        Route::get('/admin/reports', [AdminController::class, 'reports']);
+        Route::post('/notifications/email', [NotificationController::class, 'sendEmail']);
+        Route::post('/notifications/sms', [NotificationController::class, 'sendSms']);
+        Route::post('/notifications/in-app', [NotificationController::class, 'storeInApp']);
+        Route::post('/notifications/weather-alerts', [NotificationController::class, 'weatherAlerts']);
+        Route::post('/notifications/recommendation-alerts', [NotificationController::class, 'cropRecommendationAlert']);
 
         // Crop Management
         Route::post('/crops', [CropController::class, 'store']);
@@ -158,6 +178,7 @@ Route::middleware('auth:sanctum')->group(function () {
             '/analytics/compost',
             [AnalyticsController::class, 'compost']
         );
+        Route::get('/analytics/farmer-dashboard', [AIAnalyticsController::class, 'farmerDashboard']);
     });
 
     /*
@@ -272,4 +293,73 @@ Route::middleware('auth:sanctum')->group(function () {
         '/marketplace',
         [MarketplaceController::class, 'index']
     );
+    Route::post(
+        '/ai/predict',
+        [AIPredictionController::class, 'predict']
+    );
+    Route::get(
+        '/ai/history',
+        [AIPredictionController::class, 'history']
+    );
+    Route::get(
+        '/ai/dashboard',
+        [AIPredictionController::class, 'dashboard']
+    );
+    Route::get(
+        '/weather/current',
+        [WeatherController::class, 'current']
+    );
+    Route::post(
+        '/ai/smart-predict',
+        [AIPredictionController::class, 'smartPredict']
+    );
+    Route::post(
+        '/reports/recommendation',
+        [RecommendationReportController::class, 'download']
+    );
+    Route::get('/reports/crops', [ReportController::class, 'crop']);
+    Route::get('/reports/farms', [ReportController::class, 'farm']);
+    Route::get('/reports/ai', [ReportController::class, 'ai']);
+    Route::get('/reports/export-excel', [ReportController::class, 'exportExcel']);
+    Route::get('/reports/advanced-pdf', [ReportController::class, 'advancedPdf']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
+    Route::get('/analytics/ai/dashboard', [AIAnalyticsController::class, 'dashboard']);
+    Route::get('/analytics/ai/most-recommended-crops', [AIAnalyticsController::class, 'mostRecommendedCrops']);
+    Route::get('/analytics/ai/confidence', [AIAnalyticsController::class, 'confidence']);
+    Route::get('/analytics/ai/seasonal', [AIAnalyticsController::class, 'seasonal']);
+    Route::get('/analytics/ai/favorites', [AIAnalyticsController::class, 'favorites']);
+    Route::get('/analytics/ai/trends', [AIAnalyticsController::class, 'trends']);
+    Route::get(
+        '/recommendations/favorites',
+        [AIPredictionController::class, 'favorites']
+    );
+
+    Route::patch(
+        '/recommendations/{history}/favorite',
+        [AIPredictionController::class, 'toggleFavorite']
+    );
+
+    Route::middleware('auth:sanctum')->group(function () {
+
+        Route::get(
+            '/recommendations',
+            [AIPredictionController::class, 'recommendationHistory']
+        );
+
+        Route::get(
+            '/recommendations/search',
+            [AIPredictionController::class, 'searchRecommendations']
+        );
+
+        Route::get(
+            '/recommendations/{history}',
+            [AIPredictionController::class, 'showRecommendation']
+        );
+
+        Route::delete(
+            '/recommendations/{history}',
+            [AIPredictionController::class, 'destroyRecommendation']
+        );
+    });
 });

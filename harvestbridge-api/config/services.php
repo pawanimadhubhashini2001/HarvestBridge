@@ -34,5 +34,17 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'ai' => [
+        'url' => env('AI_API_URL'),
+    ],
+    'weather' => [
+        'url' => env('WEATHER_API_URL'),
+        'key' => env('WEATHER_API_KEY'),
+    ],
+    'sms' => [
+        'endpoint' => env('SMS_API_URL'),
+        'token' => env('SMS_API_TOKEN'),
+        'sender' => env('SMS_SENDER', 'HarvestBridge'),
+    ],
 
 ];
