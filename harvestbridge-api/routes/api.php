@@ -14,6 +14,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationRequestController;
 use App\Http\Controllers\AIPredictionController;
+use App\Http\Controllers\WeatherController;
 
 // =============================
 // Public Routes
@@ -284,5 +285,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get(
         '/ai/dashboard',
         [AIPredictionController::class, 'dashboard']
+    );
+    Route::get(
+        '/weather/current',
+        [WeatherController::class, 'current']
     );
 });
