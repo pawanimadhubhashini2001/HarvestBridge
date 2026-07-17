@@ -125,4 +125,55 @@ class AIService
 
         return $this->predict($payload);
     }
+    public function history($user)
+    {
+        return PredictionHistory::where(
+            'user_id',
+            $user->id
+        )
+            ->latest()
+            ->paginate(10);
+    }
+    public function searchHistory($user, array $filters)
+    {
+        $query = PredictionHistory::where(
+            'user_id',
+            $user->id
+        );
+
+        if (!empty($filters['crop'])) {
+            $query->where(
+                'recommended_crop',
+                'ILIKE',
+                '%' . $filters['crop'] . '%'
+            );
+        }
+
+        if (!empty($filters['season'])) {
+            $query->where(
+                'season',
+                $filters['season']
+            );
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate(
+                'created_at',
+                '>=',
+                $filters['from']
+            );
+        }
+
+        if (!empty($filters['to'])) {
+            $query->whereDate(
+                'created_at',
+                '<=',
+                $filters['to']
+            );
+        }
+
+        return $query
+            ->latest()
+            ->paginate(10);
+    }
 }

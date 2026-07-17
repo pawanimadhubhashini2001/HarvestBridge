@@ -13,6 +13,7 @@ use App\Services\ExplainableAIService;
 use App\Services\MarketPriceService;
 use App\Services\WeatherService;
 use Illuminate\Http\Request;
+use App\Http\Resources\RecommendationHistoryResource;
 
 class AIPredictionController extends Controller
 {
@@ -151,5 +152,74 @@ class AIPredictionController extends Controller
                 : null,
 
         ]);
+    }
+    public function recommendationHistory(
+        Request $request
+    ) {
+        return ApiResponse::success(
+
+            RecommendationHistoryResource::collection(
+
+                $this->service->history(
+                    $request->user()
+                )
+
+            ),
+
+            'Recommendation history retrieved successfully.'
+
+        );
+    }
+    public function searchRecommendations(
+        Request $request
+    ) {
+        return ApiResponse::success(
+
+            RecommendationHistoryResource::collection(
+
+                $this->service->searchHistory(
+
+                    $request->user(),
+
+                    $request->only([
+                        'crop',
+                        'season',
+                        'from',
+                        'to'
+                    ])
+
+                )
+
+            ),
+
+            'Recommendations retrieved successfully.'
+
+        );
+    }
+    public function showRecommendation(
+        PredictionHistory $history
+    ) {
+        return ApiResponse::success(
+
+            new RecommendationHistoryResource(
+                $history
+            ),
+
+            'Recommendation retrieved successfully.'
+
+        );
+    }
+    public function destroyRecommendation(
+        PredictionHistory $history
+    ) {
+        $history->delete();
+
+        return ApiResponse::success(
+
+            null,
+
+            'Recommendation deleted successfully.'
+
+        );
     }
 }

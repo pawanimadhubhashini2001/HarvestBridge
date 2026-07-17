@@ -299,4 +299,27 @@ Route::middleware('auth:sanctum')->group(function () {
         '/reports/recommendation',
         [RecommendationReportController::class, 'download']
     );
+
+    Route::middleware('auth:sanctum')->group(function () {
+
+        Route::get(
+            '/recommendations',
+            [AIPredictionController::class, 'recommendationHistory']
+        );
+
+        Route::get(
+            '/recommendations/search',
+            [AIPredictionController::class, 'searchRecommendations']
+        );
+
+        Route::get(
+            '/recommendations/{history}',
+            [AIPredictionController::class, 'showRecommendation']
+        );
+
+        Route::delete(
+            '/recommendations/{history}',
+            [AIPredictionController::class, 'destroyRecommendation']
+        );
+    });
 });
