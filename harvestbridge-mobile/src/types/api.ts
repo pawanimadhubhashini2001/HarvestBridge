@@ -10,6 +10,16 @@ export interface ApiErrorResponse {
   errors?: Record<string, string[] | string> | null;
 }
 
+export type AppErrorCode =
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'NOT_FOUND'
+  | 'VALIDATION_ERROR'
+  | 'SERVER_ERROR'
+  | 'NETWORK_ERROR'
+  | 'TIMEOUT_ERROR'
+  | 'UNKNOWN_ERROR';
+
 export interface LaravelPaginatedData<T> {
   data: T[];
   current_page: number;
@@ -31,4 +41,12 @@ export interface LaravelPaginatedData<T> {
 
 export interface FieldErrorMap {
   [key: string]: string[] | string | undefined;
+}
+
+export interface AppError extends Error {
+  code: AppErrorCode;
+  status?: number;
+  errors?: FieldErrorMap;
+  isNetworkError: boolean;
+  isTimeoutError: boolean;
 }

@@ -1,45 +1,17 @@
-import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider } from 'react-native-paper';
 
 import { queryClient } from '@/api/query-client';
-import { LoadingState } from '@/components/common/loading-state';
 import { AuthProvider } from '@/contexts/auth-context';
-import { useAuth } from '@/hooks/use-auth';
+import { RootNavigator } from '@/navigation/RootNavigator';
 import { useAppTheme } from '@/hooks/use-app-theme';
 
 void SplashScreen.preventAutoHideAsync();
 
-function RootNavigator() {
-  const theme = useAppTheme();
-  const { isHydrating } = useAuth();
-
-  useEffect(() => {
-    if (!isHydrating) {
-      void SplashScreen.hideAsync();
-    }
-  }, [isHydrating]);
-
-  if (isHydrating) {
-    return <LoadingState message="Preparing HarvestBridge..." />;
-  }
-
-  return (
-    <>
-      <StatusBar style={theme.dark ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(app)" />
-      </Stack>
-    </>
-  );
-}
-
-export default function RootLayout() {
+function AppProviders() {
   const theme = useAppTheme();
 
   return (
@@ -47,6 +19,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <PaperProvider theme={theme}>
           <AuthProvider>
+            <StatusBar style={theme.dark ? 'light' : 'dark'} />
             <RootNavigator />
           </AuthProvider>
         </PaperProvider>
@@ -54,3 +27,5 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default AppProviders;

@@ -1,0 +1,109 @@
+import type {
+  CompositeScreenProps,
+  LinkingOptions,
+  NavigatorScreenParams,
+} from '@react-navigation/native';
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as Linking from 'expo-linking';
+
+export type RootStackParamList = {
+  Auth: {
+    initialRouteName?: keyof AuthStackParamList;
+  };
+  App: NavigatorScreenParams<AppStackParamList>;
+};
+
+export type AuthStackParamList = {
+  Splash: undefined;
+  Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
+};
+
+export type AppTabParamList = {
+  Home: undefined;
+  Farms: undefined;
+  Recommendations: undefined;
+  Notifications: undefined;
+  Profile: undefined;
+};
+
+export type AppStackParamList = {
+  MainTabs: NavigatorScreenParams<AppTabParamList>;
+  FarmDetails: {
+    farmId?: string;
+  };
+  AddFarm: undefined;
+  EditFarm: {
+    farmId?: string;
+  };
+  RecommendationDetails: {
+    recommendationId?: string;
+  };
+  AIRecommendationForm: undefined;
+  RecommendationResult: {
+    predictionId?: string;
+  };
+  WeatherDetails: {
+    district?: string;
+  };
+  Settings: undefined;
+};
+
+export type RootScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<
+  RootStackParamList,
+  T
+>;
+
+export type AuthScreenProps<T extends keyof AuthStackParamList> = NativeStackScreenProps<
+  AuthStackParamList,
+  T
+>;
+
+export type AppStackScreenProps<T extends keyof AppStackParamList> = NativeStackScreenProps<
+  AppStackParamList,
+  T
+>;
+
+export type AppTabScreenProps<T extends keyof AppTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<AppTabParamList, T>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [Linking.createURL('/'), 'harvestbridgemobile://'],
+  config: {
+    screens: {
+      Auth: {
+        screens: {
+          Splash: 'splash',
+          Login: 'login',
+          Register: 'register',
+          ForgotPassword: 'forgot-password',
+        },
+      },
+      App: {
+        screens: {
+          MainTabs: {
+            screens: {
+              Home: '',
+              Farms: 'farms',
+              Recommendations: 'recommendations',
+              Notifications: 'notifications',
+              Profile: 'profile',
+            },
+          },
+          FarmDetails: 'farms/:farmId',
+          AddFarm: 'farms/new',
+          EditFarm: 'farms/:farmId/edit',
+          RecommendationDetails: 'recommendations/:recommendationId',
+          AIRecommendationForm: 'recommendations/new',
+          RecommendationResult: 'recommendations/result/:predictionId',
+          WeatherDetails: 'weather/:district',
+          Settings: 'settings',
+        },
+      },
+    },
+  },
+};

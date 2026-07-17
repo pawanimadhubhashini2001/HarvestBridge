@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from 'react';
 
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/apiClient';
 import {
   clearPersistedSession,
   fetchProfile,
@@ -8,6 +8,7 @@ import {
   logoutRequest,
   persistSession,
 } from '@/services/session-service';
+import { registerUnauthorizedHandler } from '@/services/auth-session-events';
 import type { AuthContextValue, AuthSession, AuthUser } from '@/types/auth';
 import { normalizeApiError } from '@/utils/api-error';
 
@@ -89,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     void bootstrap();
   }, []);
+
+  useEffect(() => registerUnauthorizedHandler(() => clearSession()), [token]);
 
   const value: AuthContextValue = {
     user,

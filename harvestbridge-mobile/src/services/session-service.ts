@@ -1,4 +1,4 @@
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/api/apiClient';
 import { clearStoredToken, getStoredToken, storeToken } from '@/services/auth-storage';
 import type { AuthSession, AuthUser } from '@/types/auth';
 import type { ApiSuccessResponse } from '@/types/api';
