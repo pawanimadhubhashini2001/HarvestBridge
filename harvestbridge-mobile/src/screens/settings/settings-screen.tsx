@@ -1,47 +1,43 @@
-import { Redirect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
+import { AppButton } from '@/components/common/app-button';
 import { Screen } from '@/components/layout/screen';
-import { APP_NAME } from '@/constants/app';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import { protectedRoutes } from '@/navigation';
 import { designTokens } from '@/theme';
 
-export default function IndexRoute() {
-  const { isAuthenticated } = useAuth();
+export function SettingsScreen() {
+  const { clearSession, user } = useAuth();
   const theme = useAppTheme();
-
-  if (isAuthenticated) {
-    return <Redirect href={protectedRoutes.dashboard} />;
-  }
 
   return (
     <Screen scrollable>
       <View
         style={[
-          styles.hero,
+          styles.card,
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
         ]}>
-        <Text variant="headlineMedium" style={{ color: theme.colors.onSurface }}>
-          {APP_NAME} Mobile Setup
+        <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+          Session Details
         </Text>
-        <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-          Navigation, theming, API client, React Query, and auth session management are ready.
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          Email: {user?.email ?? 'Not available'}
         </Text>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          District: {user?.district ?? 'Not set'}
+        </Text>
+        <AppButton label="Logout" mode="outline" onPress={() => void clearSession()} />
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  hero: {
+  card: {
     borderWidth: 1,
     borderRadius: designTokens.radius.lg,
     padding: designTokens.spacing.lg,
     gap: designTokens.spacing.md,
-    minHeight: 240,
-    justifyContent: 'center',
   },
 });

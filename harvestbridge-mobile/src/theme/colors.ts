@@ -1,0 +1,46 @@
+export const palette = {
+  fern: '#295D3A',
+  moss: '#5D8A52',
+  leaf: '#8CB369',
+  sand: '#F2E8CF',
+  clay: '#BC6C25',
+  sky: '#98C1D9',
+  slate: '#243B53',
+  white: '#FFFFFF',
+  black: '#101418',
+  red: '#B42318',
+} as const;
+
+export const lightColors = {
+  primary: palette.fern,
+  primaryContainer: '#DCE9DB',
+  secondary: palette.moss,
+  accent: palette.clay,
+  background: '#F7F5EF',
+  surface: palette.white,
+  surfaceVariant: '#E8E4D8',
+  text: '#172026',
+  textMuted: '#5B6670',
+  border: '#D8D1C2',
+  success: '#1F7A3E',
+  warning: '#C67A00',
+  error: palette.red,
+  info: '#266DD3',
+} as const;
+
+export const darkColors = {
+  primary: '#9FCF8A',
+  primaryContainer: '#35503A',
+  secondary: '#B3D4A7',
+  accent: '#E39A53',
+  background: '#101418',
+  surface: '#182028',
+  surfaceVariant: '#22303A',
+  text: '#F4F7F5',
+  textMuted: '#B6C2CC',
+  border: '#33414D',
+  success: '#69C97C',
+  warning: '#F7B955',
+  error: '#F97066',
+  info: '#7CC4FA',
+} as const;

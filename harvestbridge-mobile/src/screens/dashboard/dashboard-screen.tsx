@@ -1,21 +1,14 @@
-import { Redirect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { Screen } from '@/components/layout/screen';
-import { APP_NAME } from '@/constants/app';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import { protectedRoutes } from '@/navigation';
 import { designTokens } from '@/theme';
 
-export default function IndexRoute() {
-  const { isAuthenticated } = useAuth();
+export function DashboardScreen() {
+  const { user } = useAuth();
   const theme = useAppTheme();
-
-  if (isAuthenticated) {
-    return <Redirect href={protectedRoutes.dashboard} />;
-  }
 
   return (
     <Screen scrollable>
@@ -25,10 +18,16 @@ export default function IndexRoute() {
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
         ]}>
         <Text variant="headlineMedium" style={{ color: theme.colors.onSurface }}>
-          {APP_NAME} Mobile Setup
+          HarvestBridge
         </Text>
         <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-          Navigation, theming, API client, React Query, and auth session management are ready.
+          Project setup is complete and ready for the next mobile lesson.
+        </Text>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          Authenticated user: {user?.name ?? 'Unavailable'}
+        </Text>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          Role: {user?.role ?? 'Unavailable'}
         </Text>
       </View>
     </Screen>
@@ -40,8 +39,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: designTokens.radius.lg,
     padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-    minHeight: 240,
-    justifyContent: 'center',
+    gap: designTokens.spacing.sm,
   },
 });
