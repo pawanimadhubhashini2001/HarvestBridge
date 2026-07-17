@@ -15,6 +15,7 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationRequestController;
 use App\Http\Controllers\AIPredictionController;
 use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\RecommendationReportController;
 
 // =============================
 // Public Routes
@@ -293,5 +294,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/ai/smart-predict',
         [AIPredictionController::class, 'smartPredict']
+    );
+    Route::post(
+        '/reports/recommendation',
+        [RecommendationReportController::class, 'download']
     );
 });
