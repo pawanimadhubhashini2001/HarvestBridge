@@ -50,4 +50,38 @@ class AIPredictionController extends Controller
 
         );
     }
+    public function dashboard(Request $request)
+    {
+        return ApiResponse::success(
+
+            [
+
+                'overview' =>
+
+                $this->service->dashboard(
+                    $request->user()
+                ),
+
+                'monthly' =>
+
+                $this->service->monthlyPredictions(
+                    $request->user()
+                ),
+
+                'recent_predictions' =>
+
+                PredictionHistoryResource::collection(
+
+                    $this->service->recentPredictions(
+                        $request->user()
+                    )
+
+                )
+
+            ],
+
+            'AI dashboard retrieved successfully.'
+
+        );
+    }
 }

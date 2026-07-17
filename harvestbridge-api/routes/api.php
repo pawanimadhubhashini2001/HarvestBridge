@@ -281,4 +281,8 @@ Route::middleware('auth:sanctum')->group(function () {
         '/ai/history',
         [AIPredictionController::class, 'history']
     );
+    Route::get(
+        '/ai/dashboard',
+        [AIPredictionController::class, 'dashboard']
+    );
 });

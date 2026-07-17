@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use App\Models\PredictionHistory;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AIService
 {
@@ -58,5 +59,51 @@ class AIService
             'confidence' => $prediction['confidence']
 
         ]);
+    }
+    public function dashboard(User $user)
+    {
+        return [
+
+            'total_predictions' => PredictionHistory::where(
+                'user_id',
+                $user->id
+            )->count(),
+
+            'average_confidence' => round(
+                PredictionHistory::where(
+                    'user_id',
+                    $user->id
+                )->avg('confidence'),
+                4
+            ),
+
+            'most_recommended_crop' => PredictionHistory::select(
+                'recommended_crop',
+                DB::raw('COUNT(*) as total')
+            )
+                ->where('user_id', $user->id)
+                ->groupBy('recommended_crop')
+                ->orderByDesc('total')
+                ->first()
+
+        ];
+    }
+    public function monthlyPredictions(User $user)
+    {
+        return PredictionHistory::selectRaw(
+            "DATE_TRUNC('month', created_at) as month,
+         COUNT(*) as total"
+        )
+            ->where('user_id', $user->id)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+    }
+    public function recentPredictions(User $user)
+    {
+        return PredictionHistory::latest()
+            ->where('user_id', $user->id)
+            ->take(5)
+            ->get();
     }
 }
