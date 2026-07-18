@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { FarmsScreen } from '@/screens/farms/farms-screen';
-import { HomeScreen } from '@/screens/home/home-screen';
+import { HomeScreen } from '@/screens/dashboard/HomeScreen';
 import { NotificationsScreen } from '@/screens/notification/notifications-screen';
 import { RecommendationsScreen } from '@/screens/recommendation/recommendations-screen';
 import { ProfileScreen } from '@/screens/settings/profile-screen';
