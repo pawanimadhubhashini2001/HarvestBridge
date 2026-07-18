@@ -4,8 +4,6 @@ import {
   ActivityIndicator,
   Animated,
   Easing,
-  Platform,
-  Share,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -14,19 +12,32 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button, Card, Chip, Divider, Snackbar, Text } from 'react-native-paper';
 
 import {
-  downloadRecommendationReport,
   getLatestSmartRecommendationResultQueryKey,
   getRecommendations,
   getRecommendationsQueryKey,
   toggleRecommendationFavorite,
   type CachedSmartRecommendationResult,
+  type RecommendationReportPayload,
   type RecommendationHistoryDto,
 } from '@/api/recommendation.api';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
+import { ConfidenceMeter } from '@/components/recommendation/ConfidenceMeter';
+import {
+  ExplanationCard,
+  type ExplanationSectionId,
+} from '@/components/recommendation/ExplanationCard';
+import { MarketPriceCard } from '@/components/recommendation/MarketPriceCard';
 import { Screen } from '@/components/layout/screen';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
+import {
+  buildRecommendationPdfFileName,
+  downloadRecommendationPdf,
+  openRecommendationPdf,
+  shareRecommendationPdf,
+  type SavedRecommendationPdf,
+} from '@/services/pdf.service';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 function formatConfidence(confidence: number) {
@@ -51,12 +62,20 @@ function formatRecommendationTime(value: string) {
   }).format(date);
 }
 
+function formatPdfProgress(progress: number | null) {
+  if (progress === null) {
+    return 'Preparing download...';
+  }
+
+  return `Downloading PDF... ${Math.round(progress * 100)}%`;
+}
+
 function SuccessHero({
   crop,
   confidence,
 }: {
   crop: string;
-  confidence: string;
+  confidence: number;
 }) {
   const theme = useAppTheme();
   const scale = useRef(new Animated.Value(0.9)).current;
@@ -151,8 +170,9 @@ function SuccessHero({
           <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
             {crop}
           </Text>
+          <ConfidenceMeter confidence={confidence} size={164} />
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-            Confidence: {confidence}
+            Generated from your latest farm, soil, weather, and market inputs.
           </Text>
         </View>
       </Card.Content>
@@ -237,6 +257,11 @@ export function RecommendationResultScreen({
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [expandedExplanationSection, setExpandedExplanationSection] =
+    useState<ExplanationSectionId | null>(null);
+  const [savedPdf, setSavedPdf] = useState<SavedRecommendationPdf | null>(null);
+  const [pdfAction, setPdfAction] = useState<'download' | 'share' | 'view' | null>(null);
+  const [pdfProgress, setPdfProgress] = useState<number | null>(null);
   const cachedResultQuery = useQuery({
     queryKey: getLatestSmartRecommendationResultQueryKey(),
     queryFn: async () => {
@@ -296,60 +321,82 @@ export function RecommendationResultScreen({
     ]);
   };
 
-  const handleShare = async () => {
+  const buildPdfPayload = (): RecommendationReportPayload | null => {
     if (!cachedResult) {
-      setFeedbackMessage('No recommendation is available to share.');
-      return;
+      return null;
     }
 
-    const shareText = [
-      `HarvestBridge Recommendation`,
-      `Crop: ${cachedResult.response.prediction.recommended_crop}`,
-      `Confidence: ${formatConfidence(cachedResult.response.prediction.confidence)}`,
-      `District: ${cachedResult.request.District}`,
-      `Season: ${cachedResult.request.Season}`,
-      `Market Demand: ${cachedResult.request.Market_Demand}`,
-    ].join('\n');
+    return {
+      input: cachedResult.request,
+      weather: cachedResult.response.weather,
+      prediction: cachedResult.response.prediction,
+      market: cachedResult.response.market_price,
+    };
+  };
 
-    try {
-      await Share.share({
-        message: shareText,
-      });
-    } catch (error) {
-      setFeedbackMessage(getErrorMessage(error));
+  const ensurePdfSaved = async (shouldSaveToDevice: boolean) => {
+    const payload = buildPdfPayload();
+
+    if (!payload || !cachedResult) {
+      throw new Error('No recommendation is available for PDF export.');
     }
+
+    const pdfFile = await downloadRecommendationPdf(payload, {
+      fileName: buildRecommendationPdfFileName(
+        cachedResult.response.prediction.recommended_crop,
+        cachedResult.submitted_at,
+      ),
+      shouldSaveToDevice,
+      onProgress: (progress) => {
+        setPdfProgress(progress);
+      },
+    });
+
+    setSavedPdf(pdfFile);
+
+    return pdfFile;
   };
 
   const handleDownloadPdf = async () => {
-    if (!cachedResult) {
-      setFeedbackMessage('No recommendation is available for PDF export.');
-      return;
-    }
-
-    if (Platform.OS !== 'web') {
-      setFeedbackMessage('PDF download is available on web in this build.');
-      return;
-    }
-
+    setPdfAction('download');
+    setPdfProgress(0);
     try {
-      const blob = (await downloadRecommendationReport({
-        input: cachedResult.request,
-        weather: cachedResult.response.weather,
-        prediction: cachedResult.response.prediction,
-        market: cachedResult.response.market_price,
-      })) as Blob;
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'recommendation-report.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      setFeedbackMessage('Recommendation PDF download started.');
+      await ensurePdfSaved(true);
+      setFeedbackMessage('Recommendation PDF saved successfully.');
     } catch (error) {
       setFeedbackMessage(getErrorMessage(error));
+    } finally {
+      setPdfAction(null);
+      setPdfProgress(null);
+    }
+  };
+
+  const handleViewPdf = async () => {
+    setPdfAction('view');
+    setPdfProgress(0);
+    try {
+      const pdfFile = savedPdf ?? (await ensurePdfSaved(false));
+      await openRecommendationPdf(pdfFile);
+    } catch (error) {
+      setFeedbackMessage(getErrorMessage(error));
+    } finally {
+      setPdfAction(null);
+      setPdfProgress(null);
+    }
+  };
+
+  const handleSharePdf = async () => {
+    setPdfAction('share');
+    setPdfProgress(0);
+    try {
+      const pdfFile = savedPdf ?? (await ensurePdfSaved(false));
+      await shareRecommendationPdf(pdfFile);
+      setFeedbackMessage('Recommendation PDF ready to share.');
+    } catch (error) {
+      setFeedbackMessage(getErrorMessage(error));
+    } finally {
+      setPdfAction(null);
+      setPdfProgress(null);
     }
   };
 
@@ -374,6 +421,14 @@ export function RecommendationResultScreen({
   const confidence = formatConfidence(cachedResult.response.prediction.confidence);
   const weather = cachedResult.response.weather;
   const isFavorite = Boolean(matchingRecommendation?.is_favorite);
+  const weatherSummary = [
+    `${weather.temperature} deg C`,
+    `${weather.humidity}% humidity`,
+    `${weather.rainfall} mm rainfall`,
+    weather.condition,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <Screen
@@ -386,7 +441,7 @@ export function RecommendationResultScreen({
     >
       <SuccessHero
         crop={cachedResult.response.prediction.recommended_crop}
-        confidence={confidence}
+        confidence={cachedResult.response.prediction.confidence}
       />
 
       <View className={isWide ? 'flex-row gap-md' : 'gap-md'}>
@@ -416,6 +471,15 @@ export function RecommendationResultScreen({
               value={weather.location || cachedResult.request.District}
             />
           </SummarySection>
+
+          <MarketPriceCard
+            recommendedCrop={cachedResult.response.prediction.recommended_crop}
+            marketPrice={cachedResult.response.market_price}
+            isRefreshing={cachedResultQuery.isRefetching || recommendationsQuery.isRefetching}
+            onRefresh={() => {
+              void handleRefresh();
+            }}
+          />
         </View>
 
         <View style={{ flex: 1 }} className="gap-md">
@@ -439,13 +503,27 @@ export function RecommendationResultScreen({
               <Button
                 mode="contained"
                 onPress={() => {
-                  setFeedbackMessage('Explainable AI details are not implemented in this lesson.');
+                  if (!cachedResult.response.prediction.explanation) {
+                    setFeedbackMessage(
+                      'Explainable AI details are not available for this recommendation yet.',
+                    );
+                    return;
+                  }
+
+                  setExpandedExplanationSection('overall');
+                  setFeedbackMessage('Explainable AI details are available below.');
                 }}
               >
                 View Explanation
               </Button>
               <Button mode="outlined" onPress={() => void handleDownloadPdf()}>
-                Download PDF
+                {pdfAction === 'download' ? 'Downloading PDF...' : 'Download PDF'}
+              </Button>
+              <Button mode="outlined" onPress={() => void handleViewPdf()}>
+                {pdfAction === 'view' ? 'Opening PDF...' : 'View PDF'}
+              </Button>
+              <Button mode="outlined" onPress={() => void handleSharePdf()}>
+                {pdfAction === 'share' ? 'Sharing PDF...' : 'Share PDF'}
               </Button>
               <Button
                 mode="outlined"
@@ -467,9 +545,11 @@ export function RecommendationResultScreen({
                     ? 'Saved Favorite'
                     : 'Save Favorite'}
               </Button>
-              <Button mode="outlined" onPress={() => void handleShare()}>
-                Share Recommendation
-              </Button>
+              {pdfAction ? (
+                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {formatPdfProgress(pdfProgress)}
+                </Text>
+              ) : null}
               <Button
                 mode="text"
                 textColor={theme.colors.primary}
@@ -483,6 +563,23 @@ export function RecommendationResultScreen({
           </SummarySection>
         </View>
       </View>
+
+      <ExplanationCard
+        explanation={cachedResult.response.prediction.explanation}
+        recommendedCrop={cachedResult.response.prediction.recommended_crop}
+        soilType={cachedResult.request.Soil_Type}
+        season={cachedResult.request.Season}
+        marketDemand={cachedResult.request.Market_Demand}
+        district={cachedResult.request.District}
+        weatherSummary={weatherSummary}
+        confidence={cachedResult.response.prediction.confidence}
+        refreshing={cachedResultQuery.isRefetching || recommendationsQuery.isRefetching}
+        onRefresh={() => {
+          void handleRefresh();
+        }}
+        expandedSection={expandedExplanationSection}
+        onExpandedSectionChange={setExpandedExplanationSection}
+      />
 
       <SummarySection title="Recommendation Status">
         {recommendationsQuery.isLoading && !recommendationsQuery.data ? (

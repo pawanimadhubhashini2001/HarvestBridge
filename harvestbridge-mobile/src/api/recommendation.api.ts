@@ -24,6 +24,24 @@ export interface SmartPredictionPayload {
   Market_Demand: string;
 }
 
+export interface RecommendationExplanation {
+  soil?: string;
+  weather?: string;
+  season?: string;
+  market?: string;
+  [key: string]: string | undefined;
+}
+
+export interface MarketPriceSnapshot {
+  crop?: string | null;
+  market_name: string;
+  district: string;
+  price_per_unit: number | string;
+  unit: string;
+  price_date: string;
+  source?: string | null;
+}
+
 export interface SmartPredictionResponse {
   weather: {
     temperature: number;
@@ -35,9 +53,9 @@ export interface SmartPredictionResponse {
   prediction: {
     recommended_crop: string;
     confidence: number;
-    explanation: Record<string, string> | string[] | string;
+    explanation: RecommendationExplanation | string[] | string;
   };
-  market_price?: Record<string, unknown> | null;
+  market_price?: MarketPriceSnapshot | null;
 }
 
 export interface CachedSmartRecommendationResult {
@@ -91,6 +109,13 @@ export interface SearchRecommendationsParams {
   season?: string;
   from?: string;
   to?: string;
+}
+
+export interface RecommendationReportPayload {
+  input: SmartPredictionPayload;
+  weather: SmartPredictionResponse['weather'];
+  prediction: SmartPredictionResponse['prediction'];
+  market?: MarketPriceSnapshot | null;
 }
 
 export function getPredictionHistoryQueryKey() {
@@ -184,12 +209,7 @@ export async function deleteRecommendation(historyId: number | string) {
   return response.data;
 }
 
-export async function downloadRecommendationReport(payload: {
-  input: SmartPredictionPayload;
-  weather: SmartPredictionResponse['weather'];
-  prediction: SmartPredictionResponse['prediction'];
-  market?: Record<string, unknown> | null;
-}) {
+export async function downloadRecommendationReport(payload: RecommendationReportPayload) {
   const response = await apiClient.post('/reports/recommendation', payload, {
     responseType: 'blob',
     headers: {
