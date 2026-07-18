@@ -3,7 +3,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { FarmsScreen } from '@/screens/farms/farms-screen';
 import { HomeScreen } from '@/screens/dashboard/HomeScreen';
+import { useAuth } from '@/hooks/use-auth';
 import { NotificationsScreen } from '@/screens/notification/notifications-screen';
+import { MarketplaceScreen } from '@/screens/marketplace/MarketplaceScreen';
 import { RecommendationsScreen } from '@/screens/recommendation/recommendations-screen';
 import { ProfileScreen } from '@/screens/settings/profile-screen';
 import type { AppTabParamList } from '@/navigation/types';
@@ -13,10 +15,13 @@ const Tab = createBottomTabNavigator<AppTabParamList>();
 
 export function BottomTabs() {
   const theme = useAppTheme();
+  const { user } = useAuth();
+  const isConsumer = user?.role === 'consumer';
 
   const iconMap: Record<keyof AppTabParamList, keyof typeof MaterialCommunityIcons.glyphMap> = {
     Home: 'sprout',
-    Farms: 'tractor-variant',
+    Marketplace: 'storefront-outline',
+    Farms: 'storefront',
     Recommendations: 'chart-timeline-variant',
     Notifications: 'bell-ring-outline',
     Profile: 'account-circle-outline',
@@ -24,6 +29,7 @@ export function BottomTabs() {
 
   return (
     <Tab.Navigator
+      initialRouteName={isConsumer ? 'Marketplace' : 'Home'}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
@@ -53,11 +59,25 @@ export function BottomTabs() {
         },
         tabBarActiveBackgroundColor: theme.colors.primaryContainer,
       })}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Farms" component={FarmsScreen} />
-      <Tab.Screen name="Recommendations" component={RecommendationsScreen} />
-      <Tab.Screen name="Notifications" component={NotificationsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      {isConsumer ? (
+        <>
+          <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
+          <Tab.Screen name="Notifications" component={NotificationsScreen} />
+          <Tab.Screen name="Profile" component={ProfileScreen} />
+        </>
+      ) : (
+        <>
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen
+            name="Farms"
+            component={FarmsScreen}
+            options={{ tabBarLabel: 'Store' }}
+          />
+          <Tab.Screen name="Recommendations" component={RecommendationsScreen} />
+          <Tab.Screen name="Notifications" component={NotificationsScreen} />
+          <Tab.Screen name="Profile" component={ProfileScreen} />
+        </>
+      )}
     </Tab.Navigator>
   );
 }

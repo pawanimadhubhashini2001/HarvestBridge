@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateHarvestListingRequest extends FormRequest
 {
@@ -24,7 +25,13 @@ class UpdateHarvestListingRequest extends FormRequest
     {
         return [
 
-            'farm_id' => 'sometimes|required|exists:farms,id',
+            'farm_id' => [
+                'sometimes',
+                'required',
+                Rule::exists('farms', 'id')->where(function ($query) {
+                    $query->where('user_id', $this->user()?->id);
+                }),
+            ],
 
             'crop_id' => 'sometimes|required|exists:crops,id',
 

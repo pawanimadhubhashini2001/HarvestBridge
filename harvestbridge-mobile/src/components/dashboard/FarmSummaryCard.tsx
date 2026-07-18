@@ -1,16 +1,16 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import { useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, type DimensionValue, View } from 'react-native';
 import { Card, Chip, Text } from 'react-native-paper';
 
-import { getFarms, getFarmsQueryKey, type FarmDto } from '@/api/farm.api';
+import { getMyStore, getMyStoreQueryKey } from '@/api/store.api';
 import { AppButton } from '@/components/common/app-button';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackParamList } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-function SkeletonBlock({ height, width }: { height: number; width: number | string }) {
+function SkeletonBlock({ height, width }: { height: number; width: DimensionValue }) {
   const theme = useAppTheme();
 
   return (
@@ -43,80 +43,22 @@ function SummaryMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function toNumber(value: number | string) {
-  const parsed = typeof value === 'number' ? value : Number(value);
-
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function formatAreaValue(value: number) {
-  if (Number.isInteger(value)) {
-    return `${value}`;
-  }
-
-  return value.toFixed(1);
-}
-
-function formatTotalArea(farms: FarmDto[]) {
-  const totals = farms.reduce(
-    (accumulator, farm) => {
-      const size = toNumber(farm.farm_size);
-
-      if (farm.farm_size_unit === 'hectares') {
-        accumulator.hectares += size;
-      } else {
-        accumulator.acres += size;
-      }
-
-      return accumulator;
-    },
-    {
-      acres: 0,
-      hectares: 0,
-    },
-  );
-
-  const parts = [
-    totals.acres > 0 ? `${formatAreaValue(totals.acres)} acres` : null,
-    totals.hectares > 0 ? `${formatAreaValue(totals.hectares)} hectares` : null,
-  ].filter(Boolean);
-
-  return parts.length > 0 ? parts.join(' + ') : '0 acres';
-}
-
-function getRecentlyUpdatedFarm(farms: FarmDto[]) {
-  return [...farms].sort((left, right) => {
-    const leftDate = new Date(left.updated_at ?? left.created_at).getTime();
-    const rightDate = new Date(right.updated_at ?? right.created_at).getTime();
-
-    return rightDate - leftDate;
-  })[0];
-}
-
-function formatRecentUpdateLabel(farm?: FarmDto) {
-  if (!farm) {
+function formatUpdatedDate(value?: string | null) {
+  if (!value) {
     return 'No recent updates';
   }
 
-  return `${farm.farm_name} in ${farm.district}`;
-}
-
-function formatRecentUpdateHelper(farm?: FarmDto) {
-  if (!farm) {
-    return 'Create your first farm to see the latest update here.';
-  }
-
-  const date = new Date(farm.updated_at ?? farm.created_at);
+  const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return 'Last update date unavailable';
+    return 'No recent updates';
   }
 
-  return `Updated ${new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(undefined, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(date)}`;
+  }).format(date);
 }
 
 export function FarmSummaryCard() {
@@ -124,14 +66,13 @@ export function FarmSummaryCard() {
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
-  const farmsQuery = useQuery({
-    queryKey: getFarmsQueryKey(),
-    queryFn: getFarms,
+  const storeQuery = useQuery({
+    queryKey: getMyStoreQueryKey(),
+    queryFn: getMyStore,
   });
-
   const actionStackClassName = isWide ? 'flex-row gap-sm' : 'gap-sm';
 
-  if (farmsQuery.isLoading && !farmsQuery.data) {
+  if (storeQuery.isLoading && storeQuery.data === undefined) {
     return (
       <Card
         mode="outlined"
@@ -144,11 +85,11 @@ export function FarmSummaryCard() {
               style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
               textStyle={{ color: theme.colors.primary }}
             >
-              Farm Summary
+              Store Summary
             </Chip>
             <View className="gap-sm">
-              <SkeletonBlock height={34} width="38%" />
-              <SkeletonBlock height={22} width="50%" />
+              <SkeletonBlock height={34} width="40%" />
+              <SkeletonBlock height={22} width="56%" />
             </View>
             <View className={isWide ? 'flex-row flex-wrap gap-sm' : 'gap-sm'}>
               <SkeletonBlock height={76} width={isWide ? '48%' : '100%'} />
@@ -161,7 +102,7 @@ export function FarmSummaryCard() {
     );
   }
 
-  if (farmsQuery.isError) {
+  if (storeQuery.isError && storeQuery.data === undefined) {
     return (
       <Card
         mode="outlined"
@@ -174,25 +115,25 @@ export function FarmSummaryCard() {
               style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.surfaceVariant }}
               textStyle={{ color: theme.colors.error }}
             >
-              Farm Summary
+              Store Summary
             </Chip>
             <Text variant="titleLarge" style={{ color: theme.colors.error, fontWeight: '700' }}>
-              Unable to load farms
+              Unable to load your store profile
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              {getErrorMessage(farmsQuery.error)}
+              {getErrorMessage(storeQuery.error)}
             </Text>
             <View className={actionStackClassName}>
               <AppButton
-                label="View Farms"
+                label="View Store"
                 mode="outline"
                 style={{ flex: 1 }}
                 onPress={() => {
-                  navigation.navigate('Farms');
+                  navigation.navigate('MainTabs', { screen: 'Farms' });
                 }}
               />
               <AppButton
-                label="Add Farm"
+                label="Create Store"
                 style={{ flex: 1 }}
                 onPress={() => {
                   navigation.navigate('AddFarm');
@@ -205,9 +146,7 @@ export function FarmSummaryCard() {
     );
   }
 
-  const farms = farmsQuery.data ?? [];
-
-  if (farms.length === 0) {
+  if (!storeQuery.data) {
     return (
       <Card
         mode="outlined"
@@ -220,25 +159,26 @@ export function FarmSummaryCard() {
               style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
               textStyle={{ color: theme.colors.primary }}
             >
-              Farm Summary
+              Store Summary
             </Chip>
             <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-              No farms added yet
+              No store profile yet
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Add your first farm to start tracking acreage, crops, and farm activity.
+              Create your single store profile before publishing harvest listings and marketplace
+              products.
             </Text>
             <View className={actionStackClassName}>
               <AppButton
-                label="View Farms"
+                label="Open Store"
                 mode="outline"
                 style={{ flex: 1 }}
                 onPress={() => {
-                  navigation.navigate('Farms');
+                  navigation.navigate('MainTabs', { screen: 'Farms' });
                 }}
               />
               <AppButton
-                label="Add Farm"
+                label="Create Store"
                 style={{ flex: 1 }}
                 onPress={() => {
                   navigation.navigate('AddFarm');
@@ -251,14 +191,7 @@ export function FarmSummaryCard() {
     );
   }
 
-  const totalFarms = farms.length;
-  const totalActiveCrops = farms.reduce(
-    (total, farm) =>
-      total + (typeof farm.active_crop_count === 'number' ? farm.active_crop_count : 0),
-    0,
-  );
-  const totalFarmArea = formatTotalArea(farms);
-  const recentlyUpdatedFarm = getRecentlyUpdatedFarm(farms);
+  const store = storeQuery.data;
 
   return (
     <Card
@@ -274,16 +207,16 @@ export function FarmSummaryCard() {
                 style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
                 textStyle={{ color: theme.colors.primary }}
               >
-                Farm Summary
+                Store Summary
               </Chip>
               <Text
                 variant="headlineMedium"
                 style={{ color: theme.colors.onSurface, fontWeight: '700' }}
               >
-                {totalFarms} {totalFarms === 1 ? 'Farm' : 'Farms'}
+                {store.store_name}
               </Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Total area across your registered farms: {totalFarmArea}
+                {store.address}
               </Text>
             </View>
 
@@ -292,40 +225,37 @@ export function FarmSummaryCard() {
               style={{ backgroundColor: theme.colors.surfaceVariant }}
             >
               <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Recently Updated
+                Last Updated
               </Text>
               <Text
                 variant="bodyMedium"
                 style={{ color: theme.colors.onSurface, fontWeight: '700' }}
               >
-                {formatRecentUpdateLabel(recentlyUpdatedFarm)}
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                {formatRecentUpdateHelper(recentlyUpdatedFarm)}
+                {formatUpdatedDate(store.updated_at ?? store.created_at)}
               </Text>
             </View>
           </View>
 
           <View className={isWide ? 'flex-row flex-wrap gap-sm' : 'gap-sm'}>
-            <SummaryMetric label="Total Farms" value={`${totalFarms}`} />
-            <SummaryMetric label="Total Active Crops" value={`${totalActiveCrops}`} />
-            <SummaryMetric label="Total Farm Area" value={totalFarmArea} />
+            <SummaryMetric label="Store Status" value={store.business_status ?? 'open'} />
+            <SummaryMetric label="Phone Number" value={store.phone_number} />
+            <SummaryMetric label="Active Crops" value={`${store.active_crop_count ?? 0}`} />
           </View>
 
           <View className={actionStackClassName}>
             <AppButton
-              label="View Farms"
+              label="View Store"
               mode="outline"
               style={{ flex: 1 }}
               onPress={() => {
-                navigation.navigate('Farms');
+                navigation.navigate('FarmDetails', { farmId: String(store.id) });
               }}
             />
             <AppButton
-              label="Add Farm"
+              label="Edit Store"
               style={{ flex: 1 }}
               onPress={() => {
-                navigation.navigate('AddFarm');
+                navigation.navigate('EditFarm', { farmId: String(store.id) });
               }}
             />
           </View>

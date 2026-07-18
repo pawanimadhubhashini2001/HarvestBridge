@@ -172,7 +172,7 @@ function SuccessHero({
           </Text>
           <ConfidenceMeter confidence={confidence} size={164} />
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-            Generated from your latest farm, soil, weather, and market inputs.
+            Generated from your latest store location, soil, weather, and market inputs.
           </Text>
         </View>
       </Card.Content>
@@ -483,7 +483,7 @@ export function RecommendationResultScreen({
         </View>
 
         <View style={{ flex: 1 }} className="gap-md">
-          <SummarySection title="Soil Summary" subtitle={`Farm: ${cachedResult.farm.name}`}>
+          <SummarySection title="Soil Summary" subtitle={`Store: ${cachedResult.store.name}`}>
             <DetailRow label="Soil Type" value={cachedResult.request.Soil_Type} />
             <DetailRow label="Soil pH" value={`${cachedResult.form.soil_ph}`} />
             <DetailRow label="Nitrogen" value={`${cachedResult.form.nitrogen}`} />
@@ -597,7 +597,7 @@ export function RecommendationResultScreen({
           <View className="gap-sm">
             <View className="flex-row flex-wrap gap-sm">
               <Chip compact>{isFavorite ? 'Favorite Saved' : 'Not Favorited Yet'}</Chip>
-              <Chip compact>{cachedResult.farm.district}</Chip>
+              <Chip compact>{cachedResult.store.district}</Chip>
               <Chip compact>{cachedResult.request.Season}</Chip>
             </View>
             <Divider />

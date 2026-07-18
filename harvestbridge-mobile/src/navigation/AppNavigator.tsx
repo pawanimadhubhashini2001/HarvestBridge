@@ -6,6 +6,7 @@ import type { AppStackParamList } from '@/navigation/types';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
+import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
@@ -48,17 +49,17 @@ export function AppNavigator() {
       <Stack.Screen
         name="FarmDetails"
         component={FarmDetailsScreen}
-        options={{ title: 'Farm Details' }}
+        options={{ title: 'Store Profile' }}
       />
       <Stack.Screen
         name="AddFarm"
         component={AddFarmScreen}
-        options={{ title: 'Add Farm' }}
+        options={{ title: 'Create Store Profile' }}
       />
       <Stack.Screen
         name="EditFarm"
         component={EditFarmScreen}
-        options={{ title: 'Edit Farm' }}
+        options={{ title: 'Edit Store Profile' }}
       />
       <Stack.Screen
         name="RecommendationDetails"
@@ -80,6 +81,11 @@ export function AppNavigator() {
         name="RecommendationResult"
         component={RecommendationResultScreen}
         options={{ title: 'Recommendation Result' }}
+      />
+      <Stack.Screen
+        name="MarketplaceProductDetails"
+        component={MarketplaceProductDetailsScreen}
+        options={{ title: 'Product Details' }}
       />
       <Stack.Screen
         name="WeatherDetails"

@@ -1,9 +1,11 @@
-import { Pressable, View } from 'react-native';
-import { Controller, type Control, type FieldErrors } from 'react-hook-form';
-import { Text } from 'react-native-paper';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
+import { View } from 'react-native';
+import { Controller, type Control, type FieldErrors, useWatch } from 'react-hook-form';
+import { Button, Text } from 'react-native-paper';
 import { z } from 'zod';
 
-import { type FarmDto, type StoreFarmPayload } from '@/api/farm.api';
+import { type StoreDto, type StoreImageAsset, type StorePayload } from '@/api/store.api';
 import { AppTextInput } from '@/components/form/app-text-input';
 import { useAppTheme } from '@/hooks/use-app-theme';
 
@@ -15,38 +17,63 @@ const optionalNumberSchema = z.union([
     .refine((value) => !Number.isNaN(Number(value)), 'Enter a valid number.'),
 ]);
 
-export const farmFormSchema = z.object({
-  farm_name: z
-    .string()
-    .trim()
-    .min(1, 'Farm name is required.')
-    .max(255, 'Farm name is too long.'),
-  district: z
-    .string()
-    .trim()
-    .min(1, 'District is required.')
-    .max(100, 'District is too long.'),
-  address: z.string().trim().min(1, 'Address is required.'),
-  latitude: optionalNumberSchema,
-  longitude: optionalNumberSchema,
-  farm_size: z
-    .string()
-    .trim()
-    .min(1, 'Farm size is required.')
-    .refine((value) => !Number.isNaN(Number(value)), 'Farm size must be a number.')
-    .refine((value) => Number(value) >= 0.1, 'Farm size must be at least 0.1.'),
-  farm_size_unit: z.enum(['acres', 'hectares']),
-  soil_type: z
-    .string()
-    .trim()
-    .min(1, 'Soil type is required.')
-    .max(100, 'Soil type is too long.'),
-  description: z.string().trim().max(1000, 'Description is too long.').optional().or(z.literal('')),
-});
+const storeImageSchema = z
+  .object({
+    uri: z.string().min(1),
+    name: z.string().min(1),
+    type: z.string().min(1),
+  })
+  .nullable()
+  .optional();
+
+export const farmFormSchema = z
+  .object({
+    store_name: z
+      .string()
+      .trim()
+      .min(1, 'Store name is required.')
+      .max(255, 'Store name is too long.'),
+    phone_number: z
+      .string()
+      .trim()
+      .min(1, 'Phone number is required.')
+      .max(30, 'Phone number is too long.'),
+    district: z
+      .string()
+      .trim()
+      .min(1, 'District is required.')
+      .max(100, 'District is too long.'),
+    address: z.string().trim().min(1, 'Address is required.'),
+    latitude: optionalNumberSchema,
+    longitude: optionalNumberSchema,
+    store_description: z
+      .string()
+      .trim()
+      .max(1000, 'Description is too long.')
+      .optional()
+      .or(z.literal('')),
+    store_image: storeImageSchema,
+    existing_store_image_url: z.string().optional().or(z.literal('')),
+  })
+  .superRefine((values, context) => {
+    const hasLatitude = values.latitude.trim().length > 0;
+    const hasLongitude = values.longitude.trim().length > 0;
+
+    if (hasLatitude !== hasLongitude) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['latitude'],
+        message: 'Latitude and longitude must be provided together.',
+      });
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['longitude'],
+        message: 'Latitude and longitude must be provided together.',
+      });
+    }
+  });
 
 export type FarmFormValues = z.infer<typeof farmFormSchema>;
-
-export const farmSizeUnitOptions: StoreFarmPayload['farm_size_unit'][] = ['acres', 'hectares'];
 
 function stringifyOptionalValue(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
@@ -56,52 +83,165 @@ function stringifyOptionalValue(value: string | number | null | undefined) {
   return String(value);
 }
 
+function getImageFileName(uri: string, fallbackPrefix: string) {
+  const uriSegments = uri.split('/');
+  const lastSegment = uriSegments[uriSegments.length - 1];
+
+  if (lastSegment) {
+    return lastSegment;
+  }
+
+  return `${fallbackPrefix}-${Date.now()}.jpg`;
+}
+
 export function getDefaultFarmFormValues(): FarmFormValues {
   return {
-    farm_name: '',
+    store_name: '',
+    phone_number: '',
     district: '',
     address: '',
     latitude: '',
     longitude: '',
-    farm_size: '',
-    farm_size_unit: 'acres',
-    soil_type: '',
-    description: '',
+    store_description: '',
+    store_image: null,
+    existing_store_image_url: '',
   };
 }
 
-export function toFarmFormValues(farm?: Partial<FarmDto>): FarmFormValues {
+export function toFarmFormValues(store?: Partial<StoreDto>): FarmFormValues {
   const defaults = getDefaultFarmFormValues();
 
-  if (!farm) {
+  if (!store) {
     return defaults;
   }
 
   return {
-    farm_name: farm.farm_name ?? defaults.farm_name,
-    district: farm.district ?? defaults.district,
-    address: farm.address ?? defaults.address,
-    latitude: stringifyOptionalValue(farm.latitude),
-    longitude: stringifyOptionalValue(farm.longitude),
-    farm_size: stringifyOptionalValue(farm.farm_size),
-    farm_size_unit: farm.farm_size_unit ?? defaults.farm_size_unit,
-    soil_type: farm.soil_type ?? defaults.soil_type,
-    description: farm.description ?? defaults.description,
+    store_name: store.store_name ?? defaults.store_name,
+    phone_number: store.phone_number ?? defaults.phone_number,
+    district: store.district ?? defaults.district,
+    address: store.address ?? defaults.address,
+    latitude: stringifyOptionalValue(store.latitude),
+    longitude: stringifyOptionalValue(store.longitude),
+    store_description: store.store_description ?? defaults.store_description,
+    store_image: null,
+    existing_store_image_url: store.store_image_url ?? store.store_logo_url ?? '',
   };
 }
 
-export function toFarmPayload(values: FarmFormValues): StoreFarmPayload {
+export function toFarmPayload(values: FarmFormValues): StorePayload {
   return {
-    farm_name: values.farm_name.trim(),
+    store_name: values.store_name.trim(),
+    phone_number: values.phone_number.trim(),
     district: values.district.trim(),
     address: values.address.trim(),
-    farm_size: Number(values.farm_size),
-    farm_size_unit: values.farm_size_unit,
-    soil_type: values.soil_type.trim(),
     ...(values.latitude.trim() ? { latitude: Number(values.latitude) } : {}),
     ...(values.longitude.trim() ? { longitude: Number(values.longitude) } : {}),
-    ...(values.description?.trim() ? { description: values.description.trim() } : {}),
+    ...(values.store_description?.trim()
+      ? { store_description: values.store_description.trim() }
+      : {}),
+    ...(values.store_image ? { store_image: values.store_image } : {}),
   };
+}
+
+function StoreImageField({
+  control,
+  disabled,
+}: {
+  control: Control<FarmFormValues>;
+  disabled: boolean;
+}) {
+  const theme = useAppTheme();
+  const selectedImage = useWatch({
+    control,
+    name: 'store_image',
+  });
+  const existingImageUrl = useWatch({
+    control,
+    name: 'existing_store_image_url',
+  });
+  const previewUri = selectedImage?.uri ?? existingImageUrl ?? null;
+
+  return (
+    <Controller
+      control={control}
+      name="store_image"
+      render={({ field: { onChange } }) => {
+        const handlePickImage = async () => {
+          const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+          if (permission.status !== 'granted') {
+            return;
+          }
+
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            quality: 0.8,
+            allowsMultipleSelection: false,
+          });
+
+          if (result.canceled || result.assets.length === 0) {
+            return;
+          }
+
+          const asset = result.assets[0];
+          const pickedImage: StoreImageAsset = {
+            uri: asset.uri,
+            name: asset.fileName ?? getImageFileName(asset.uri, 'store-image'),
+            type: asset.mimeType ?? 'image/jpeg',
+          };
+
+          onChange(pickedImage);
+        };
+
+        return (
+          <View className="gap-sm">
+            <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
+              Store Image (optional)
+            </Text>
+
+            {previewUri ? (
+              <View
+                className="overflow-hidden rounded-lg border"
+                style={{ borderColor: theme.colors.outline }}
+              >
+                <Image
+                  source={{ uri: previewUri }}
+                  style={{ width: '100%', height: 180 }}
+                  contentFit="cover"
+                />
+              </View>
+            ) : (
+              <View
+                className="items-center justify-center rounded-lg border border-dashed px-md py-xl"
+                style={{ borderColor: theme.colors.outline }}
+              >
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  Add a store image to help shoppers recognize your selling location.
+                </Text>
+              </View>
+            )}
+
+            <View className="flex-row gap-sm">
+              <Button mode="contained-tonal" disabled={disabled} onPress={() => void handlePickImage()}>
+                {previewUri ? 'Change Image' : 'Choose Image'}
+              </Button>
+              {previewUri ? (
+                <Button
+                  mode="text"
+                  disabled={disabled}
+                  onPress={() => {
+                    onChange(null);
+                  }}
+                >
+                  Remove
+                </Button>
+              ) : null}
+            </View>
+          </View>
+        );
+      }}
+    />
+  );
 }
 
 export function FarmFormFields({
@@ -125,20 +265,39 @@ export function FarmFormFields({
     <>
       <Controller
         control={control}
-        name="farm_name"
+        name="store_name"
         render={({ field: { onChange, onBlur, value } }) => (
           <AppTextInput
             containerClassName="gap-0"
-            label="Farm Name"
+            label="Store Name"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
             autoCapitalize="words"
-            errorMessage={errors.farm_name?.message}
+            errorMessage={errors.store_name?.message}
             disabled={disabled}
           />
         )}
       />
+
+      <Controller
+        control={control}
+        name="phone_number"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppTextInput
+            containerClassName="gap-0"
+            label="Phone Number"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            keyboardType="phone-pad"
+            errorMessage={errors.phone_number?.message}
+            disabled={disabled}
+          />
+        )}
+      />
+
+      <StoreImageField control={control} disabled={disabled} />
 
       <Controller
         control={control}
@@ -170,85 +329,6 @@ export function FarmFormFields({
             multiline
             numberOfLines={3}
             errorMessage={errors.address?.message}
-            disabled={disabled}
-          />
-        )}
-      />
-
-      <View className="gap-sm">
-        <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
-          Farm Size Unit
-        </Text>
-        <View className="flex-row flex-wrap gap-sm">
-          {farmSizeUnitOptions.map((unit) => (
-            <Controller
-              key={unit}
-              control={control}
-              name="farm_size_unit"
-              render={({ field: { onChange, value } }) => (
-                <Pressable
-                  className="rounded-md border px-md py-sm"
-                  onPress={() => {
-                    onChange(unit);
-                  }}
-                  disabled={disabled}
-                  style={{
-                    borderColor: value === unit ? theme.colors.primary : theme.colors.outline,
-                    backgroundColor:
-                      value === unit ? theme.colors.secondaryContainer : theme.colors.surface,
-                    opacity: disabled ? 0.7 : 1,
-                  }}
-                >
-                  <Text
-                    variant="bodyMedium"
-                    style={{
-                      color: value === unit ? theme.colors.primary : theme.colors.onSurface,
-                      fontWeight: value === unit ? '700' : '500',
-                    }}
-                  >
-                    {unit === 'acres' ? 'Acres' : 'Hectares'}
-                  </Text>
-                </Pressable>
-              )}
-            />
-          ))}
-        </View>
-        {errors.farm_size_unit?.message ? (
-          <Text variant="bodySmall" style={{ color: theme.colors.error }}>
-            {errors.farm_size_unit.message}
-          </Text>
-        ) : null}
-      </View>
-
-      <Controller
-        control={control}
-        name="farm_size"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <AppTextInput
-            containerClassName="gap-0"
-            label="Farm Size"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            keyboardType="decimal-pad"
-            errorMessage={errors.farm_size?.message}
-            disabled={disabled}
-          />
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="soil_type"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <AppTextInput
-            containerClassName="gap-0"
-            label="Soil Type"
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            autoCapitalize="words"
-            errorMessage={errors.soil_type?.message}
             disabled={disabled}
           />
         )}
@@ -290,7 +370,7 @@ export function FarmFormFields({
 
       <Controller
         control={control}
-        name="description"
+        name="store_description"
         render={({ field: { onChange, onBlur, value } }) => (
           <AppTextInput
             containerClassName="gap-0"
@@ -300,11 +380,21 @@ export function FarmFormFields({
             onBlur={onBlur}
             multiline
             numberOfLines={4}
-            errorMessage={errors.description?.message}
+            errorMessage={errors.store_description?.message}
             disabled={disabled}
           />
         )}
       />
+
+      <View
+        className="gap-xs rounded-lg px-md py-md"
+        style={{ backgroundColor: theme.colors.surfaceVariant }}
+      >
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          Latitude and longitude are optional, but provide both together if you want Google Maps
+          directions and nearby marketplace matching to work accurately.
+        </Text>
+      </View>
     </>
   );
 }

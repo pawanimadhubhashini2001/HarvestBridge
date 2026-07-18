@@ -3,18 +3,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useForm } from 'react-hook-form';
-import { Button, Chip, Snackbar, Text } from 'react-native-paper';
+import { Chip, Snackbar, Text } from 'react-native-paper';
 
 import {
-  deleteFarm,
-  getFarms,
-  getFarmsQueryKey,
-  updateFarm,
-  type FarmDto,
-  type UpdateFarmPayload,
-} from '@/api/farm.api';
+  getMyStore,
+  getMyStoreQueryKey,
+  updateStore,
+  type StoreDto,
+  type UpdateStorePayload,
+} from '@/api/store.api';
 import { AppButton } from '@/components/common/app-button';
-import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
@@ -31,30 +29,22 @@ import {
 import type { AppError } from '@/types/api';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-const farmFormFieldNames = [
-  'farm_name',
+const storeFormFieldNames = [
+  'store_name',
+  'phone_number',
   'district',
   'address',
   'latitude',
   'longitude',
-  'farm_size',
-  'farm_size_unit',
-  'soil_type',
-  'description',
+  'store_description',
 ] as const satisfies readonly (keyof FarmFormValues)[];
 
-export function EditFarmScreen({
-  navigation,
-  route,
-}: AppStackScreenProps<'EditFarm'>) {
+export function EditFarmScreen({ navigation }: AppStackScreenProps<'EditFarm'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const farmId = route.params?.farmId;
   const shouldBypassLeaveWarning = useRef(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [deleteFeedbackMessage, setDeleteFeedbackMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -66,22 +56,18 @@ export function EditFarmScreen({
     resolver: zodResolver(farmFormSchema),
     mode: 'onChange',
   });
-  const farmsQuery = useQuery({
-    queryKey: getFarmsQueryKey(),
-    queryFn: getFarms,
-    enabled: Boolean(farmId),
+  const storeQuery = useQuery({
+    queryKey: getMyStoreQueryKey(),
+    queryFn: getMyStore,
   });
 
-  const farms = farmsQuery.data ?? [];
-  const farm = farms.find((farmItem) => String(farmItem.id) === farmId);
-
   useEffect(() => {
-    if (!farm) {
+    if (!storeQuery.data) {
       return;
     }
 
-    reset(toFarmFormValues(farm));
-  }, [farm, reset]);
+    reset(toFarmFormValues(storeQuery.data));
+  }, [reset, storeQuery.data]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (event) => {
@@ -93,7 +79,7 @@ export function EditFarmScreen({
 
       Alert.alert(
         'Discard changes?',
-        'You have unsaved farm updates. Leave this screen and lose your changes?',
+        'You have unsaved store profile updates. Leave this screen and lose your changes?',
         [
           {
             text: 'Keep Editing',
@@ -114,33 +100,29 @@ export function EditFarmScreen({
     return unsubscribe;
   }, [isDirty, navigation]);
 
-  const updateFarmMutation = useMutation({
-    mutationFn: async (values: UpdateFarmPayload) => {
-      if (!farmId) {
-        throw new Error('Farm id is required to update a farm.');
+  const updateStoreMutation = useMutation({
+    mutationFn: async (values: UpdateStorePayload) => {
+      if (!storeQuery.data) {
+        throw new Error('Store profile is required before updating.');
       }
 
-      return updateFarm(farmId, values);
+      return updateStore(storeQuery.data.id, values);
     },
-    onSuccess: async (updatedFarm: FarmDto) => {
+    onSuccess: async (updatedStore: StoreDto) => {
       setApiError(null);
-      setSuccessMessage('Farm updated successfully. Opening farm details...');
-      queryClient.setQueryData<FarmDto[]>(getFarmsQueryKey(), (currentFarms) =>
-        currentFarms?.map((farmItem) => (farmItem.id === updatedFarm.id ? updatedFarm : farmItem)) ??
-        [updatedFarm],
-      );
-      await queryClient.invalidateQueries({ queryKey: getFarmsQueryKey() });
-      await queryClient.refetchQueries({ queryKey: getFarmsQueryKey(), type: 'active' });
+      setSuccessMessage('Store profile updated successfully. Opening your latest profile...');
+      queryClient.setQueryData(getMyStoreQueryKey(), updatedStore);
+      await queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() });
       shouldBypassLeaveWarning.current = true;
       setTimeout(() => {
-        navigation.replace('FarmDetails', { farmId: String(updatedFarm.id) });
+        navigation.replace('FarmDetails', { farmId: String(updatedStore.id) });
       }, 500);
     },
     onError: (error: AppError) => {
       setSuccessMessage(null);
       setApiError(error.message);
 
-      for (const field of farmFormFieldNames) {
+      for (const field of storeFormFieldNames) {
         const fieldError = error.errors?.[field];
 
         if (fieldError) {
@@ -151,79 +133,38 @@ export function EditFarmScreen({
       }
     },
   });
-  const deleteFarmMutation = useMutation({
-    mutationFn: async () => {
-      if (!farmId) {
-        throw new Error('Farm id is required to delete a farm.');
-      }
-
-      return deleteFarm(farmId);
-    },
-    onSuccess: async () => {
-      setDeleteDialogVisible(false);
-      setApiError(null);
-      setSuccessMessage(null);
-      setDeleteFeedbackMessage('Farm deleted successfully. Returning...');
-      queryClient.setQueryData<FarmDto[]>(getFarmsQueryKey(), (currentFarms) =>
-        currentFarms?.filter((farmItem) => String(farmItem.id) !== farmId) ?? [],
-      );
-      await queryClient.invalidateQueries({ queryKey: getFarmsQueryKey() });
-      await queryClient.refetchQueries({ queryKey: getFarmsQueryKey(), type: 'active' });
-      shouldBypassLeaveWarning.current = true;
-      setTimeout(() => {
-        navigation.goBack();
-      }, 700);
-    },
-    onError: (error: Error) => {
-      setDeleteDialogVisible(false);
-      setDeleteFeedbackMessage(getErrorMessage(error));
-    },
-  });
 
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
     setSuccessMessage(null);
-    await updateFarmMutation.mutateAsync(toFarmPayload(values));
+    await updateStoreMutation.mutateAsync(toFarmPayload(values));
   });
 
-  if (!farmId) {
-    return (
-      <ErrorState
-        title="Farm not found"
-        message="A farm id was not provided for editing."
-        actionLabel="Back to farms"
-        onAction={() => {
-          navigation.navigate('MainTabs', { screen: 'Farms' });
-        }}
-      />
-    );
+  if (storeQuery.isLoading && storeQuery.data === undefined) {
+    return <LoadingState message="Loading your store profile..." />;
   }
 
-  if (farmsQuery.isLoading && !farmsQuery.data) {
-    return <LoadingState message="Loading farm details..." />;
-  }
-
-  if (farmsQuery.isError && !farmsQuery.data) {
+  if (storeQuery.isError && storeQuery.data === undefined) {
     return (
       <ErrorState
-        title="Unable to load farm"
-        message={getErrorMessage(farmsQuery.error)}
+        title="Unable to load your store"
+        message={getErrorMessage(storeQuery.error)}
         actionLabel="Retry"
         onAction={() => {
-          void farmsQuery.refetch();
+          void storeQuery.refetch();
         }}
       />
     );
   }
 
-  if (!farm) {
+  if (!storeQuery.data) {
     return (
       <ErrorState
-        title="Farm not found"
-        message="We could not find that farm in your current farm list."
-        actionLabel="Back to farms"
+        title="No store profile yet"
+        message="Create your store profile before trying to edit it."
+        actionLabel="Create Store"
         onAction={() => {
-          navigation.navigate('MainTabs', { screen: 'Farms' });
+          navigation.replace('AddFarm');
         }}
       />
     );
@@ -240,13 +181,13 @@ export function EditFarmScreen({
           style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
           textStyle={{ color: theme.colors.primary }}
         >
-          Farm Module
+          Store Profile
         </Chip>
         <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-          Edit Farm
+          Edit Store Profile
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Update the saved details for {farm.farm_name}.
+          Update the selling location details for {storeQuery.data.store_name}.
         </Text>
       </View>
 
@@ -257,12 +198,15 @@ export function EditFarmScreen({
         <FarmFormFields
           control={control}
           errors={errors}
-          disabled={updateFarmMutation.isPending}
+          disabled={updateStoreMutation.isPending}
+          latitudeLabel="Latitude (optional)"
+          longitudeLabel="Longitude (optional)"
+          descriptionLabel="Store Description (optional)"
         />
 
         {isDirty ? (
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            You have unsaved changes.
+            You have unsaved store profile changes.
           </Text>
         ) : null}
 
@@ -286,62 +230,28 @@ export function EditFarmScreen({
             onPress={() => {
               navigation.goBack();
             }}
-            disabled={updateFarmMutation.isPending}
+            disabled={updateStoreMutation.isPending}
           />
           <AppButton
-            label="Update Farm"
+            label="Save Store"
             className="flex-1"
             onPress={() => {
               void onSubmit();
             }}
-            loading={updateFarmMutation.isPending}
-            disabled={!isValid || !isDirty || updateFarmMutation.isPending}
+            loading={updateStoreMutation.isPending}
+            disabled={!isValid || !isDirty || updateStoreMutation.isPending}
           />
         </View>
-
-        <Button
-          mode="text"
-          textColor={theme.colors.error}
-          disabled={updateFarmMutation.isPending || deleteFarmMutation.isPending}
-          onPress={() => {
-            setDeleteDialogVisible(true);
-          }}
-        >
-          Delete Farm
-        </Button>
       </View>
 
       <Snackbar
-        visible={Boolean(deleteFeedbackMessage)}
+        visible={Boolean(successMessage)}
         onDismiss={() => {
-          setDeleteFeedbackMessage(null);
-        }}
-        action={{
-          label: 'Close',
-          onPress: () => {
-            setDeleteFeedbackMessage(null);
-          },
+          setSuccessMessage(null);
         }}
       >
-        {deleteFeedbackMessage ?? ''}
+        {successMessage ?? ''}
       </Snackbar>
-
-      <ConfirmationDialog
-        visible={deleteDialogVisible}
-        title="Delete farm?"
-        message={`This will permanently remove ${farm.farm_name}. This action cannot be undone.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        loading={deleteFarmMutation.isPending}
-        onCancel={() => {
-          if (!deleteFarmMutation.isPending) {
-            setDeleteDialogVisible(false);
-          }
-        }}
-        onConfirm={() => {
-          void deleteFarmMutation.mutateAsync();
-        }}
-      />
     </Screen>
   );
 }

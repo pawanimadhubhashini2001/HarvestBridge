@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Farm;
 use App\Models\HarvestListingImage;
 use App\Models\HarvestListing;
 use App\Models\User;
@@ -51,6 +52,7 @@ class HarvestListingService
     public function create(User $user, array $data)
     {
         $data['user_id'] = $user->id;
+        $this->assertOwnedStore($user->id, $data['farm_id']);
 
         $data = $this->initializeStockState($data);
 
@@ -67,6 +69,10 @@ class HarvestListingService
 
     public function update(HarvestListing $listing, array $data)
     {
+        if (array_key_exists('farm_id', $data)) {
+            $this->assertOwnedStore($listing->user_id, $data['farm_id']);
+        }
+
         $listing = DB::transaction(function () use ($listing, $data) {
             /** @var HarvestListing $lockedListing */
             $lockedListing = HarvestListing::query()
@@ -361,6 +367,20 @@ class HarvestListingService
         );
 
         return $data;
+    }
+
+    private function assertOwnedStore(int $userId, mixed $farmId): void
+    {
+        $ownsStore = Farm::query()
+            ->where('user_id', $userId)
+            ->whereKey($farmId)
+            ->exists();
+
+        if (! $ownsStore) {
+            throw ValidationException::withMessages([
+                'farm_id' => ['You must select your own store profile before publishing a harvest listing.'],
+            ]);
+        }
     }
 
     private function refreshExpiredListing(HarvestListing $listing): void

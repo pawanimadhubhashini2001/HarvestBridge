@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreHarvestListingRequest extends FormRequest
@@ -21,7 +22,12 @@ class StoreHarvestListingRequest extends FormRequest
     {
         return [
 
-            'farm_id' => 'required|exists:farms,id',
+            'farm_id' => [
+                'required',
+                Rule::exists('farms', 'id')->where(function ($query) {
+                    $query->where('user_id', $this->user()?->id);
+                }),
+            ],
 
             'crop_id' => 'required|exists:crops,id',
 

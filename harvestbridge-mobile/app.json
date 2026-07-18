@@ -32,6 +32,18 @@
           "imageWidth": 76
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "HarvestBridge uses your location to show nearby products and directions to farmer stores."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "HarvestBridge uses your photo library so you can upload an optional store image."
+        }
+      ],
       "expo-sharing"
     ],
     "experiments": {

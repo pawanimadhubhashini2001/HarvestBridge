@@ -11,6 +11,7 @@ use App\Http\Controllers\FarmController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
 use App\Http\Controllers\MarketplaceController;
@@ -93,6 +94,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/farms', [FarmController::class, 'store']);
         Route::put('/farms/{farm}', [FarmController::class, 'update']);
         Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
+        Route::get('/stores', [StoreController::class, 'index']);
+        Route::get('/stores/me', [StoreController::class, 'me']);
+        Route::get('/stores/{store}', [StoreController::class, 'show']);
+        Route::post('/stores', [StoreController::class, 'store']);
+        Route::put('/stores/{store}', [StoreController::class, 'update']);
+        Route::delete('/stores/{store}', [StoreController::class, 'destroy']);
 
         Route::get('/harvest-listings', [HarvestListingController::class, 'index']);
         Route::get('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'show']);
@@ -290,9 +297,14 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/crops', [CropController::class, 'index']);
+    Route::get('/stores/{store}/location', [StoreController::class, 'location']);
     Route::get(
         '/marketplace',
         [MarketplaceController::class, 'index']
+    );
+    Route::get(
+        '/marketplace/{harvestListing}',
+        [MarketplaceController::class, 'show']
     );
     Route::post(
         '/ai/predict',

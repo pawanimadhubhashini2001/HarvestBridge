@@ -1,17 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
 import {
-  createFarm,
-  getFarmsQueryKey,
-  type FarmDto,
-  type StoreFarmPayload,
-} from '@/api/farm.api';
+  createStore,
+  getMyStore,
+  getMyStoreQueryKey,
+  type StoreDto,
+  type StorePayload,
+} from '@/api/store.api';
 import { AppButton } from '@/components/common/app-button';
+import { ErrorState } from '@/components/common/error-state';
+import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
@@ -23,17 +26,16 @@ import {
   type FarmFormValues,
 } from '@/screens/farms/farm-form';
 import type { AppError } from '@/types/api';
+import { getErrorMessage } from '@/utils/errorHandler';
 
-const farmFormFieldNames = [
-  'farm_name',
+const storeFormFieldNames = [
+  'store_name',
+  'phone_number',
   'district',
   'address',
   'latitude',
   'longitude',
-  'farm_size',
-  'farm_size_unit',
-  'soil_type',
-  'description',
+  'store_description',
 ] as const satisfies readonly (keyof FarmFormValues)[];
 
 export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
@@ -41,7 +43,7 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
   const queryClient = useQueryClient();
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [createdFarmId, setCreatedFarmId] = useState<string | null>(null);
+  const [createdStoreId, setCreatedStoreId] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -52,38 +54,39 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
     resolver: zodResolver(farmFormSchema),
     mode: 'onChange',
   });
+  const storeQuery = useQuery({
+    queryKey: getMyStoreQueryKey(),
+    queryFn: getMyStore,
+  });
 
   useEffect(() => {
-    if (!createdFarmId) {
+    if (!createdStoreId) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
-      navigation.replace('FarmDetails', { farmId: createdFarmId });
+      navigation.replace('FarmDetails', { farmId: createdStoreId });
     }, 500);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [createdFarmId, navigation]);
+  }, [createdStoreId, navigation]);
 
-  const createFarmMutation = useMutation({
-    mutationFn: async (values: StoreFarmPayload) => createFarm(values),
-    onSuccess: async (createdFarm: FarmDto) => {
+  const createStoreMutation = useMutation({
+    mutationFn: async (values: StorePayload) => createStore(values),
+    onSuccess: async (createdStore: StoreDto) => {
       setApiError(null);
-      setSuccessMessage('Farm created successfully. Opening farm details...');
-      queryClient.setQueryData<FarmDto[]>(getFarmsQueryKey(), (currentFarms) =>
-        currentFarms ? [createdFarm, ...currentFarms] : [createdFarm],
-      );
-      await queryClient.invalidateQueries({ queryKey: getFarmsQueryKey() });
-      await queryClient.refetchQueries({ queryKey: getFarmsQueryKey(), type: 'active' });
-      setCreatedFarmId(String(createdFarm.id));
+      setSuccessMessage('Store profile created successfully. Opening your store profile...');
+      queryClient.setQueryData(getMyStoreQueryKey(), createdStore);
+      await queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() });
+      setCreatedStoreId(String(createdStore.id));
     },
     onError: (error: AppError) => {
       setSuccessMessage(null);
       setApiError(error.message);
 
-      for (const field of farmFormFieldNames) {
+      for (const field of storeFormFieldNames) {
         const fieldError = error.errors?.[field];
 
         if (fieldError) {
@@ -98,8 +101,77 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
     setSuccessMessage(null);
-    await createFarmMutation.mutateAsync(toFarmPayload(values));
+    await createStoreMutation.mutateAsync(toFarmPayload(values));
   });
+
+  if (storeQuery.isLoading && storeQuery.data === undefined) {
+    return <LoadingState message="Checking your store profile..." />;
+  }
+
+  if (storeQuery.isError && storeQuery.data === undefined) {
+    return (
+      <ErrorState
+        title="Unable to check your store"
+        message={getErrorMessage(storeQuery.error)}
+        actionLabel="Retry"
+        onAction={() => {
+          void storeQuery.refetch();
+        }}
+      />
+    );
+  }
+
+  if (storeQuery.data) {
+    return (
+      <Screen scrollable contentClassName="gap-lg">
+        <View
+          className="gap-sm rounded-lg border px-lg py-lg"
+          style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
+        >
+          <Chip
+            compact
+            style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
+            textStyle={{ color: theme.colors.primary }}
+          >
+            Store Profile
+          </Chip>
+          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+            Your store already exists
+          </Text>
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            Farmers can create exactly one store profile before publishing harvest listings.
+          </Text>
+        </View>
+
+        <View
+          className="gap-md rounded-lg border px-lg py-lg"
+          style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
+        >
+          <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+            {storeQuery.data.store_name}
+          </Text>
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            {storeQuery.data.address}
+          </Text>
+          <View className="gap-sm">
+            <AppButton
+              label="View Store Profile"
+              onPress={() => {
+                navigation.replace('FarmDetails', { farmId: String(storeQuery.data?.id) });
+              }}
+            />
+            <AppButton
+              label="Edit Store Profile"
+              mode="outline"
+              onPress={() => {
+                navigation.replace('EditFarm', { farmId: String(storeQuery.data?.id) });
+              }}
+            />
+          </View>
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen scrollable contentClassName="gap-lg">
@@ -112,13 +184,13 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
           style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
           textStyle={{ color: theme.colors.primary }}
         >
-          Farm Module
+          Store Profile
         </Chip>
         <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-          Add Farm
+          Create Your Store Profile
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Create a new farm using the current Laravel farm API validation rules.
+          Set up your single selling location before you publish harvest listings.
         </Text>
       </View>
 
@@ -129,15 +201,11 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
         <FarmFormFields
           control={control}
           errors={errors}
-          disabled={createFarmMutation.isPending}
+          disabled={createStoreMutation.isPending}
           latitudeLabel="Latitude (optional)"
           longitudeLabel="Longitude (optional)"
-          descriptionLabel="Description (optional)"
+          descriptionLabel="Store Description (optional)"
         />
-
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          The current API may still return validation errors if latitude or longitude is omitted.
-        </Text>
 
         {apiError ? (
           <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
@@ -159,16 +227,16 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
             onPress={() => {
               navigation.goBack();
             }}
-            disabled={createFarmMutation.isPending}
+            disabled={createStoreMutation.isPending}
           />
           <AppButton
-            label="Submit"
+            label="Create Store"
             className="flex-1"
             onPress={() => {
               void onSubmit();
             }}
-            loading={createFarmMutation.isPending}
-            disabled={!isValid || createFarmMutation.isPending}
+            loading={createStoreMutation.isPending}
+            disabled={!isValid || createStoreMutation.isPending}
           />
         </View>
       </View>

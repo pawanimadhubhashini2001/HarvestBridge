@@ -62,11 +62,10 @@ export interface CachedSmartRecommendationResult {
   request: SmartPredictionPayload;
   response: SmartPredictionResponse;
   submitted_at: string;
-  farm: {
+  store: {
     id: string;
     name: string;
     district: string;
-    soil_type: string;
   };
   form: {
     season: string;

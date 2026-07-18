@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
-import { getFarms, getFarmsQueryKey } from '@/api/farm.api';
+import { getMyStore, getMyStoreQueryKey } from '@/api/store.api';
 import { getPredictionHistory, getPredictionHistoryQueryKey } from '@/api/recommendation.api';
 import { getAnalyticsQueryKey } from '@/api/analytics.api';
 import { getCurrentWeatherQueryKey } from '@/api/weather.api';
@@ -55,16 +55,16 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const weatherCity = user?.district?.trim() || undefined;
   const isTwoColumn = width >= 720;
   const analyticsQueryKey = getAnalyticsQueryKey('trends').slice(0, 2);
-  const farmsQueryKey = getFarmsQueryKey();
+  const storeQueryKey = getMyStoreQueryKey();
   const aiHistoryQueryKey = getPredictionHistoryQueryKey();
   const weatherQueryKey = getCurrentWeatherQueryKey(weatherCity);
   const analyticsFetchCount = useIsFetching({ queryKey: analyticsQueryKey });
-  const farmsFetchCount = useIsFetching({ queryKey: farmsQueryKey });
+  const storeFetchCount = useIsFetching({ queryKey: storeQueryKey });
   const aiHistoryFetchCount = useIsFetching({ queryKey: aiHistoryQueryKey });
   const weatherFetchCount = useIsFetching({ queryKey: weatherQueryKey });
-  const farmsQuery = useQuery({
-    queryKey: farmsQueryKey,
-    queryFn: getFarms,
+  const storeQuery = useQuery({
+    queryKey: storeQueryKey,
+    queryFn: getMyStore,
     staleTime: QUERY_STALE_TIME_MS,
   });
   const aiHistoryQuery = useQuery({
@@ -75,7 +75,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
 
   const handleRefresh = async () => {
     await Promise.all([
-      farmsQuery.refetch(),
+      storeQuery.refetch(),
       aiHistoryQuery.refetch(),
       queryClient.refetchQueries({
         queryKey: analyticsQueryKey,
@@ -90,33 +90,33 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     ]);
   };
 
-  const farms = farmsQuery.data ?? [];
+  const hasStore = Boolean(storeQuery.data);
   const history = aiHistoryQuery.data ?? [];
 
   const isEmpty =
-    !farmsQuery.isLoading &&
+    !storeQuery.isLoading &&
     !aiHistoryQuery.isLoading &&
-    farms.length === 0 &&
+    !hasStore &&
     history.length === 0 &&
     !weatherCity;
 
   if (
-    farmsQuery.isLoading &&
-    !farmsQuery.data &&
+    storeQuery.isLoading &&
+    storeQuery.data === undefined &&
     aiHistoryQuery.isLoading &&
     !aiHistoryQuery.data
   ) {
     return <LoadingState message="Loading your farmer dashboard..." />;
   }
 
-  if (farmsQuery.isError && !farmsQuery.data) {
+  if (storeQuery.isError && storeQuery.data === undefined) {
     return (
       <ErrorState
         title="Unable to load dashboard"
-        message={getErrorMessage(farmsQuery.error)}
+        message={getErrorMessage(storeQuery.error)}
         actionLabel="Reload dashboard"
         onAction={() => {
-          void farmsQuery.refetch();
+          void storeQuery.refetch();
         }}
       />
     );
@@ -128,10 +128,10 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         scrollable
         contentClassName="gap-lg"
         refreshing={
-          farmsQuery.isRefetching ||
+          storeQuery.isRefetching ||
           aiHistoryQuery.isRefetching ||
           analyticsFetchCount > 0 ||
-          farmsFetchCount > 0 ||
+          storeFetchCount > 0 ||
           aiHistoryFetchCount > 0 ||
           weatherFetchCount > 0
         }
@@ -142,12 +142,12 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         <View className="flex-1 justify-center gap-md">
           <Text variant="headlineSmall">Your dashboard is ready</Text>
           <Text variant="bodyLarge" style={{ textAlign: 'center' }}>
-            Add your first farm or generate an AI recommendation to start filling the {APP_NAME}{' '}
-            home dashboard.
+            Create your store profile or generate an AI recommendation to start filling the{' '}
+            {APP_NAME} home dashboard.
           </Text>
           <View className="gap-md">
             <AppButton
-              label="Add Farm"
+              label="Create Store Profile"
               onPress={() => {
                 navigation.navigate('AddFarm');
               }}
@@ -169,10 +169,10 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     <Screen
       scrollable
       refreshing={
-        farmsQuery.isRefetching ||
+        storeQuery.isRefetching ||
         aiHistoryQuery.isRefetching ||
         analyticsFetchCount > 0 ||
-        farmsFetchCount > 0 ||
+        storeFetchCount > 0 ||
         aiHistoryFetchCount > 0 ||
         weatherFetchCount > 0
       }
@@ -194,7 +194,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
           {currentDateLabel}
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Here is a quick snapshot of your farms, weather conditions, and recommendation activity.
+          Here is a quick snapshot of your store profile, weather conditions, and recommendation
+          activity.
         </Text>
       </View>
 
@@ -221,9 +222,9 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
           }}
           style={[{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
         >
-          <Text variant="titleSmall">My Farms</Text>
+          <Text variant="titleSmall">Store Profile</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            View and manage farm records
+            View and manage your selling location
           </Text>
         </Pressable>
 

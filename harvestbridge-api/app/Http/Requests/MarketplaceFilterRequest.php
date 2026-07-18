@@ -18,6 +18,12 @@ class MarketplaceFilterRequest extends FormRequest
 
             'search' => 'nullable|string|max:255',
 
+            'latitude' => 'nullable|numeric',
+
+            'longitude' => 'nullable|numeric',
+
+            'radius' => 'nullable|numeric|min:1|max:200',
+
             'crop_name' => 'nullable|string|max:255',
 
             'farmer_name' => 'nullable|string|max:255',
@@ -69,6 +75,9 @@ class MarketplaceFilterRequest extends FormRequest
                     'lowest_price',
                     'price_high',
                     'highest_price',
+                    'distance',
+                    'availability',
+                    'quality_grade',
                     'featured',
                     'featured_first',
                     'harvest_date',
@@ -94,6 +103,46 @@ class MarketplaceFilterRequest extends FormRequest
                     $validator->errors()->add(
                         'max_price',
                         'The maximum price must be greater than or equal to the minimum price.'
+                    );
+                }
+
+                $latitude = $this->input('latitude');
+                $longitude = $this->input('longitude');
+                $radius = $this->input('radius');
+                $sort = $this->input('sort');
+
+                if (($latitude === null) xor ($longitude === null)) {
+                    $validator->errors()->add(
+                        'coordinates',
+                        'Latitude and longitude must both be provided together.'
+                    );
+                }
+
+                if ($latitude !== null && ((float) $latitude < -90 || (float) $latitude > 90)) {
+                    $validator->errors()->add(
+                        'latitude',
+                        'Latitude must be between -90 and 90.'
+                    );
+                }
+
+                if ($longitude !== null && ((float) $longitude < -180 || (float) $longitude > 180)) {
+                    $validator->errors()->add(
+                        'longitude',
+                        'Longitude must be between -180 and 180.'
+                    );
+                }
+
+                if ($radius !== null && ($latitude === null || $longitude === null)) {
+                    $validator->errors()->add(
+                        'radius',
+                        'Radius may only be used when latitude and longitude are provided.'
+                    );
+                }
+
+                if ($sort === 'distance' && ($latitude === null || $longitude === null)) {
+                    $validator->errors()->add(
+                        'sort',
+                        'Distance sorting requires latitude and longitude.'
                     );
                 }
             },

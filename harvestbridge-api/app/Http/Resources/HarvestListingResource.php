@@ -32,6 +32,21 @@ class HarvestListingResource extends JsonResource
 
             'district' => $this->farm?->district,
 
+            'matched_field' => $this->when(
+                isset($this->matched_field),
+                fn () => $this->matched_field
+            ),
+
+            'distance' => $this->when(
+                isset($this->distance_km),
+                fn () => round((float) $this->distance_km, 2)
+            ),
+
+            'distance_km' => $this->when(
+                isset($this->distance_km),
+                fn () => round((float) $this->distance_km, 2)
+            ),
+
             'quantity' => $this->quantity,
 
             'total_quantity' => $this->quantity,
@@ -65,6 +80,32 @@ class HarvestListingResource extends JsonResource
             'updated_at' => $this->updated_at,
 
             'images' => HarvestListingImageResource::collection($this->whenLoaded('images')),
+
+            'store' => $this->whenLoaded('farm', function () {
+                return [
+                    'id' => $this->farm?->id,
+                    'store_name' => $this->farm?->farm_name,
+                    'district' => $this->farm?->district,
+                    'address' => $this->farm?->address,
+                ];
+            }),
+
+            'coordinates' => $this->whenLoaded('farm', function () {
+                return [
+                    'latitude' => $this->farm?->latitude,
+                    'longitude' => $this->farm?->longitude,
+                ];
+            }),
+
+            'google_maps_url' => $this->whenLoaded(
+                'farm',
+                fn () => $this->farm?->googleMapsUrl()
+            ),
+
+            'open_maps_action' => $this->whenLoaded(
+                'farm',
+                fn () => $this->farm?->openMapsAction()
+            ),
 
             $this->mergeWhen($isDetailedResponse, [
                 'details' => [

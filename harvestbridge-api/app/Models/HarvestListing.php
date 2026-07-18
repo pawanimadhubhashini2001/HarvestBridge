@@ -6,6 +6,7 @@ use App\Models\OrderItem;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class HarvestListing extends Model
@@ -106,17 +107,27 @@ class HarvestListing extends Model
         return ! $featuredUntil->isBefore(now()->startOfDay());
     }
 
-    public function farmer()
+    public function shareUrl(): string
+    {
+        return url('/api/marketplace/'.$this->getKey());
+    }
+
+    public function farmer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function farm()
+    public function farm(): BelongsTo
     {
         return $this->belongsTo(Farm::class);
     }
 
-    public function crop()
+    public function store(): BelongsTo
+    {
+        return $this->belongsTo(Farm::class, 'farm_id');
+    }
+
+    public function crop(): BelongsTo
     {
         return $this->belongsTo(Crop::class);
     }

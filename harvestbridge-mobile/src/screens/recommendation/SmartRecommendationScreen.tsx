@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   ActivityIndicator,
@@ -9,10 +9,10 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { Button, Card, Chip, Divider, Menu, Snackbar, Text } from 'react-native-paper';
+import { Button, Card, Chip, Snackbar, Text } from 'react-native-paper';
 import { z } from 'zod';
 
-import { getFarms, getFarmsQueryKey, type FarmDto } from '@/api/farm.api';
+import { getMyStore, getMyStoreQueryKey } from '@/api/store.api';
 import {
   getLatestSmartRecommendationResultQueryKey,
   getPredictionHistoryQueryKey,
@@ -37,7 +37,6 @@ const seasonOptions = ['Yala', 'Maha'] as const;
 const marketDemandOptions = ['Low', 'Medium', 'High'] as const;
 
 const smartRecommendationSchema = z.object({
-  farm_id: z.string().min(1, 'Please select a farm.'),
   season: z.enum(seasonOptions, {
     message: 'Please select a season.',
   }),
@@ -87,7 +86,6 @@ const smartRecommendationSchema = z.object({
 type SmartRecommendationFormValues = z.infer<typeof smartRecommendationSchema>;
 
 const formFieldNames = [
-  'farm_id',
   'season',
   'soil_type',
   'soil_ph',
@@ -101,22 +99,14 @@ const formFieldNames = [
 function SelectorField({
   label,
   value,
-  placeholder,
-  visible,
-  onOpen,
-  onDismiss,
   options,
   onSelect,
   errorMessage,
   disabled = false,
 }: {
   label: string;
-  value?: string;
-  placeholder: string;
-  visible: boolean;
-  onOpen: () => void;
-  onDismiss: () => void;
-  options: { label: string; value: string }[];
+  value: string;
+  options: readonly string[];
   onSelect: (value: string) => void;
   errorMessage?: string;
   disabled?: boolean;
@@ -128,33 +118,24 @@ function SelectorField({
       <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
         {label}
       </Text>
-      <Menu
-        visible={visible}
-        onDismiss={onDismiss}
-        anchor={
-          <Button
-            mode="outlined"
-            icon="chevron-down"
-            disabled={disabled}
-            contentStyle={{ flexDirection: 'row-reverse', justifyContent: 'space-between' }}
-            style={{ justifyContent: 'center' }}
-            onPress={onOpen}
-          >
-            {value || placeholder}
-          </Button>
-        }
-      >
-        {options.map((option) => (
-          <Menu.Item
-            key={option.value}
-            title={option.label}
-            onPress={() => {
-              onSelect(option.value);
-              onDismiss();
-            }}
-          />
-        ))}
-      </Menu>
+      <View className="flex-row flex-wrap gap-sm">
+        {options.map((option) => {
+          const selected = value === option;
+
+          return (
+            <Button
+              key={option}
+              mode={selected ? 'contained-tonal' : 'outlined'}
+              disabled={disabled}
+              onPress={() => {
+                onSelect(option);
+              }}
+            >
+              {option}
+            </Button>
+          );
+        })}
+      </View>
       {errorMessage ? (
         <Text variant="bodySmall" style={{ color: theme.colors.error }}>
           {errorMessage}
@@ -164,25 +145,12 @@ function SelectorField({
   );
 }
 
-function formatFarmSize(farm: FarmDto) {
-  const numericValue =
-    typeof farm.farm_size === 'number' ? farm.farm_size : Number(farm.farm_size);
-
-  if (Number.isNaN(numericValue)) {
-    return `${farm.farm_size} ${farm.farm_size_unit}`;
-  }
-
-  return `${new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 2,
-  }).format(numericValue)} ${farm.farm_size_unit}`;
-}
-
 function toSmartPayload(
   values: SmartRecommendationFormValues,
-  selectedFarm: FarmDto,
+  store: NonNullable<Awaited<ReturnType<typeof getMyStore>>>,
 ): SmartPredictionPayload {
   return {
-    District: selectedFarm.district,
+    District: store.district,
     Season: values.season,
     Soil_Type: values.soil_type.trim(),
     pH: Number(values.soil_ph),
@@ -197,19 +165,14 @@ export function SmartRecommendationScreen({
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
-  const [farmMenuVisible, setFarmMenuVisible] = useState(false);
-  const [seasonMenuVisible, setSeasonMenuVisible] = useState(false);
-  const [marketMenuVisible, setMarketMenuVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
     setError,
-    setValue,
     formState: { errors, isValid },
   } = useForm<SmartRecommendationFormValues>({
     defaultValues: {
-      farm_id: '',
       season: 'Yala',
       soil_type: '',
       soil_ph: '',
@@ -223,10 +186,6 @@ export function SmartRecommendationScreen({
     mode: 'onChange',
   });
 
-  const selectedFarmId = useWatch({
-    control,
-    name: 'farm_id',
-  });
   const soilPhValue = useWatch({
     control,
     name: 'soil_ph',
@@ -248,49 +207,33 @@ export function SmartRecommendationScreen({
     name: 'additional_notes',
   });
 
-  const farmsQuery = useQuery({
-    queryKey: getFarmsQueryKey(),
-    queryFn: getFarms,
+  const storeQuery = useQuery({
+    queryKey: getMyStoreQueryKey(),
+    queryFn: getMyStore,
     staleTime: QUERY_STALE_TIME_MS,
   });
-
-  const farms = useMemo(() => farmsQuery.data ?? [], [farmsQuery.data]);
-  const selectedFarm = useMemo(
-    () => farms.find((farm) => String(farm.id) === selectedFarmId),
-    [farms, selectedFarmId],
-  );
+  const store = storeQuery.data;
 
   const weatherQuery = useQuery({
-    queryKey: getCurrentWeatherQueryKey(selectedFarm?.district),
-    queryFn: () => getCurrentWeather(selectedFarm?.district ?? ''),
-    enabled: Boolean(selectedFarm?.district),
+    queryKey: getCurrentWeatherQueryKey(store?.district),
+    queryFn: () => getCurrentWeather(store?.district ?? ''),
+    enabled: Boolean(store?.district),
   });
-
-  useEffect(() => {
-    if (!selectedFarm) {
-      return;
-    }
-
-    setValue('soil_type', selectedFarm.soil_type, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  }, [selectedFarm, setValue]);
 
   const smartRecommendationMutation = useMutation({
     mutationFn: async (payload: SmartPredictionPayload) => smartPredict(payload),
     onSuccess: async (response, payload) => {
       setErrorMessage(null);
-      if (selectedFarm) {
+
+      if (store) {
         const cachedResult: CachedSmartRecommendationResult = {
           request: payload,
           response,
           submitted_at: new Date().toISOString(),
-          farm: {
-            id: String(selectedFarm.id),
-            name: selectedFarm.farm_name,
-            district: selectedFarm.district,
-            soil_type: selectedFarm.soil_type,
+          store: {
+            id: String(store.id),
+            name: store.store_name,
+            district: store.district,
           },
           form: {
             season: payload.Season,
@@ -305,11 +248,13 @@ export function SmartRecommendationScreen({
 
         queryClient.setQueryData(getLatestSmartRecommendationResultQueryKey(), cachedResult);
       }
+
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getPredictionHistoryQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getRecommendationsQueryKey() }),
         queryClient.invalidateQueries({ queryKey: ['analytics', 'ai'] }),
       ]);
+
       navigation.navigate('RecommendationResult', { predictionId: undefined });
     },
     onError: (error: AppError) => {
@@ -328,35 +273,33 @@ export function SmartRecommendationScreen({
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    if (!selectedFarm) {
-      setError('farm_id', {
-        message: 'Please select a farm.',
-      });
+    if (!store) {
+      setErrorMessage('Create your store profile before requesting a smart recommendation.');
       return;
     }
 
     setErrorMessage(null);
-    await smartRecommendationMutation.mutateAsync(toSmartPayload(values, selectedFarm));
+    await smartRecommendationMutation.mutateAsync(toSmartPayload(values, store));
   });
 
-  if (farmsQuery.isLoading && !farmsQuery.data) {
-    return <LoadingState message="Loading your farms..." />;
+  if (storeQuery.isLoading && storeQuery.data === undefined) {
+    return <LoadingState message="Loading your store profile..." />;
   }
 
-  if (farmsQuery.isError && !farmsQuery.data) {
+  if (storeQuery.isError && storeQuery.data === undefined) {
     return (
       <ErrorState
-        title="Unable to load farms"
-        message={getErrorMessage(farmsQuery.error)}
+        title="Unable to load your store"
+        message={getErrorMessage(storeQuery.error)}
         actionLabel="Retry"
         onAction={() => {
-          void farmsQuery.refetch();
+          void storeQuery.refetch();
         }}
       />
     );
   }
 
-  if (farms.length === 0) {
+  if (!store) {
     return (
       <Screen scrollable contentClassName="gap-lg">
         <Card
@@ -376,11 +319,11 @@ export function SmartRecommendationScreen({
                 variant="headlineSmall"
                 style={{ color: theme.colors.onSurface, fontWeight: '700' }}
               >
-                Add a farm first
+                Create your store profile first
               </Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Smart recommendations need a farm so the system can use its district and soil
-                context.
+                Smart recommendations now use your store district as the location context before
+                prediction.
               </Text>
               <Button
                 mode="contained"
@@ -388,7 +331,7 @@ export function SmartRecommendationScreen({
                   navigation.navigate('AddFarm');
                 }}
               >
-                Add Farm
+                Create Store Profile
               </Button>
             </View>
           </Card.Content>
@@ -419,8 +362,8 @@ export function SmartRecommendationScreen({
               Smart Crop Recommendation
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Select a farm, confirm growing conditions, and let the AI service use live weather
-              context from the farm district.
+              Use your saved store location, confirm growing conditions, and let the AI service
+              request a crop recommendation with live district weather context.
             </Text>
           </View>
 
@@ -444,49 +387,12 @@ export function SmartRecommendationScreen({
 
                   <Controller
                     control={control}
-                    name="farm_id"
-                    render={({ field: { onChange, value } }) => (
-                      <SelectorField
-                        label="Farm Selector"
-                        value={farms.find((farm) => String(farm.id) === value)?.farm_name}
-                        placeholder="Choose a farm"
-                        visible={farmMenuVisible}
-                        onOpen={() => {
-                          setFarmMenuVisible(true);
-                        }}
-                        onDismiss={() => {
-                          setFarmMenuVisible(false);
-                        }}
-                        options={farms.map((farm) => ({
-                          label: `${farm.farm_name} - ${farm.district}`,
-                          value: String(farm.id),
-                        }))}
-                        onSelect={onChange}
-                        errorMessage={errors.farm_id?.message}
-                        disabled={smartRecommendationMutation.isPending}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    control={control}
                     name="season"
                     render={({ field: { onChange, value } }) => (
                       <SelectorField
-                        label="Season Selector"
+                        label="Season"
                         value={value}
-                        placeholder="Choose a season"
-                        visible={seasonMenuVisible}
-                        onOpen={() => {
-                          setSeasonMenuVisible(true);
-                        }}
-                        onDismiss={() => {
-                          setSeasonMenuVisible(false);
-                        }}
-                        options={seasonOptions.map((season) => ({
-                          label: season,
-                          value: season,
-                        }))}
+                        options={seasonOptions}
                         onSelect={onChange}
                         errorMessage={errors.season?.message}
                         disabled={smartRecommendationMutation.isPending}
@@ -592,18 +498,7 @@ export function SmartRecommendationScreen({
                       <SelectorField
                         label="Market Demand"
                         value={value}
-                        placeholder="Choose market demand"
-                        visible={marketMenuVisible}
-                        onOpen={() => {
-                          setMarketMenuVisible(true);
-                        }}
-                        onDismiss={() => {
-                          setMarketMenuVisible(false);
-                        }}
-                        options={marketDemandOptions.map((option) => ({
-                          label: option,
-                          value: option,
-                        }))}
+                        options={marketDemandOptions}
                         onSelect={onChange}
                         errorMessage={errors.market_demand?.message}
                         disabled={smartRecommendationMutation.isPending}
@@ -628,12 +523,6 @@ export function SmartRecommendationScreen({
                       />
                     )}
                   />
-
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    The current smart recommendation API uses district, season, soil type, pH, and
-                    market demand. Nutrient values and notes are collected here for operator
-                    context.
-                  </Text>
 
                   {smartRecommendationMutation.isPending ? (
                     <View
@@ -670,45 +559,28 @@ export function SmartRecommendationScreen({
                       variant="titleLarge"
                       style={{ color: theme.colors.onSurface, fontWeight: '700' }}
                     >
-                      Selected Farm
+                      Store Context
                     </Text>
-
-                    {!selectedFarm ? (
-                      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                        Select a farm to preload district and soil information.
+                    <Text
+                      variant="titleMedium"
+                      style={{ color: theme.colors.onSurface, fontWeight: '700' }}
+                    >
+                      {store.store_name}
+                    </Text>
+                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                      {store.address}
+                    </Text>
+                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      District: {store.district}
+                    </Text>
+                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      Phone: {store.phone_number}
+                    </Text>
+                    {store.store_description?.trim() ? (
+                      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                        {store.store_description}
                       </Text>
-                    ) : (
-                      <View className="gap-sm">
-                        <Text
-                          variant="titleMedium"
-                          style={{ color: theme.colors.onSurface, fontWeight: '700' }}
-                        >
-                          {selectedFarm.farm_name}
-                        </Text>
-                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                          {selectedFarm.address}
-                        </Text>
-                        <Divider />
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                          District
-                        </Text>
-                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                          {selectedFarm.district}
-                        </Text>
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                          Soil Type
-                        </Text>
-                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                          {selectedFarm.soil_type}
-                        </Text>
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                          Farm Size
-                        </Text>
-                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                          {formatFarmSize(selectedFarm)}
-                        </Text>
-                      </View>
-                    )}
+                    ) : null}
                   </View>
                 </Card.Content>
               </Card>
@@ -725,19 +597,15 @@ export function SmartRecommendationScreen({
                     >
                       Weather Context
                     </Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                      The backend automatically loads weather by district during smart prediction.
-                    </Text>
-
-                    {!selectedFarm ? (
+                    {!store ? (
                       <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                        Weather preview will appear after you select a farm.
+                        Weather preview will appear after you create your store profile.
                       </Text>
                     ) : weatherQuery.isLoading && !weatherQuery.data ? (
                       <View className="items-center gap-sm py-md">
                         <ActivityIndicator size="small" color={theme.colors.primary} />
                         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                          Loading weather for {selectedFarm.district}...
+                          Loading weather for {store.district}...
                         </Text>
                       </View>
                     ) : weatherQuery.isError ? (
@@ -757,7 +625,7 @@ export function SmartRecommendationScreen({
                             'Current conditions available'}
                         </Text>
                         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                          {weatherQuery.data.location || selectedFarm.district}
+                          {weatherQuery.data.location || store.district}
                         </Text>
                       </View>
                     ) : (
@@ -765,29 +633,6 @@ export function SmartRecommendationScreen({
                         Weather preview is unavailable right now.
                       </Text>
                     )}
-                  </View>
-                </Card.Content>
-              </Card>
-
-              <Card
-                mode="outlined"
-                style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
-              >
-                <Card.Content>
-                  <View className="gap-sm">
-                    <Text
-                      variant="titleLarge"
-                      style={{ color: theme.colors.onSurface, fontWeight: '700' }}
-                    >
-                      Submission Notes
-                    </Text>
-                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                      Results are not shown here. After a successful request, the app moves to the
-                      AI result screen.
-                    </Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                      Existing endpoint used: /ai/smart-predict
-                    </Text>
                   </View>
                 </Card.Content>
               </Card>
