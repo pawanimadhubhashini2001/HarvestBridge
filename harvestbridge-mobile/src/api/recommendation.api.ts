@@ -24,6 +24,22 @@ export interface SmartPredictionPayload {
   Market_Demand: string;
 }
 
+export interface SmartPredictionResponse {
+  weather: {
+    temperature: number;
+    rainfall: number;
+    humidity: number;
+    condition?: string | null;
+    location?: string | null;
+  };
+  prediction: {
+    recommended_crop: string;
+    confidence: number;
+    explanation: Record<string, string> | string[] | string;
+  };
+  market_price?: Record<string, unknown> | null;
+}
+
 export interface PredictionHistoryDto {
   id: number;
   district: string;
@@ -70,7 +86,7 @@ export async function predict(payload: PredictionPayload) {
 }
 
 export async function smartPredict(payload: SmartPredictionPayload) {
-  const response = await apiClient.post<Record<string, unknown>>('/ai/smart-predict', payload);
+  const response = await apiClient.post<SmartPredictionResponse>('/ai/smart-predict', payload);
 
   return response.data;
 }

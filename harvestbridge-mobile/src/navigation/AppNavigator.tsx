@@ -6,6 +6,7 @@ import type { AppStackParamList } from '@/navigation/types';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
+import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -71,15 +72,9 @@ export function AppNavigator() {
       </Stack.Screen>
       <Stack.Screen
         name="AIRecommendationForm"
-        options={{ title: 'AI Recommendation Form' }}>
-        {() => (
-          <StackPlaceholder
-            title="AI Recommendation Form"
-            description="Prepared for the AI recommendation request form."
-            badgeLabel="AI Module"
-          />
-        )}
-      </Stack.Screen>
+        component={SmartRecommendationScreen}
+        options={{ title: 'Smart Recommendation' }}
+      />
       <Stack.Screen
         name="RecommendationResult"
         options={{ title: 'Recommendation Result' }}>
