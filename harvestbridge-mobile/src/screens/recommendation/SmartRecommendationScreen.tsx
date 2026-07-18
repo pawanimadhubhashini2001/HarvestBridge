@@ -14,8 +14,11 @@ import { z } from 'zod';
 
 import { getFarms, getFarmsQueryKey, type FarmDto } from '@/api/farm.api';
 import {
+  getLatestSmartRecommendationResultQueryKey,
   getPredictionHistoryQueryKey,
+  getRecommendationsQueryKey,
   smartPredict,
+  type CachedSmartRecommendationResult,
   type SmartPredictionPayload,
 } from '@/api/recommendation.api';
 import { getCurrentWeather, getCurrentWeatherQueryKey } from '@/api/weather.api';
@@ -224,6 +227,26 @@ export function SmartRecommendationScreen({
     control,
     name: 'farm_id',
   });
+  const soilPhValue = useWatch({
+    control,
+    name: 'soil_ph',
+  });
+  const nitrogenValue = useWatch({
+    control,
+    name: 'nitrogen',
+  });
+  const phosphorusValue = useWatch({
+    control,
+    name: 'phosphorus',
+  });
+  const potassiumValue = useWatch({
+    control,
+    name: 'potassium',
+  });
+  const additionalNotesValue = useWatch({
+    control,
+    name: 'additional_notes',
+  });
 
   const farmsQuery = useQuery({
     queryKey: getFarmsQueryKey(),
@@ -256,11 +279,35 @@ export function SmartRecommendationScreen({
 
   const smartRecommendationMutation = useMutation({
     mutationFn: async (payload: SmartPredictionPayload) => smartPredict(payload),
-    onSuccess: async () => {
+    onSuccess: async (response, payload) => {
       setErrorMessage(null);
+      if (selectedFarm) {
+        const cachedResult: CachedSmartRecommendationResult = {
+          request: payload,
+          response,
+          submitted_at: new Date().toISOString(),
+          farm: {
+            id: String(selectedFarm.id),
+            name: selectedFarm.farm_name,
+            district: selectedFarm.district,
+            soil_type: selectedFarm.soil_type,
+          },
+          form: {
+            season: payload.Season,
+            soil_ph: Number(soilPhValue),
+            nitrogen: Number(nitrogenValue),
+            phosphorus: Number(phosphorusValue),
+            potassium: Number(potassiumValue),
+            market_demand: payload.Market_Demand,
+            additional_notes: additionalNotesValue?.trim() || undefined,
+          },
+        };
+
+        queryClient.setQueryData(getLatestSmartRecommendationResultQueryKey(), cachedResult);
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getPredictionHistoryQueryKey() }),
-        queryClient.invalidateQueries({ queryKey: ['recommendations'] }),
+        queryClient.invalidateQueries({ queryKey: getRecommendationsQueryKey() }),
         queryClient.invalidateQueries({ queryKey: ['analytics', 'ai'] }),
       ]);
       navigation.navigate('RecommendationResult', { predictionId: undefined });

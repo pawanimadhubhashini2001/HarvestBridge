@@ -6,6 +6,7 @@ import type { AppStackParamList } from '@/navigation/types';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
+import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 
@@ -77,15 +78,9 @@ export function AppNavigator() {
       />
       <Stack.Screen
         name="RecommendationResult"
-        options={{ title: 'Recommendation Result' }}>
-        {() => (
-          <StackPlaceholder
-            title="Recommendation Result"
-            description="Prepared for displaying AI recommendation results."
-            badgeLabel="AI Module"
-          />
-        )}
-      </Stack.Screen>
+        component={RecommendationResultScreen}
+        options={{ title: 'Recommendation Result' }}
+      />
       <Stack.Screen
         name="WeatherDetails"
         options={{ title: 'Weather Details' }}>

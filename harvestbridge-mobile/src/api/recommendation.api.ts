@@ -40,6 +40,27 @@ export interface SmartPredictionResponse {
   market_price?: Record<string, unknown> | null;
 }
 
+export interface CachedSmartRecommendationResult {
+  request: SmartPredictionPayload;
+  response: SmartPredictionResponse;
+  submitted_at: string;
+  farm: {
+    id: string;
+    name: string;
+    district: string;
+    soil_type: string;
+  };
+  form: {
+    season: string;
+    soil_ph: number;
+    nitrogen: number;
+    phosphorus: number;
+    potassium: number;
+    market_demand: string;
+    additional_notes?: string;
+  };
+}
+
 export interface PredictionHistoryDto {
   id: number;
   district: string;
@@ -74,6 +95,14 @@ export interface SearchRecommendationsParams {
 
 export function getPredictionHistoryQueryKey() {
   return ['ai', 'history'] as const;
+}
+
+export function getRecommendationsQueryKey() {
+  return ['recommendations'] as const;
+}
+
+export function getLatestSmartRecommendationResultQueryKey() {
+  return ['ai', 'smart-result', 'latest'] as const;
 }
 
 export async function predict(payload: PredictionPayload) {
@@ -151,6 +180,22 @@ export async function deleteRecommendation(historyId: number | string) {
   const response = await apiClient.delete<ApiSuccessResponse<null>>(
     `/recommendations/${historyId}`,
   );
+
+  return response.data;
+}
+
+export async function downloadRecommendationReport(payload: {
+  input: SmartPredictionPayload;
+  weather: SmartPredictionResponse['weather'];
+  prediction: SmartPredictionResponse['prediction'];
+  market?: Record<string, unknown> | null;
+}) {
+  const response = await apiClient.post('/reports/recommendation', payload, {
+    responseType: 'blob',
+    headers: {
+      Accept: 'application/pdf',
+    },
+  });
 
   return response.data;
 }
