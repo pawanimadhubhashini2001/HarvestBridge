@@ -1,13 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
 import { getFarms } from '@/api/farm.api';
 import { getPredictionHistory } from '@/api/recommendation.api';
-import { getCurrentWeather } from '@/api/weather.api';
+import { getCurrentWeatherQueryKey } from '@/api/weather.api';
 import { AppButton } from '@/components/common/app-button';
 import { ErrorState } from '@/components/common/error-state';
+import { WeatherCard } from '@/components/dashboard/WeatherCard';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { APP_NAME, QUERY_STALE_TIME_MS } from '@/constants/app';
@@ -84,7 +85,8 @@ function DashboardCard({
           backgroundColor: theme.colors.surface,
           borderColor: theme.colors.outline,
         },
-      ]}>
+      ]}
+    >
       <View className="mb-xs h-[6px] w-12 rounded-full" style={{ backgroundColor: accent }} />
       <Text variant="titleMedium">{title}</Text>
       <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
@@ -102,6 +104,7 @@ function DashboardCard({
 
 export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const theme = useAppTheme();
+  const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const { user } = useAuth();
   const now = useMemo(() => new Date(), []);
@@ -109,43 +112,45 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const currentDateLabel = formatDate(now);
   const weatherCity = user?.district?.trim() || undefined;
   const isTwoColumn = width >= 720;
+  const weatherQueryKey = getCurrentWeatherQueryKey(weatherCity);
+  const weatherFetchCount = useIsFetching({ queryKey: weatherQueryKey });
 
   const dashboardQuery = useQuery({
     queryKey: ['dashboard', 'home', weatherCity ?? 'no-city'],
     staleTime: QUERY_STALE_TIME_MS,
     queryFn: async () => {
-      const [farms, history, weather] = await Promise.all([
-        getFarms(),
-        getPredictionHistory(),
-        weatherCity ? getCurrentWeather(weatherCity) : Promise.resolve(null),
-      ]);
+      const [farms, history] = await Promise.all([getFarms(), getPredictionHistory()]);
 
       return {
         farms,
         history,
-        weather,
       };
     },
   });
 
+  const handleRefresh = async () => {
+    await Promise.all([
+      dashboardQuery.refetch(),
+      weatherCity
+        ? queryClient.refetchQueries({
+            queryKey: weatherQueryKey,
+            type: 'active',
+          })
+        : Promise.resolve(),
+    ]);
+  };
+
   const farms = dashboardQuery.data?.farms ?? [];
   const history = dashboardQuery.data?.history ?? [];
-  const weather = dashboardQuery.data?.weather ?? null;
   const latestRecommendation = history[0] ?? null;
   const averageConfidence = history.length
     ? Math.round(
-        history.reduce(
-          (total, item) => total + (Number(item.confidence) || 0),
-          0,
-        ) / history.length,
+        history.reduce((total, item) => total + (Number(item.confidence) || 0), 0) / history.length,
       )
     : null;
 
   const isEmpty =
-    !dashboardQuery.isLoading &&
-    farms.length === 0 &&
-    history.length === 0 &&
-    !weather;
+    !dashboardQuery.isLoading && farms.length === 0 && history.length === 0 && !weatherCity;
 
   if (dashboardQuery.isLoading && !dashboardQuery.data) {
     return <LoadingState message="Loading your farmer dashboard..." />;
@@ -169,10 +174,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
       <Screen
         scrollable
         contentClassName="gap-lg"
-        refreshing={dashboardQuery.isRefetching}
+        refreshing={dashboardQuery.isRefetching || weatherFetchCount > 0}
         onRefresh={() => {
-          void dashboardQuery.refetch();
-        }}>
+          void handleRefresh();
+        }}
+      >
         <View className="flex-1 justify-center gap-md">
           <Text variant="headlineSmall">Your dashboard is ready</Text>
           <Text variant="bodyLarge" style={{ textAlign: 'center' }}>
@@ -202,15 +208,15 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   return (
     <Screen
       scrollable
-      refreshing={dashboardQuery.isRefetching}
+      refreshing={dashboardQuery.isRefetching || weatherFetchCount > 0}
       onRefresh={() => {
-        void dashboardQuery.refetch();
-      }}>
+        void handleRefresh();
+      }}
+    >
       <View
         className="gap-sm rounded-lg border px-lg py-lg"
-        style={[
-          { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-        ]}>
+        style={[{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
+      >
         <Chip style={{ alignSelf: 'flex-start' }} compact>
           Farmer Dashboard
         </Chip>
@@ -233,7 +239,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
           }}
           style={[
             { backgroundColor: theme.colors.secondaryContainer, borderColor: theme.colors.outline },
-          ]}>
+          ]}
+        >
           <Text variant="titleSmall">AI Recommendation</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             Start a new crop recommendation
@@ -245,9 +252,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
           onPress={() => {
             navigation.navigate('Farms');
           }}
-          style={[
-            { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-          ]}>
+          style={[{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
+        >
           <Text variant="titleSmall">My Farms</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             View and manage farm records
@@ -259,9 +265,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
           onPress={() => {
             navigation.navigate('WeatherDetails', { district: weatherCity });
           }}
-          style={[
-            { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-          ]}>
+          style={[{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
+        >
           <Text variant="titleSmall">Weather</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             Open weather details for your area
@@ -273,9 +278,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
           onPress={() => {
             navigation.navigate('Recommendations');
           }}
-          style={[
-            { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-          ]}>
+          style={[{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
+        >
           <Text variant="titleSmall">Recommendation History</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
             Review recent AI predictions
@@ -283,27 +287,9 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         </Pressable>
       </View>
 
-      <View className={isTwoColumn ? 'flex-row flex-wrap gap-md' : 'gap-md'}>
-        <DashboardCard
-          title="Weather Summary"
-          value={
-            weather
-              ? `${Math.round(weather.temperature)} C`
-              : weatherCity
-                ? 'Unavailable'
-                : 'No location'
-          }
-          subtitle={
-            weather
-              ? `${weather.humidity}% humidity with ${weather.rainfall} mm rainfall`
-              : weatherCity
-                ? `Weather for ${weatherCity} is not available yet`
-                : 'Add a district to unlock weather data'
-          }
-          helper={weatherCity ? `Location: ${weatherCity}` : 'Profile district not set'}
-          accent={theme.colors.primary}
-        />
+      <WeatherCard city={weatherCity} />
 
+      <View className={isTwoColumn ? 'flex-row flex-wrap gap-md' : 'gap-md'}>
         <DashboardCard
           title="Farm Summary"
           value={`${farms.length}`}
@@ -353,7 +339,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
               backgroundColor: theme.colors.surfaceVariant,
               borderColor: theme.colors.error,
             },
-          ]}>
+          ]}
+        >
           <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
             {getErrorMessage(dashboardQuery.error)}
           </Text>
