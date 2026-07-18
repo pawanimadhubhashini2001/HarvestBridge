@@ -5,6 +5,7 @@ import { BottomTabs } from '@/navigation/BottomTabs';
 import type { AppStackParamList } from '@/navigation/types';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
+import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -44,15 +45,9 @@ export function AppNavigator() {
       />
       <Stack.Screen
         name="FarmDetails"
-        options={{ title: 'Farm Details' }}>
-        {() => (
-          <StackPlaceholder
-            title="Farm Details"
-            description="Prepared for viewing a specific farm record."
-            badgeLabel="Farm Module"
-          />
-        )}
-      </Stack.Screen>
+        component={FarmDetailsScreen}
+        options={{ title: 'Farm Details' }}
+      />
       <Stack.Screen
         name="AddFarm"
         component={AddFarmScreen}
