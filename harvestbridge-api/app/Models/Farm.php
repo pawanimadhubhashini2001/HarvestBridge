@@ -30,6 +30,14 @@ class Farm extends Model
         return $this->hasMany(HarvestListing::class);
     }
 
+    public function activeHarvestListings()
+    {
+        return $this->hasMany(HarvestListing::class)->whereIn('status', [
+            'available',
+            'reserved',
+        ]);
+    }
+
     public function predictions()
     {
         return $this->hasMany(Prediction::class);

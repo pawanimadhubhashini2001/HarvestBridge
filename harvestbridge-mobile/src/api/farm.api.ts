@@ -11,7 +11,9 @@ export interface FarmDto {
   farm_size: string | number;
   farm_size_unit: 'acres' | 'hectares';
   soil_type: string;
+  active_crop_count?: number;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface StoreFarmPayload {
@@ -26,6 +28,10 @@ export interface StoreFarmPayload {
 }
 
 export type UpdateFarmPayload = Partial<StoreFarmPayload>;
+
+export function getFarmsQueryKey() {
+  return ['farms'] as const;
+}
 
 export async function getFarms() {
   const response = await apiClient.get<ApiSuccessResponse<FarmDto[]>>('/farms');

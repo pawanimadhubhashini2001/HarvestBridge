@@ -3,11 +3,12 @@ import { useMemo } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
-import { getFarms } from '@/api/farm.api';
+import { getFarms, getFarmsQueryKey } from '@/api/farm.api';
 import { getPredictionHistory } from '@/api/recommendation.api';
 import { getCurrentWeatherQueryKey } from '@/api/weather.api';
 import { AppButton } from '@/components/common/app-button';
 import { ErrorState } from '@/components/common/error-state';
+import { FarmSummaryCard } from '@/components/dashboard/FarmSummaryCard';
 import { WeatherCard } from '@/components/dashboard/WeatherCard';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
@@ -112,24 +113,29 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const currentDateLabel = formatDate(now);
   const weatherCity = user?.district?.trim() || undefined;
   const isTwoColumn = width >= 720;
+  const farmsQueryKey = getFarmsQueryKey();
   const weatherQueryKey = getCurrentWeatherQueryKey(weatherCity);
+  const farmsFetchCount = useIsFetching({ queryKey: farmsQueryKey });
   const weatherFetchCount = useIsFetching({ queryKey: weatherQueryKey });
+  const farmsQuery = useQuery({
+    queryKey: farmsQueryKey,
+    queryFn: getFarms,
+    staleTime: QUERY_STALE_TIME_MS,
+  });
 
   const dashboardQuery = useQuery({
     queryKey: ['dashboard', 'home', weatherCity ?? 'no-city'],
     staleTime: QUERY_STALE_TIME_MS,
     queryFn: async () => {
-      const [farms, history] = await Promise.all([getFarms(), getPredictionHistory()]);
-
       return {
-        farms,
-        history,
+        history: await getPredictionHistory(),
       };
     },
   });
 
   const handleRefresh = async () => {
     await Promise.all([
+      farmsQuery.refetch(),
       dashboardQuery.refetch(),
       weatherCity
         ? queryClient.refetchQueries({
@@ -140,7 +146,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     ]);
   };
 
-  const farms = dashboardQuery.data?.farms ?? [];
+  const farms = farmsQuery.data ?? [];
   const history = dashboardQuery.data?.history ?? [];
   const latestRecommendation = history[0] ?? null;
   const averageConfidence = history.length
@@ -150,7 +156,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     : null;
 
   const isEmpty =
-    !dashboardQuery.isLoading && farms.length === 0 && history.length === 0 && !weatherCity;
+    !dashboardQuery.isLoading &&
+    !farmsQuery.isLoading &&
+    farms.length === 0 &&
+    history.length === 0 &&
+    !weatherCity;
 
   if (dashboardQuery.isLoading && !dashboardQuery.data) {
     return <LoadingState message="Loading your farmer dashboard..." />;
@@ -174,7 +184,12 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
       <Screen
         scrollable
         contentClassName="gap-lg"
-        refreshing={dashboardQuery.isRefetching || weatherFetchCount > 0}
+        refreshing={
+          dashboardQuery.isRefetching ||
+          farmsQuery.isRefetching ||
+          farmsFetchCount > 0 ||
+          weatherFetchCount > 0
+        }
         onRefresh={() => {
           void handleRefresh();
         }}
@@ -208,7 +223,12 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   return (
     <Screen
       scrollable
-      refreshing={dashboardQuery.isRefetching || weatherFetchCount > 0}
+      refreshing={
+        dashboardQuery.isRefetching ||
+        farmsQuery.isRefetching ||
+        farmsFetchCount > 0 ||
+        weatherFetchCount > 0
+      }
       onRefresh={() => {
         void handleRefresh();
       }}
@@ -288,20 +308,9 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
       </View>
 
       <WeatherCard city={weatherCity} />
+      <FarmSummaryCard />
 
       <View className={isTwoColumn ? 'flex-row flex-wrap gap-md' : 'gap-md'}>
-        <DashboardCard
-          title="Farm Summary"
-          value={`${farms.length}`}
-          subtitle={farms.length === 1 ? 'farm recorded' : 'farms recorded'}
-          helper={
-            farms[0]
-              ? `Latest: ${farms[0].farm_name} in ${farms[0].district}`
-              : 'No farms added yet'
-          }
-          accent={theme.colors.secondary}
-        />
-
         <DashboardCard
           title="AI Recommendation Summary"
           value={`${history.length}`}

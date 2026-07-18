@@ -9,7 +9,13 @@ class FarmService
 {
     public function getAll(User $user)
     {
-        return $user->farms()->latest()->get();
+        return $user
+            ->farms()
+            ->with([
+                'activeHarvestListings:id,farm_id,crop_id',
+            ])
+            ->latest()
+            ->get();
     }
 
     public function create(User $user,array $data)
