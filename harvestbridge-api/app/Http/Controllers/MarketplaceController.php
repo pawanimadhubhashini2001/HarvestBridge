@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Http\Requests\ShowMarketplaceProductRequest;
 use App\Http\Resources\HarvestListingResource;
 use App\Http\Resources\MarketplaceProductResource;
 use App\Http\Resources\NearbyProductSuggestionResource;
@@ -46,11 +47,17 @@ class MarketplaceController extends Controller
         );
     }
 
-    public function show(HarvestListing $harvestListing)
+    public function show(
+        ShowMarketplaceProductRequest $request,
+        HarvestListing $harvestListing
+    )
     {
         return ApiResponse::success(
             new MarketplaceProductResource(
-                $this->service->getMarketplaceProduct($harvestListing)
+                $this->service->getMarketplaceProduct(
+                    $harvestListing,
+                    $request->validated()
+                )
             ),
             'Marketplace product retrieved successfully'
         );

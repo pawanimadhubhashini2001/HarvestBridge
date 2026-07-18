@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Crop;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -40,7 +41,12 @@ class MarketplaceFilterRequest extends FormRequest
 
             'quality_grade' => 'nullable|string|max:50',
 
-            'crop_category' => 'nullable|string|max:100',
+            'crop_category' => [
+                'nullable',
+                'string',
+                'max:100',
+                Rule::in(Crop::supportedCategories()),
+            ],
 
             'harvest_date' => 'nullable|date',
 
@@ -53,10 +59,6 @@ class MarketplaceFilterRequest extends FormRequest
                 'string',
                 Rule::in([
                     'available',
-                    'reserved',
-                    'sold',
-                    'expired',
-                    'donated',
                 ]),
             ],
 
@@ -147,5 +149,14 @@ class MarketplaceFilterRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('crop_category')) {
+            $this->merge([
+                'crop_category' => Crop::normalizeCategory($this->input('crop_category')),
+            ]);
+        }
     }
 }

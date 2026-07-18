@@ -9,6 +9,7 @@ import { AppButton } from '@/components/common/app-button';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackParamList } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { formatStoreStatus } from '@/utils/store-status';
 
 function SkeletonBlock({ height, width }: { height: number; width: DimensionValue }) {
   const theme = useAppTheme();
@@ -237,7 +238,7 @@ export function FarmSummaryCard() {
           </View>
 
           <View className={isWide ? 'flex-row flex-wrap gap-sm' : 'gap-sm'}>
-            <SummaryMetric label="Store Status" value={store.business_status ?? 'open'} />
+            <SummaryMetric label="Store Status" value={formatStoreStatus(store.business_status)} />
             <SummaryMetric label="Phone Number" value={store.phone_number} />
             <SummaryMetric label="Active Crops" value={`${store.active_crop_count ?? 0}`} />
           </View>

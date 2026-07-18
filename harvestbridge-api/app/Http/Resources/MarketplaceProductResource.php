@@ -27,10 +27,18 @@ class MarketplaceProductResource extends JsonResource
                 'harvest_date' => $this->harvest_date,
                 'available_until' => $this->available_until,
                 'status' => $this->status,
+                'status_label' => $this->statusLabel(),
+                'is_available' => $this->isAvailableForConsumers(),
                 'is_featured' => $this->isCurrentlyFeatured(),
                 'featured_until' => $this->featured_until,
                 'images' => HarvestListingImageResource::collection(
                     $this->whenLoaded('images')
+                ),
+                'primary_image' => $this->whenLoaded(
+                    'images',
+                    fn () => $this->images->isNotEmpty()
+                        ? HarvestListingImageResource::make($this->images->first())->resolve()
+                        : null
                 ),
                 'created_at' => $this->created_at,
                 'updated_at' => $this->updated_at,
@@ -64,9 +72,15 @@ class MarketplaceProductResource extends JsonResource
                 'address' => $this->farm->address,
                 'latitude' => $this->farm->latitude,
                 'longitude' => $this->farm->longitude,
+                'distance_km' => isset($this->distance_km)
+                    ? round((float) $this->distance_km, 2)
+                    : null,
                 'google_maps_url' => $this->farm->googleMapsUrl(),
                 'open_maps_action' => $this->farm->openMapsAction(),
             ]),
+            'related_products' => HarvestListingResource::collection(
+                $this->whenLoaded('relatedProducts')
+            ),
         ];
     }
 }

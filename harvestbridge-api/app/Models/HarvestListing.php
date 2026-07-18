@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 class HarvestListing extends Model
 {
     public const STATUS_AVAILABLE = 'available';
+    public const STATUS_HIDDEN = 'hidden';
     public const STATUS_RESERVED = 'reserved';
     public const STATUS_SOLD = 'sold';
     public const STATUS_EXPIRED = 'expired';
@@ -110,6 +111,40 @@ class HarvestListing extends Model
     public function shareUrl(): string
     {
         return url('/api/marketplace/'.$this->getKey());
+    }
+
+    public static function farmerManageableStatuses(): array
+    {
+        return [
+            self::STATUS_AVAILABLE,
+            self::STATUS_HIDDEN,
+            self::STATUS_SOLD,
+        ];
+    }
+
+    public static function marketplaceVisibleStatuses(): array
+    {
+        return [
+            self::STATUS_AVAILABLE,
+        ];
+    }
+
+    public function isAvailableForConsumers(): bool
+    {
+        return $this->status === self::STATUS_AVAILABLE
+            && (float) $this->available_quantity > 0;
+    }
+
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_SOLD => 'Sold Out',
+            self::STATUS_HIDDEN => 'Hidden',
+            self::STATUS_EXPIRED => 'Expired',
+            self::STATUS_RESERVED => 'Reserved',
+            self::STATUS_DONATED => 'Donated',
+            default => 'Available',
+        };
     }
 
     public function farmer(): BelongsTo

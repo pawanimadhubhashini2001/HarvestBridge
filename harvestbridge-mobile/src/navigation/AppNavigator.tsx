@@ -7,6 +7,7 @@ import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
+import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
@@ -86,6 +87,11 @@ export function AppNavigator() {
         name="MarketplaceProductDetails"
         component={MarketplaceProductDetailsScreen}
         options={{ title: 'Product Details' }}
+      />
+      <Stack.Screen
+        name="StoreDetails"
+        component={StoreDetailsScreen}
+        options={{ title: 'Store Details' }}
       />
       <Stack.Screen
         name="WeatherDetails"

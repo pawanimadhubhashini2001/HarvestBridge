@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Helpers\ApiResponse;
 use App\Http\Requests\StoreHarvestListingImagesRequest;
 use App\Http\Requests\StoreHarvestListingRequest;
+use App\Http\Requests\UpdateHarvestListingImageOrderRequest;
+use App\Http\Requests\UpdateHarvestListingAvailabilityRequest;
 use App\Http\Requests\UpdateHarvestListingRequest;
 use App\Http\Resources\HarvestListingResource;
 use App\Models\HarvestListing;
@@ -90,6 +92,57 @@ class HarvestListingController extends Controller
         return ApiResponse::success(
             new HarvestListingResource($listing),
             'Harvest listing updated successfully'
+        );
+    }
+
+    public function updateAvailability(
+        UpdateHarvestListingAvailabilityRequest $request,
+        HarvestListing $harvestListing
+    ) {
+        $this->authorize('update', $harvestListing);
+
+        $listing = $this->service->updateAvailability(
+            $harvestListing,
+            $request->validated()
+        );
+
+        return ApiResponse::success(
+            new HarvestListingResource($listing),
+            'Harvest listing availability updated successfully'
+        );
+    }
+
+    public function setPrimaryImage(
+        HarvestListing $harvestListing,
+        HarvestListingImage $image
+    ) {
+        $this->authorize('update', $harvestListing);
+
+        $listing = $this->service->setPrimaryImage(
+            $harvestListing,
+            $image
+        );
+
+        return ApiResponse::success(
+            new HarvestListingResource($listing),
+            'Harvest listing primary image updated successfully.'
+        );
+    }
+
+    public function reorderImages(
+        UpdateHarvestListingImageOrderRequest $request,
+        HarvestListing $harvestListing
+    ) {
+        $this->authorize('update', $harvestListing);
+
+        $listing = $this->service->reorderImages(
+            $harvestListing,
+            $request->validated('image_ids')
+        );
+
+        return ApiResponse::success(
+            new HarvestListingResource($listing),
+            'Harvest listing image order updated successfully.'
         );
     }
 

@@ -16,6 +16,7 @@ import { AppButton } from '@/components/common/app-button';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
+import { DeleteStoreButton } from '@/components/store/DeleteStoreButton';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import {
@@ -36,6 +37,8 @@ const storeFormFieldNames = [
   'latitude',
   'longitude',
   'store_description',
+  'store_logo',
+  'store_cover_image',
 ] as const satisfies readonly (keyof FarmFormValues)[];
 
 export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
@@ -48,6 +51,7 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors, isValid },
   } = useForm<FarmFormValues>({
     defaultValues: getDefaultFarmFormValues(),
@@ -155,18 +159,19 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
           </Text>
           <View className="gap-sm">
             <AppButton
-              label="View Store Profile"
+              label="My Store"
               onPress={() => {
                 navigation.replace('FarmDetails', { farmId: String(storeQuery.data?.id) });
               }}
             />
             <AppButton
-              label="Edit Store Profile"
+              label="Edit Store"
               mode="outline"
               onPress={() => {
                 navigation.replace('EditFarm', { farmId: String(storeQuery.data?.id) });
               }}
             />
+            <DeleteStoreButton storeId={storeQuery.data.id} label="Delete Store" />
           </View>
         </View>
       </Screen>
@@ -201,6 +206,7 @@ export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {
         <FarmFormFields
           control={control}
           errors={errors}
+          setValue={setValue}
           disabled={createStoreMutation.isPending}
           latitudeLabel="Latitude (optional)"
           longitudeLabel="Longitude (optional)"

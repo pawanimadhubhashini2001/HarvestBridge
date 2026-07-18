@@ -164,7 +164,7 @@ export function ExplanationCard({
         icon: 'sprout',
         content:
           normalized.soil ??
-          `${soilType} soil data was used to evaluate how suitable the farm is for ${recommendedCrop}.`,
+          `${soilType} soil data was used to evaluate how suitable the store location is for ${recommendedCrop}.`,
         preview:
           normalized.soil ??
           `${soilType} conditions were considered in the recommendation.`,

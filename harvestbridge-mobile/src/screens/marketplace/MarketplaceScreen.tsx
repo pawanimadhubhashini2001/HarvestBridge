@@ -216,6 +216,9 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
           onPress={() => {
             navigation.navigate('MarketplaceProductDetails', {
               listingId: String(item.id),
+              latitude: coordinates?.latitude,
+              longitude: coordinates?.longitude,
+              distanceKm: item.distance_km ?? item.distance ?? null,
             });
           }}
           onCallPress={() => {
@@ -429,6 +432,9 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                     onPress={() => {
                       navigation.navigate('MarketplaceProductDetails', {
                         listingId: String(suggestion.id),
+                        latitude: coordinates?.latitude,
+                        longitude: coordinates?.longitude,
+                        distanceKm: suggestion.distance_km ?? suggestion.distance ?? null,
                       });
                     }}
                     onCallPress={() => {

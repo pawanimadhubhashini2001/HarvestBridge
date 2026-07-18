@@ -2,9 +2,7 @@
 
 use App\Models\Farm;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -18,13 +16,14 @@ return new class extends Migration
             ->where('business_status', 'inactive')
             ->update(['business_status' => Farm::BUSINESS_STATUS_CLOSED]);
 
-        Schema::table('farms', function (Blueprint $table) {
-            $table->decimal('farm_size', 8, 2)->nullable()->change();
-            $table->enum('farm_size_unit', ['acres', 'hectares'])->nullable()->change();
-            $table->enum('soil_type', ['Clay', 'Loam', 'Sandy', 'Silt', 'Peat', 'Chalk'])->nullable()->change();
-            $table->enum('irrigation_method', ['Rain Fed', 'Canal', 'Tube Well', 'Drip', 'Sprinkler'])->nullable()->change();
-            $table->string('business_status', 50)->default(Farm::BUSINESS_STATUS_OPEN)->change();
-        });
+        DB::statement('ALTER TABLE farms ALTER COLUMN farm_size DROP NOT NULL');
+        DB::statement('ALTER TABLE farms ALTER COLUMN farm_size_unit DROP NOT NULL');
+        DB::statement('ALTER TABLE farms ALTER COLUMN farm_size_unit DROP DEFAULT');
+        DB::statement('ALTER TABLE farms ALTER COLUMN soil_type DROP NOT NULL');
+        DB::statement(sprintf(
+            "ALTER TABLE farms ALTER COLUMN business_status SET DEFAULT '%s'",
+            Farm::BUSINESS_STATUS_OPEN
+        ));
     }
 
     public function down(): void
@@ -37,12 +36,22 @@ return new class extends Migration
             ->where('business_status', Farm::BUSINESS_STATUS_CLOSED)
             ->update(['business_status' => 'inactive']);
 
-        Schema::table('farms', function (Blueprint $table) {
-            $table->decimal('farm_size', 8, 2)->nullable(false)->change();
-            $table->enum('farm_size_unit', ['acres', 'hectares'])->nullable(false)->change();
-            $table->enum('soil_type', ['Clay', 'Loam', 'Sandy', 'Silt', 'Peat', 'Chalk'])->nullable(false)->change();
-            $table->enum('irrigation_method', ['Rain Fed', 'Canal', 'Tube Well', 'Drip', 'Sprinkler'])->nullable()->change();
-            $table->string('business_status', 50)->default('active')->change();
-        });
+        DB::table('farms')
+            ->whereNull('farm_size')
+            ->update(['farm_size' => 0]);
+
+        DB::table('farms')
+            ->whereNull('farm_size_unit')
+            ->update(['farm_size_unit' => 'acres']);
+
+        DB::table('farms')
+            ->whereNull('soil_type')
+            ->update(['soil_type' => 'Loam']);
+
+        DB::statement('ALTER TABLE farms ALTER COLUMN farm_size SET NOT NULL');
+        DB::statement('ALTER TABLE farms ALTER COLUMN farm_size_unit SET DEFAULT \'acres\'');
+        DB::statement('ALTER TABLE farms ALTER COLUMN farm_size_unit SET NOT NULL');
+        DB::statement('ALTER TABLE farms ALTER COLUMN soil_type SET NOT NULL');
+        DB::statement("ALTER TABLE farms ALTER COLUMN business_status SET DEFAULT 'active'");
     }
 };

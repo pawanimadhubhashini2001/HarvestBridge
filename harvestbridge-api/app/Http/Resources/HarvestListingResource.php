@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Crop;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -25,6 +26,13 @@ class HarvestListingResource extends JsonResource
             'crop_id' => $this->crop_id,
 
             'crop' => $this->crop?->name,
+
+            'crop_category' => $this->crop?->category,
+
+            'category' => $this->whenLoaded('crop', fn () => [
+                'name' => $this->crop?->category,
+                'slug' => Crop::categorySlug($this->crop?->category),
+            ]),
 
             'farm' => $this->farm?->farm_name,
 
@@ -69,7 +77,11 @@ class HarvestListingResource extends JsonResource
 
             'status' => $this->status,
 
+            'status_label' => $this->statusLabel(),
+
             'is_featured' => $this->isCurrentlyFeatured(),
+
+            'is_available' => $this->isAvailableForConsumers(),
 
             'featured_until' => $this->featured_until,
 
@@ -81,10 +93,18 @@ class HarvestListingResource extends JsonResource
 
             'images' => HarvestListingImageResource::collection($this->whenLoaded('images')),
 
+            'primary_image' => $this->whenLoaded(
+                'images',
+                fn () => $this->images->isNotEmpty()
+                    ? HarvestListingImageResource::make($this->images->first())->resolve()
+                    : null
+            ),
+
             'store' => $this->whenLoaded('farm', function () {
                 return [
                     'id' => $this->farm?->id,
                     'store_name' => $this->farm?->farm_name,
+                    'business_status' => $this->farm?->business_status,
                     'district' => $this->farm?->district,
                     'address' => $this->farm?->address,
                 ];
@@ -114,6 +134,7 @@ class HarvestListingResource extends JsonResource
                         'user_id' => $this->user_id,
                         'farm_id' => $this->farm_id,
                         'crop_id' => $this->crop_id,
+                        'crop_category' => $this->crop?->category,
                         'quantity' => $this->quantity,
                         'total_quantity' => $this->quantity,
                         'available_quantity' => $this->available_quantity,
@@ -125,12 +146,20 @@ class HarvestListingResource extends JsonResource
                         'harvest_date' => $this->harvest_date,
                         'available_until' => $this->available_until,
                         'status' => $this->status,
+                        'status_label' => $this->statusLabel(),
+                        'is_available' => $this->isAvailableForConsumers(),
                         'is_featured' => $this->isCurrentlyFeatured(),
                         'featured_until' => $this->featured_until,
                         'description' => $this->description,
                         'created_at' => $this->created_at,
                         'updated_at' => $this->updated_at,
                         'images' => HarvestListingImageResource::collection($this->whenLoaded('images')),
+                        'primary_image' => $this->whenLoaded(
+                            'images',
+                            fn () => $this->images->isNotEmpty()
+                                ? HarvestListingImageResource::make($this->images->first())->resolve()
+                                : null
+                        ),
                     ],
                     'farmer' => $this->whenLoaded('farmer', function () {
                         return [

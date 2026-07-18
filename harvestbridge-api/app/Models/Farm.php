@@ -10,6 +10,7 @@ class Farm extends Model
 {
     public const BUSINESS_STATUS_OPEN = 'open';
     public const BUSINESS_STATUS_CLOSED = 'closed';
+    public const BUSINESS_STATUS_TEMPORARILY_CLOSED = 'temporarily_closed';
 
     protected $fillable = [
         'user_id',
@@ -53,7 +54,7 @@ class Farm extends Model
         }
 
         return sprintf(
-            'https://www.google.com/maps/search/?api=1&query=%s,%s',
+            'https://www.google.com/maps/dir/?api=1&destination=%s,%s&travelmode=driving',
             $this->latitude,
             $this->longitude
         );
@@ -69,7 +70,7 @@ class Farm extends Model
 
         return [
             'type' => 'open_url',
-            'label' => 'Open Maps',
+            'label' => 'Directions',
             'url' => $googleMapsUrl,
         ];
     }
@@ -108,10 +109,9 @@ class Farm extends Model
 
     public function activeHarvestListings(): HasMany
     {
-        return $this->hasMany(HarvestListing::class)->whereIn('status', [
-            'available',
-            'reserved',
-        ]);
+        return $this->hasMany(HarvestListing::class)
+            ->where('status', HarvestListing::STATUS_AVAILABLE)
+            ->where('available_quantity', '>', 0);
     }
 
     public function predictions(): HasMany
@@ -122,5 +122,14 @@ class Farm extends Model
     public function scopeOwnedBy($query, User $user)
     {
         return $query->where('user_id', $user->id);
+    }
+
+    public static function businessStatuses(): array
+    {
+        return [
+            self::BUSINESS_STATUS_OPEN,
+            self::BUSINESS_STATUS_CLOSED,
+            self::BUSINESS_STATUS_TEMPORARILY_CLOSED,
+        ];
     }
 }

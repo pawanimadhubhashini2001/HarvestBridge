@@ -16,6 +16,7 @@ class StoreLocationResource extends JsonResource
             'address' => $this->address,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
+            'google_maps_location' => $this->googleMapsUrl(),
             'google_maps_url' => $this->googleMapsUrl(),
             'open_maps_action' => $this->openMapsAction(),
             'owner' => $this->whenLoaded('user', fn () => [

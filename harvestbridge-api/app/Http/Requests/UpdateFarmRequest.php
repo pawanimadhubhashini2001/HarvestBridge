@@ -79,10 +79,7 @@ class UpdateFarmRequest extends FormRequest
             'business_status' => [
                 'sometimes',
                 'string',
-                Rule::in([
-                    Farm::BUSINESS_STATUS_OPEN,
-                    Farm::BUSINESS_STATUS_CLOSED,
-                ]),
+                Rule::in(Farm::businessStatuses()),
             ],
 
             'description' => 'sometimes|nullable|string'

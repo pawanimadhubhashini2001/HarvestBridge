@@ -20,7 +20,13 @@ class StoreResource extends JsonResource
             'store_logo_url' => $this->store_logo_path
                 ? Storage::disk('public')->url($this->store_logo_path)
                 : null,
+            'logo_url' => $this->store_logo_path
+                ? Storage::disk('public')->url($this->store_logo_path)
+                : null,
             'store_cover_image_url' => $this->store_cover_image_path
+                ? Storage::disk('public')->url($this->store_cover_image_path)
+                : null,
+            'cover_url' => $this->store_cover_image_path
                 ? Storage::disk('public')->url($this->store_cover_image_path)
                 : null,
             'phone_number' => $this->phone_number,
@@ -35,6 +41,7 @@ class StoreResource extends JsonResource
             'open_maps_action' => $this->openMapsAction(),
             'business_hours' => $this->business_hours,
             'business_status' => $this->business_status,
+            'store_status' => $this->business_status,
             'farm_size' => $this->farm_size,
             'farm_size_unit' => $this->farm_size_unit,
             'soil_type' => $this->soil_type,

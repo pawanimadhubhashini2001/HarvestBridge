@@ -26,6 +26,14 @@ class CropController extends Controller
         );
     }
 
+    public function categories()
+    {
+        return ApiResponse::success(
+            $this->cropService->getCategories(),
+            'Crop categories retrieved successfully'
+        );
+    }
+
     public function store(StoreCropRequest $request)
     {
         $this->authorize('create', Crop::class);

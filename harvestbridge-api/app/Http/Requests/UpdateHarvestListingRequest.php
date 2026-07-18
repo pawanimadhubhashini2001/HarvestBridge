@@ -51,4 +51,12 @@ class UpdateHarvestListingRequest extends FormRequest
 
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'farm_id.required' => 'Please create your Store Profile before adding products.',
+            'farm_id.exists' => 'Please create your Store Profile before adding products.',
+        ];
+    }
 }

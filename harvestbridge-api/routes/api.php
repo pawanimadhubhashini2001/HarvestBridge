@@ -99,6 +99,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stores/{store}', [StoreController::class, 'show']);
         Route::post('/stores', [StoreController::class, 'store']);
         Route::put('/stores/{store}', [StoreController::class, 'update']);
+        Route::get('/stores/{store}/status', [StoreController::class, 'status']);
+        Route::put('/stores/{store}/status', [StoreController::class, 'updateStatus']);
+        Route::post('/stores/{store}/logo', [StoreController::class, 'uploadLogo']);
+        Route::post('/stores/{store}/cover', [StoreController::class, 'uploadCover']);
+        Route::delete('/stores/{store}/logo', [StoreController::class, 'deleteLogo']);
+        Route::delete('/stores/{store}/cover', [StoreController::class, 'deleteCover']);
+        Route::put('/stores/{store}/location', [StoreController::class, 'updateLocation']);
         Route::delete('/stores/{store}', [StoreController::class, 'destroy']);
 
         Route::get('/harvest-listings', [HarvestListingController::class, 'index']);
@@ -106,6 +113,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/harvest-listings', [HarvestListingController::class, 'store']);
         Route::post('/harvest-listings/{harvestListing}/images', [HarvestListingController::class, 'uploadImages']);
         Route::put('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'update']);
+        Route::patch('/harvest-listings/{harvestListing}/availability', [HarvestListingController::class, 'updateAvailability']);
+        Route::patch('/harvest-listings/{harvestListing}/images/order', [HarvestListingController::class, 'reorderImages']);
+        Route::patch('/harvest-listings/{harvestListing}/images/{image}/primary', [HarvestListingController::class, 'setPrimaryImage']);
         Route::delete('/harvest-listings/{harvestListing}/images/{image}', [HarvestListingController::class, 'deleteImage']);
         Route::delete('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'destroy']);
 
@@ -297,6 +307,9 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/crops', [CropController::class, 'index']);
+    Route::get('/crops/categories', [CropController::class, 'categories']);
+    Route::get('/stores/public/{store}', [StoreController::class, 'publicShow']);
+    Route::get('/stores/public/{store}/products', [StoreController::class, 'publicProducts']);
     Route::get('/stores/{store}/location', [StoreController::class, 'location']);
     Route::get(
         '/marketplace',

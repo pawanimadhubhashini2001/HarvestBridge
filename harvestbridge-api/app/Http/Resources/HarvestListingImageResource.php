@@ -14,6 +14,7 @@ class HarvestListingImageResource extends JsonResource
             'id' => $this->id,
             'url' => Storage::disk('public')->url($this->image_path),
             'sort_order' => $this->sort_order,
+            'is_primary' => $this->isPrimary(),
         ];
     }
 }

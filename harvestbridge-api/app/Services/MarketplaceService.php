@@ -20,7 +20,6 @@ class MarketplaceService
     private const AUTO_EXPANSION_RADII = [50, 75, 100];
     private const ACTIVE_STATUSES = [
         HarvestListing::STATUS_AVAILABLE,
-        HarvestListing::STATUS_RESERVED,
     ];
 
     public function __construct(
@@ -78,12 +77,15 @@ class MarketplaceService
         ];
     }
 
-    public function getMarketplaceProduct(HarvestListing $harvestListing): HarvestListing
+    public function getMarketplaceProduct(
+        HarvestListing $harvestListing,
+        array $filters = []
+    ): HarvestListing
     {
         $this->harvestListingService->expireElapsedListings();
         $this->harvestListingService->expireElapsedFeaturedListings();
 
-        return HarvestListing::query()
+        $query = HarvestListing::query()
             ->whereKey($harvestListing->getKey())
             ->whereIn('status', self::ACTIVE_STATUSES)
             ->where('available_quantity', '>', 0)
@@ -93,8 +95,34 @@ class MarketplaceService
                 'farm:id,user_id,farm_name,description,store_logo_path,store_cover_image_path,phone_number,whatsapp_number,email,district,address,latitude,longitude,business_hours,business_status,updated_at',
                 'farm.user:id,name,phone',
                 'images:id,harvest_listing_id,image_path,sort_order',
-            ])
-            ->firstOrFail();
+            ]);
+
+        if ($this->hasLocationSearch($filters)) {
+            $latitude = (float) $filters['latitude'];
+            $longitude = (float) $filters['longitude'];
+            $distanceFormula = $this->distanceFormula('marketplace_product_farms');
+
+            $query->join(
+                'farms as marketplace_product_farms',
+                'marketplace_product_farms.id',
+                '=',
+                'harvest_listings.farm_id'
+            )
+                ->select('harvest_listings.*')
+                ->selectRaw("ROUND(($distanceFormula)::numeric, 2) as distance_km", [
+                    $latitude,
+                    $longitude,
+                    $latitude,
+                ]);
+        }
+
+        $listing = $query->firstOrFail();
+        $listing->setRelation(
+            'relatedProducts',
+            $this->getRelatedProducts($listing, $filters)
+        );
+
+        return $listing;
     }
 
     private function applyStatusScope($query, array $filters): void
@@ -125,7 +153,8 @@ class MarketplaceService
             $query->where(function ($nestedQuery) use ($search) {
                 $nestedQuery->where('description', 'ILIKE', '%'.$search.'%')
                     ->orWhereHas('crop', function ($cropQuery) use ($search) {
-                        $cropQuery->where('name', 'ILIKE', '%'.$search.'%');
+                        $cropQuery->where('name', 'ILIKE', '%'.$search.'%')
+                            ->orWhere('category', 'ILIKE', '%'.$search.'%');
                     })
                     ->orWhereHas('farmer', function ($farmerQuery) use ($search) {
                         $farmerQuery->where('name', 'ILIKE', '%'.$search.'%');
@@ -397,14 +426,20 @@ class MarketplaceService
         }
 
         $requestedRadius = $filters['radius'] ?? null;
+        $resolvedRequestedRadius = $requestedRadius !== null
+            ? $this->resolveRadius($requestedRadius)
+            : null;
 
-        if ($requestedRadius !== null) {
+        if (
+            $resolvedRequestedRadius !== null
+            && $resolvedRequestedRadius !== self::DEFAULT_RADIUS_KM
+        ) {
             return [
                 'effective_filters' => [
                     ...$filters,
-                    'radius' => $this->resolveRadius($requestedRadius),
+                    'radius' => $resolvedRequestedRadius,
                 ],
-                'used_radius' => $this->resolveRadius($requestedRadius),
+                'used_radius' => $resolvedRequestedRadius,
                 'expanded' => false,
                 'search_scope' => 'radius',
             ];
@@ -438,7 +473,7 @@ class MarketplaceService
         ];
     }
 
-    private function distanceFormula(): string
+    private function distanceFormula(string $tableAlias = 'marketplace_farms'): string
     {
         return '('.self::EARTH_RADIUS_KM.' * acos(
             LEAST(
@@ -446,10 +481,10 @@ class MarketplaceService
                 GREATEST(
                     -1.0,
                     cos(radians(?))
-                    * cos(radians(marketplace_farms.latitude))
-                    * cos(radians(marketplace_farms.longitude) - radians(?))
+                    * cos(radians('.$tableAlias.'.latitude))
+                    * cos(radians('.$tableAlias.'.longitude) - radians(?))
                     + sin(radians(?))
-                    * sin(radians(marketplace_farms.latitude))
+                    * sin(radians('.$tableAlias.'.latitude))
                 )
             )
         ))';
@@ -522,6 +557,12 @@ class MarketplaceService
                 ) THEN 'crop_name'
                 WHEN EXISTS (
                     SELECT 1
+                    FROM crops
+                    WHERE crops.id = harvest_listings.crop_id
+                        AND crops.category ILIKE ?
+                ) THEN 'category'
+                WHEN EXISTS (
+                    SELECT 1
                     FROM users
                     WHERE users.id = harvest_listings.user_id
                         AND users.name ILIKE ?
@@ -543,6 +584,7 @@ class MarketplaceService
             END as matched_field",
             [
                 $exactSearch,
+                $partialSearch,
                 $partialSearch,
                 $partialSearch,
                 $partialSearch,
@@ -704,5 +746,51 @@ class MarketplaceService
             'farmer:id,name',
             'images:id,harvest_listing_id,image_path,sort_order',
         ]);
+    }
+
+    private function getRelatedProducts(
+        HarvestListing $listing,
+        array $filters = []
+    ): Collection {
+        $query = HarvestListing::query()
+            ->where('farm_id', $listing->farm_id)
+            ->whereKeyNot($listing->getKey())
+            ->whereIn('status', self::ACTIVE_STATUSES)
+            ->where('available_quantity', '>', 0)
+            ->with([
+                'crop:id,name,category',
+                'farm:id,farm_name,district,address,latitude,longitude,business_status',
+                'farmer:id,name',
+                'images:id,harvest_listing_id,image_path,sort_order',
+            ]);
+
+        if ($this->hasLocationSearch($filters)) {
+            $latitude = (float) $filters['latitude'];
+            $longitude = (float) $filters['longitude'];
+            $distanceFormula = $this->distanceFormula('related_marketplace_farms');
+
+            $query->join(
+                'farms as related_marketplace_farms',
+                'related_marketplace_farms.id',
+                '=',
+                'harvest_listings.farm_id'
+            )
+                ->select('harvest_listings.*')
+                ->selectRaw("ROUND(($distanceFormula)::numeric, 2) as distance_km", [
+                    $latitude,
+                    $longitude,
+                    $latitude,
+                ])
+                ->orderBy('distance_km')
+                ->orderByDesc('available_quantity')
+                ->orderBy('price_per_unit')
+                ->orderByDesc('id');
+        } else {
+            $query->latest();
+        }
+
+        return $query
+            ->limit(6)
+            ->get();
     }
 }

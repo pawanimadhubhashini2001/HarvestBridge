@@ -32,6 +32,7 @@ class NearbyProductSuggestionResource extends JsonResource
                 return [
                     'id' => $this->farm?->id,
                     'store_name' => $this->farm?->farm_name,
+                    'business_status' => $this->farm?->business_status,
                     'district' => $this->farm?->district,
                     'address' => $this->farm?->address,
                 ];

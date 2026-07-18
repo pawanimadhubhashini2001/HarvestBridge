@@ -1,18 +1,22 @@
 import { Image } from 'expo-image';
 import { useQuery } from '@tanstack/react-query';
-import { Linking, ScrollView, View } from 'react-native';
+import { Linking, ScrollView, Share, View } from 'react-native';
 import { Button, Card, Chip, Divider, Snackbar, Text } from 'react-native-paper';
 
 import {
   getMarketplaceProduct,
   getMarketplaceProductQueryKey,
+  type MarketplaceQueryParams,
 } from '@/api/marketplace.api';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
+import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { estimateTravelDirection, formatStoreCoordinates } from '@/utils/store-location';
+import { formatStoreStatus } from '@/utils/store-status';
 import { useState } from 'react';
 
 function formatCurrency(value: number | string, unit?: string) {
@@ -46,12 +50,12 @@ function formatDate(value?: string | null) {
   }).format(date);
 }
 
-function formatDistance(latitude?: number | string | null, longitude?: number | string | null) {
-  if (!latitude || !longitude) {
-    return 'Location not provided';
+function formatDistance(distance?: number | null) {
+  if (typeof distance !== 'number' || !Number.isFinite(distance)) {
+    return 'Distance unavailable';
   }
 
-  return `${latitude}, ${longitude}`;
+  return `${distance.toFixed(distance % 1 === 0 ? 0 : 1)} km away`;
 }
 
 function formatStatusLabel(status: string) {
@@ -62,14 +66,22 @@ function formatStatusLabel(status: string) {
 }
 
 export function MarketplaceProductDetailsScreen({
+  navigation,
   route,
 }: AppStackScreenProps<'MarketplaceProductDetails'>) {
   const theme = useAppTheme();
   const listingId = route.params?.listingId;
   const [actionError, setActionError] = useState<string | null>(null);
+  const detailQueryParams: Pick<MarketplaceQueryParams, 'latitude' | 'longitude'> =
+    typeof route.params?.latitude === 'number' && typeof route.params?.longitude === 'number'
+      ? {
+          latitude: route.params.latitude,
+          longitude: route.params.longitude,
+        }
+      : {};
   const detailsQuery = useQuery({
-    queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing'),
-    queryFn: () => getMarketplaceProduct(listingId ?? ''),
+    queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing', detailQueryParams),
+    queryFn: () => getMarketplaceProduct(listingId ?? '', detailQueryParams),
     enabled: Boolean(listingId),
   });
 
@@ -83,6 +95,22 @@ export function MarketplaceProductDetailsScreen({
       await Linking.openURL(url);
     } catch {
       setActionError('Unable to open the requested action on this device.');
+    }
+  }
+
+  async function shareProduct() {
+    if (!detailsQuery.data?.contact.share_url) {
+      setActionError('Share link is not available for this product.');
+      return;
+    }
+
+    try {
+      await Share.share({
+        message: `Check out ${detailsQuery.data.product.crop_name ?? 'this product'} on HarvestBridge: ${detailsQuery.data.contact.share_url}`,
+        url: detailsQuery.data.contact.share_url,
+      });
+    } catch {
+      setActionError('Unable to share this product right now.');
     }
   }
 
@@ -121,8 +149,26 @@ export function MarketplaceProductDetailsScreen({
     );
   }
 
-  const { product, contact, farmer, store, store_location: storeLocation } = detailsQuery.data;
+  const {
+    product,
+    contact,
+    farmer,
+    store,
+    store_location: storeLocation,
+    related_products: relatedProducts,
+  } = detailsQuery.data;
   const hasImages = product.images.length > 0;
+  const distanceLabel = formatDistance(storeLocation?.distance_km ?? route.params?.distanceKm ?? null);
+  const estimatedDirection = estimateTravelDirection(
+    route.params?.latitude,
+    route.params?.longitude,
+    storeLocation?.latitude,
+    storeLocation?.longitude,
+  );
+  const coordinatesLabel = formatStoreCoordinates(
+    storeLocation?.latitude,
+    storeLocation?.longitude,
+  );
 
   return (
     <Screen
@@ -177,7 +223,7 @@ export function MarketplaceProductDetailsScreen({
           )}
 
           <View className="flex-row flex-wrap gap-sm">
-            <Chip compact>{formatStatusLabel(product.status)}</Chip>
+            <Chip compact>{product.status_label ?? formatStatusLabel(product.status)}</Chip>
             {product.quality_grade ? <Chip compact>Grade {product.quality_grade}</Chip> : null}
             <Chip compact>{product.available_quantity} {product.unit} available</Chip>
             {storeLocation?.district ? <Chip compact>{storeLocation.district}</Chip> : null}
@@ -191,12 +237,27 @@ export function MarketplaceProductDetailsScreen({
             <Button mode="contained" icon="phone-outline" onPress={() => void openExternalUrl(contact.phone ? `tel:${contact.phone}` : null)}>
               Call Farmer
             </Button>
-            <Button mode="outlined" icon="whatsapp" onPress={() => void openExternalUrl(contact.whatsapp)}>
-              WhatsApp
-            </Button>
             <Button mode="outlined" icon="map-marker-path" onPress={() => void openExternalUrl(storeLocation?.open_maps_action?.url ?? storeLocation?.google_maps_url)}>
-              Google Maps
+              Directions
             </Button>
+            <Button mode="outlined" icon="share-variant-outline" onPress={() => void shareProduct()}>
+              Share Product
+            </Button>
+            {store?.id ? (
+              <Button
+                mode="contained-tonal"
+                icon="storefront-outline"
+                onPress={() => {
+                  navigation.navigate('StoreDetails', {
+                    storeId: String(store.id),
+                    latitude: route.params?.latitude,
+                    longitude: route.params?.longitude,
+                    distanceKm: storeLocation?.distance_km ?? route.params?.distanceKm ?? null,
+                  });
+                }}>
+                View Store
+              </Button>
+            ) : null}
           </View>
         </View>
       </Card>
@@ -208,11 +269,12 @@ export function MarketplaceProductDetailsScreen({
           </Text>
           <View className="gap-sm">
             <Text variant="bodyMedium">Crop Category: {product.crop_category ?? 'Not available'}</Text>
+            <Text variant="bodyMedium">Description: {product.description?.trim() || 'Not available'}</Text>
+            <Text variant="bodyMedium">Price: {formatCurrency(product.price_per_unit, product.unit)}</Text>
+            <Text variant="bodyMedium">Available Quantity: {product.available_quantity} {product.unit}</Text>
             <Text variant="bodyMedium">Harvest Date: {formatDate(product.harvest_date)}</Text>
             <Text variant="bodyMedium">Available Until: {formatDate(product.available_until)}</Text>
-            <Text variant="bodyMedium">Total Quantity: {product.quantity} {product.unit}</Text>
-            <Text variant="bodyMedium">Reserved Quantity: {product.reserved_quantity} {product.unit}</Text>
-            <Text variant="bodyMedium">Sold Quantity: {product.sold_quantity} {product.unit}</Text>
+            <Text variant="bodyMedium">Quality Grade: {product.quality_grade ?? 'Not available'}</Text>
             <Text variant="bodyMedium">Last Updated: {formatDate(product.updated_at)}</Text>
           </View>
         </View>
@@ -224,12 +286,36 @@ export function MarketplaceProductDetailsScreen({
             Store Information
           </Text>
           <View className="gap-sm">
-            <Text variant="bodyLarge" style={{ fontWeight: '700' }}>
-              {store?.store_name ?? 'Store unavailable'}
-            </Text>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              {store?.store_description?.trim() || 'No store description provided.'}
-            </Text>
+            <View className="flex-row items-center gap-md">
+              <View
+                className="items-center justify-center overflow-hidden rounded-xl"
+                style={{
+                  width: 72,
+                  height: 72,
+                  backgroundColor: theme.colors.surfaceVariant,
+                }}>
+                {store?.store_logo_url ? (
+                  <Image
+                    source={{ uri: store.store_logo_url }}
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                    No Logo
+                  </Text>
+                )}
+              </View>
+
+              <View className="flex-1 gap-xs">
+                <Text variant="bodyLarge" style={{ fontWeight: '700' }}>
+                  {store?.store_name ?? 'Store unavailable'}
+                </Text>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {store?.store_description?.trim() || 'No store description provided.'}
+                </Text>
+              </View>
+            </View>
           </View>
 
           <Divider />
@@ -241,14 +327,61 @@ export function MarketplaceProductDetailsScreen({
               Business Hours: {store?.business_hours ?? 'Not available'}
             </Text>
             <Text variant="bodyMedium">
-              Business Status: {store?.business_status ?? 'Not available'}
+              Business Status: {store?.business_status ? formatStoreStatus(store.business_status) : 'Not available'}
+            </Text>
+            <Text variant="bodyMedium">Distance: {distanceLabel}</Text>
+            <Text variant="bodyMedium">
+              Estimated Direction: {estimatedDirection ?? 'Not available'}
             </Text>
             <Text variant="bodyMedium">District: {storeLocation?.district ?? 'Not available'}</Text>
             <Text variant="bodyMedium">Address: {storeLocation?.address ?? 'Not available'}</Text>
-            <Text variant="bodyMedium">
-              Coordinates: {formatDistance(storeLocation?.latitude, storeLocation?.longitude)}
+            <Text variant="bodyMedium">Coordinates: {coordinatesLabel}</Text>
+          </View>
+        </View>
+      </Card>
+
+      <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
+        <View className="gap-md p-lg">
+          <View className="gap-xs">
+            <Text variant="titleLarge" style={{ fontWeight: '700' }}>
+              Related Products
+            </Text>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              More available products from the same store.
             </Text>
           </View>
+
+          {relatedProducts.length === 0 ? (
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              No related products are available from this store right now.
+            </Text>
+          ) : (
+            <View className="gap-md">
+              {relatedProducts.map((relatedProduct) => (
+                <MarketplaceProductCard
+                  key={`related-${relatedProduct.id}`}
+                  item={relatedProduct}
+                  compact
+                  onPress={() => {
+                    navigation.push('MarketplaceProductDetails', {
+                      listingId: String(relatedProduct.id),
+                      latitude: route.params?.latitude,
+                      longitude: route.params?.longitude,
+                      distanceKm: relatedProduct.distance_km ?? relatedProduct.distance ?? null,
+                    });
+                  }}
+                  onCallPress={() => {
+                    void openExternalUrl(contact.phone ? `tel:${contact.phone}` : null);
+                  }}
+                  onDirectionsPress={() => {
+                    void openExternalUrl(
+                      relatedProduct.open_maps_action?.url ?? relatedProduct.google_maps_url ?? null,
+                    );
+                  }}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </Card>
 

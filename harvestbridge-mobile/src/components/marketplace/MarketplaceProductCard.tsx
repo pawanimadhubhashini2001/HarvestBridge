@@ -4,6 +4,7 @@ import { Button, Card, Chip, Text } from 'react-native-paper';
 
 import type { MarketplaceListingDto, NearbyProductSuggestionDto } from '@/api/marketplace.api';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { formatStoreStatus } from '@/utils/store-status';
 
 type MarketplaceCardItem = MarketplaceListingDto | NearbyProductSuggestionDto;
 
@@ -121,6 +122,9 @@ export function MarketplaceProductCard({
             <Chip compact icon="map-marker-distance">
               {formatDistance(distance)}
             </Chip>
+            {item.store?.business_status ? (
+              <Chip compact>{formatStoreStatus(item.store.business_status)}</Chip>
+            ) : null}
             {item.quality_grade ? <Chip compact>Grade {item.quality_grade}</Chip> : null}
             <Chip compact>{formatAvailability(item)}</Chip>
           </View>

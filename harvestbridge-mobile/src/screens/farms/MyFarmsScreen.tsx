@@ -3,12 +3,14 @@ import { View } from 'react-native';
 import { Button, Card, Chip, Text } from 'react-native-paper';
 
 import { getMyStore, getMyStoreQueryKey } from '@/api/store.api';
+import { DeleteStoreButton } from '@/components/store/DeleteStoreButton';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
+import { formatStoreStatus } from '@/utils/store-status';
 
 export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
   const theme = useAppTheme();
@@ -124,7 +126,7 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
             <View className="flex-row flex-wrap gap-sm">
               <Chip compact>{store.district}</Chip>
               <Chip compact>{store.active_crop_count ?? 0} active crops</Chip>
-              <Chip compact>{store.business_status ?? 'open'}</Chip>
+              <Chip compact>{formatStoreStatus(store.business_status)}</Chip>
             </View>
 
             <View className="gap-sm">
@@ -148,7 +150,7 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
                   navigation.navigate('FarmDetails', { farmId: String(store.id) });
                 }}
               >
-                View Store Profile
+                My Store
               </Button>
               <Button
                 mode="outlined"
@@ -156,8 +158,9 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
                   navigation.navigate('EditFarm', { farmId: String(store.id) });
                 }}
               >
-                Edit Store Profile
+                Edit Store
               </Button>
+              <DeleteStoreButton storeId={store.id} label="Delete Store" />
             </View>
           </View>
         </Card.Content>

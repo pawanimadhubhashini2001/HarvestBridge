@@ -5,11 +5,13 @@ export interface MarketplaceImageDto {
   id: number;
   url: string;
   sort_order: number | null;
+  is_primary?: boolean;
 }
 
 export interface MarketplaceStoreSummaryDto {
   id: number;
   store_name: string;
+  business_status?: string | null;
   district?: string | null;
   address?: string | null;
 }
@@ -123,9 +125,12 @@ export interface MarketplaceProductDetailDto {
     harvest_date?: string | null;
     available_until?: string | null;
     status: string;
+    status_label?: string | null;
+    is_available: boolean;
     is_featured: boolean;
     featured_until?: string | null;
     images: MarketplaceImageDto[];
+    primary_image?: MarketplaceImageDto | null;
     created_at: string;
     updated_at?: string | null;
   };
@@ -154,9 +159,11 @@ export interface MarketplaceProductDetailDto {
     address?: string | null;
     latitude?: number | string | null;
     longitude?: number | string | null;
+    distance_km?: number | null;
     google_maps_url?: string | null;
     open_maps_action?: MarketplaceOpenMapsActionDto | null;
   } | null;
+  related_products: MarketplaceListingDto[];
 }
 
 export interface MarketplaceQueryParams {
@@ -173,8 +180,11 @@ export function getMarketplaceQueryKey(params: Partial<MarketplaceQueryParams>) 
   return ['marketplace', params] as const;
 }
 
-export function getMarketplaceProductQueryKey(listingId: number | string) {
-  return ['marketplace', 'product', String(listingId)] as const;
+export function getMarketplaceProductQueryKey(
+  listingId: number | string,
+  params: Pick<MarketplaceQueryParams, 'latitude' | 'longitude'> = {},
+) {
+  return ['marketplace', 'product', String(listingId), params] as const;
 }
 
 export async function getMarketplace(params: MarketplaceQueryParams) {
@@ -185,9 +195,15 @@ export async function getMarketplace(params: MarketplaceQueryParams) {
   return response.data.data;
 }
 
-export async function getMarketplaceProduct(listingId: number | string) {
+export async function getMarketplaceProduct(
+  listingId: number | string,
+  params: Pick<MarketplaceQueryParams, 'latitude' | 'longitude'> = {},
+) {
   const response = await apiClient.get<ApiSuccessResponse<MarketplaceProductDetailDto>>(
     `/marketplace/${listingId}`,
+    {
+      params,
+    },
   );
 
   return response.data.data;

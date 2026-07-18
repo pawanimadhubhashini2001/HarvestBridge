@@ -19,6 +19,11 @@ class HarvestListingImage extends Model
         ];
     }
 
+    public function isPrimary(): bool
+    {
+        return (int) $this->sort_order === 1;
+    }
+
     public function harvestListing()
     {
         return $this->belongsTo(HarvestListing::class);

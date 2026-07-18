@@ -48,6 +48,15 @@ export type AppStackParamList = {
   };
   MarketplaceProductDetails: {
     listingId?: string;
+    latitude?: number;
+    longitude?: number;
+    distanceKm?: number | null;
+  };
+  StoreDetails: {
+    storeId?: string;
+    latitude?: number;
+    longitude?: number;
+    distanceKm?: number | null;
   };
   WeatherDetails: {
     district?: string;
@@ -100,6 +109,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
             },
           },
           MarketplaceProductDetails: 'marketplace/:listingId',
+          StoreDetails: 'marketplace/store/:storeId',
           FarmDetails: 'store/:farmId',
           AddFarm: 'store/new',
           EditFarm: 'store/:farmId/edit',

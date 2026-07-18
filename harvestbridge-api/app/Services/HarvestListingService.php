@@ -115,6 +115,73 @@ class HarvestListingService
         return $listing->load(self::SUMMARY_RELATIONS);
     }
 
+    public function updateAvailability(
+        HarvestListing $listing,
+        array $data
+    ): HarvestListing {
+        $listing = DB::transaction(function () use ($listing, $data) {
+            /** @var HarvestListing $lockedListing */
+            $lockedListing = HarvestListing::query()
+                ->lockForUpdate()
+                ->findOrFail($listing->id);
+
+            $this->refreshExpiredListing($lockedListing);
+
+            if ($lockedListing->status === HarvestListing::STATUS_DONATED) {
+                throw ValidationException::withMessages([
+                    'status' => [
+                        'Donated products cannot be managed through availability controls.',
+                    ],
+                ]);
+            }
+
+            $reservedQuantity = $this->toDecimal($lockedListing->reserved_quantity);
+            $soldQuantity = $this->toDecimal($lockedListing->sold_quantity);
+            $availableQuantity = array_key_exists('available_quantity', $data)
+                ? $this->toDecimal($data['available_quantity'])
+                : $this->toDecimal($lockedListing->available_quantity);
+            $requestedStatus = $data['status'] ?? $lockedListing->status;
+
+            if ($requestedStatus === HarvestListing::STATUS_SOLD) {
+                $availableQuantity = 0;
+            }
+
+            if (
+                $requestedStatus === HarvestListing::STATUS_AVAILABLE
+                && $this->isExpired($lockedListing->available_until)
+            ) {
+                throw ValidationException::withMessages([
+                    'status' => [
+                        'This product has expired. Update its availability date before making it available again.',
+                    ],
+                ]);
+            }
+
+            $totalQuantity = $this->toDecimal(
+                $availableQuantity + $reservedQuantity + $soldQuantity
+            );
+
+            $status = $this->determineStockStatus(
+                totalQuantity: $totalQuantity,
+                availableQuantity: $availableQuantity,
+                reservedQuantity: $reservedQuantity,
+                soldQuantity: $soldQuantity,
+                availableUntil: $lockedListing->available_until,
+                currentStatus: $requestedStatus,
+            );
+
+            $lockedListing->update([
+                'quantity' => $totalQuantity,
+                'available_quantity' => $availableQuantity,
+                'status' => $status,
+            ]);
+
+            return $lockedListing->fresh();
+        });
+
+        return $listing->load(self::SUMMARY_RELATIONS);
+    }
+
     public function reserveStock(
         HarvestListing $listing,
         float $quantity
@@ -128,6 +195,10 @@ class HarvestListingService
 
         if ($lockedListing->status === HarvestListing::STATUS_DONATED) {
             throw new \Exception('Harvest listing is not available for sale.');
+        }
+
+        if ($lockedListing->status === HarvestListing::STATUS_HIDDEN) {
+            throw new \Exception('Harvest listing is hidden and cannot be reserved.');
         }
 
         if ($lockedListing->status === HarvestListing::STATUS_EXPIRED) {
@@ -250,6 +321,7 @@ class HarvestListingService
             ->whereDate('available_until', '<', now()->toDateString())
             ->whereIn('status', [
                 HarvestListing::STATUS_AVAILABLE,
+                HarvestListing::STATUS_HIDDEN,
                 HarvestListing::STATUS_RESERVED,
             ])
             ->update([
@@ -306,6 +378,63 @@ class HarvestListingService
         return $listing->fresh()->load(self::SUMMARY_RELATIONS);
     }
 
+    public function setPrimaryImage(
+        HarvestListing $listing,
+        HarvestListingImage $image
+    ): HarvestListing {
+        $this->assertImageBelongsToListing($listing, $image);
+
+        DB::transaction(function () use ($listing, $image) {
+            $orderedIds = $listing->images()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->pluck('id')
+                ->reject(fn (int $id) => $id === $image->id)
+                ->prepend($image->id)
+                ->values()
+                ->all();
+
+            $this->resequenceImagesByIds($listing, $orderedIds);
+        });
+
+        return $listing->fresh()->load(self::SUMMARY_RELATIONS);
+    }
+
+    public function reorderImages(
+        HarvestListing $listing,
+        array $imageIds
+    ): HarvestListing {
+        $currentIds = $listing->images()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->pluck('id')
+            ->values();
+        $requestedIds = collect($imageIds)
+            ->map(fn (mixed $id) => (int) $id)
+            ->values();
+
+        if ($currentIds->count() !== $requestedIds->count()) {
+            throw ValidationException::withMessages([
+                'image_ids' => ['All listing image IDs must be provided to reorder the gallery.'],
+            ]);
+        }
+
+        if (
+            $currentIds->diff($requestedIds)->isNotEmpty()
+            || $requestedIds->diff($currentIds)->isNotEmpty()
+        ) {
+            throw ValidationException::withMessages([
+                'image_ids' => ['The provided image order does not match the listing gallery.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($listing, $requestedIds) {
+            $this->resequenceImagesByIds($listing, $requestedIds->all());
+        });
+
+        return $listing->fresh()->load(self::SUMMARY_RELATIONS);
+    }
+
     public function deleteImage(
         HarvestListing $listing,
         HarvestListingImage $image
@@ -351,6 +480,29 @@ class HarvestListingService
             });
     }
 
+    private function resequenceImagesByIds(HarvestListing $listing, array $orderedIds): void
+    {
+        foreach (array_values($orderedIds) as $index => $imageId) {
+            $listing->images()
+                ->whereKey($imageId)
+                ->update([
+                    'sort_order' => $index + 1,
+                ]);
+        }
+    }
+
+    private function assertImageBelongsToListing(
+        HarvestListing $listing,
+        HarvestListingImage $image
+    ): void {
+        if ($image->harvest_listing_id !== $listing->id) {
+            throw (new ModelNotFoundException())->setModel(
+                HarvestListingImage::class,
+                [$image->getKey()]
+            );
+        }
+    }
+
     private function initializeStockState(array $data): array
     {
         $totalQuantity = $this->toDecimal($data['quantity']);
@@ -378,7 +530,7 @@ class HarvestListingService
 
         if (! $ownsStore) {
             throw ValidationException::withMessages([
-                'farm_id' => ['You must select your own store profile before publishing a harvest listing.'],
+                'farm_id' => ['Please create your Store Profile before adding products.'],
             ]);
         }
     }
@@ -417,12 +569,16 @@ class HarvestListingService
             return HarvestListing::STATUS_DONATED;
         }
 
-        if ($totalQuantity <= 0 || ($availableQuantity <= 0 && $reservedQuantity <= 0 && $soldQuantity >= $totalQuantity)) {
+        if ($totalQuantity <= 0 || $availableQuantity <= 0) {
             return HarvestListing::STATUS_SOLD;
         }
 
         if ($this->isExpired($availableUntil)) {
             return HarvestListing::STATUS_EXPIRED;
+        }
+
+        if ($currentStatus === HarvestListing::STATUS_HIDDEN) {
+            return HarvestListing::STATUS_HIDDEN;
         }
 
         if ($reservedQuantity > 0) {
