@@ -11,9 +11,10 @@ import {
   Snackbar,
   Text,
 } from 'react-native-paper';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getFarms, getFarmsQueryKey, type FarmDto } from '@/api/farm.api';
+import { deleteFarm, getFarms, getFarmsQueryKey, type FarmDto } from '@/api/farm.api';
+import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { ErrorState } from '@/components/common/error-state';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
@@ -282,13 +283,31 @@ function FarmCard({
 
 export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
   const theme = useAppTheme();
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<FarmStatus | null>(null);
-  const [deleteFarmName, setDeleteFarmName] = useState<string | null>(null);
+  const [farmPendingDelete, setFarmPendingDelete] = useState<FarmDto | null>(null);
+  const [deleteFeedbackMessage, setDeleteFeedbackMessage] = useState<string | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const farmsQuery = useQuery({
     queryKey: getFarmsQueryKey(),
     queryFn: getFarms,
+  });
+  const deleteFarmMutation = useMutation({
+    mutationFn: async (farm: FarmDto) => deleteFarm(farm.id),
+    onSuccess: async (_, farm) => {
+      setFarmPendingDelete(null);
+      setDeleteFeedbackMessage('Farm deleted successfully.');
+      queryClient.setQueryData<FarmDto[]>(getFarmsQueryKey(), (currentFarms) =>
+        currentFarms?.filter((farmItem) => farmItem.id !== farm.id) ?? [],
+      );
+      await queryClient.invalidateQueries({ queryKey: getFarmsQueryKey() });
+      await queryClient.refetchQueries({ queryKey: getFarmsQueryKey(), type: 'active' });
+    },
+    onError: (error: Error) => {
+      setFarmPendingDelete(null);
+      setDeleteFeedbackMessage(getErrorMessage(error));
+    },
   });
 
   const farms = farmsQuery.data ?? [];
@@ -467,7 +486,7 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
                   navigation.navigate('EditFarm', { farmId: String(item.id) });
                 }}
                 onDelete={() => {
-                  setDeleteFarmName(item.farm_name);
+                  setFarmPendingDelete(item);
                 }}
               />
             )
@@ -490,21 +509,42 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
         />
 
         <Snackbar
-          visible={Boolean(deleteFarmName)}
+          visible={Boolean(deleteFeedbackMessage)}
           onDismiss={() => {
-            setDeleteFarmName(null);
+            setDeleteFeedbackMessage(null);
           }}
           action={{
             label: 'Close',
             onPress: () => {
-              setDeleteFarmName(null);
+              setDeleteFeedbackMessage(null);
             },
           }}
         >
-          {deleteFarmName
-            ? `Delete Farm is available for ${deleteFarmName}, but the delete flow is not implemented in Lesson 116.`
-            : ''}
+          {deleteFeedbackMessage ?? ''}
         </Snackbar>
+
+        <ConfirmationDialog
+          visible={Boolean(farmPendingDelete)}
+          title="Delete farm?"
+          message={
+            farmPendingDelete
+              ? `This will permanently remove ${farmPendingDelete.farm_name} from your farm list.`
+              : ''
+          }
+          confirmLabel="Delete"
+          cancelLabel="Cancel"
+          loading={deleteFarmMutation.isPending}
+          onCancel={() => {
+            if (!deleteFarmMutation.isPending) {
+              setFarmPendingDelete(null);
+            }
+          }}
+          onConfirm={() => {
+            if (farmPendingDelete) {
+              void deleteFarmMutation.mutateAsync(farmPendingDelete);
+            }
+          }}
+        />
       </View>
     </SafeAreaView>
   );

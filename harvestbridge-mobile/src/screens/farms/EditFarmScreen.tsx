@@ -3,9 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { useForm } from 'react-hook-form';
-import { Chip, Text } from 'react-native-paper';
+import { Button, Chip, Snackbar, Text } from 'react-native-paper';
 
 import {
+  deleteFarm,
   getFarms,
   getFarmsQueryKey,
   updateFarm,
@@ -13,6 +14,7 @@ import {
   type UpdateFarmPayload,
 } from '@/api/farm.api';
 import { AppButton } from '@/components/common/app-button';
+import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
@@ -51,6 +53,8 @@ export function EditFarmScreen({
   const shouldBypassLeaveWarning = useRef(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [deleteFeedbackMessage, setDeleteFeedbackMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -145,6 +149,34 @@ export function EditFarmScreen({
           });
         }
       }
+    },
+  });
+  const deleteFarmMutation = useMutation({
+    mutationFn: async () => {
+      if (!farmId) {
+        throw new Error('Farm id is required to delete a farm.');
+      }
+
+      return deleteFarm(farmId);
+    },
+    onSuccess: async () => {
+      setDeleteDialogVisible(false);
+      setApiError(null);
+      setSuccessMessage(null);
+      setDeleteFeedbackMessage('Farm deleted successfully. Returning...');
+      queryClient.setQueryData<FarmDto[]>(getFarmsQueryKey(), (currentFarms) =>
+        currentFarms?.filter((farmItem) => String(farmItem.id) !== farmId) ?? [],
+      );
+      await queryClient.invalidateQueries({ queryKey: getFarmsQueryKey() });
+      await queryClient.refetchQueries({ queryKey: getFarmsQueryKey(), type: 'active' });
+      shouldBypassLeaveWarning.current = true;
+      setTimeout(() => {
+        navigation.goBack();
+      }, 700);
+    },
+    onError: (error: Error) => {
+      setDeleteDialogVisible(false);
+      setDeleteFeedbackMessage(getErrorMessage(error));
     },
   });
 
@@ -266,7 +298,50 @@ export function EditFarmScreen({
             disabled={!isValid || !isDirty || updateFarmMutation.isPending}
           />
         </View>
+
+        <Button
+          mode="text"
+          textColor={theme.colors.error}
+          disabled={updateFarmMutation.isPending || deleteFarmMutation.isPending}
+          onPress={() => {
+            setDeleteDialogVisible(true);
+          }}
+        >
+          Delete Farm
+        </Button>
       </View>
+
+      <Snackbar
+        visible={Boolean(deleteFeedbackMessage)}
+        onDismiss={() => {
+          setDeleteFeedbackMessage(null);
+        }}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            setDeleteFeedbackMessage(null);
+          },
+        }}
+      >
+        {deleteFeedbackMessage ?? ''}
+      </Snackbar>
+
+      <ConfirmationDialog
+        visible={deleteDialogVisible}
+        title="Delete farm?"
+        message={`This will permanently remove ${farm.farm_name}. This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleteFarmMutation.isPending}
+        onCancel={() => {
+          if (!deleteFarmMutation.isPending) {
+            setDeleteDialogVisible(false);
+          }
+        }}
+        onConfirm={() => {
+          void deleteFarmMutation.mutateAsync();
+        }}
+      />
     </Screen>
   );
 }
