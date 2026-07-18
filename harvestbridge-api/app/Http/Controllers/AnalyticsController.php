@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Http\Resources\FarmerMarketplaceDashboardResource;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 
@@ -40,6 +41,16 @@ class AnalyticsController extends Controller
 
             'Analytics retrieved successfully.'
 
+        );
+    }
+
+    public function farmerMarketplaceDashboard(Request $request)
+    {
+        return ApiResponse::success(
+            new FarmerMarketplaceDashboardResource(
+                $this->service->farmerMarketplaceDashboard($request->user())
+            ),
+            'Farmer marketplace dashboard retrieved successfully.'
         );
     }
 }

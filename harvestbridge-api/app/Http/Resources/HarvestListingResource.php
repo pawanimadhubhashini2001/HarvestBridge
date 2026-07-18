@@ -9,9 +9,20 @@ class HarvestListingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $isDetailedResponse =
+            $this->relationLoaded('donation')
+            || $this->relationLoaded('compostListing')
+            || $this->relationLoaded('orderItems');
+
         return [
 
             'id' => $this->id,
+
+            'user_id' => $this->user_id,
+
+            'farm_id' => $this->farm_id,
+
+            'crop_id' => $this->crop_id,
 
             'crop' => $this->crop?->name,
 
@@ -22,6 +33,14 @@ class HarvestListingResource extends JsonResource
             'district' => $this->farm?->district,
 
             'quantity' => $this->quantity,
+
+            'total_quantity' => $this->quantity,
+
+            'available_quantity' => $this->available_quantity,
+
+            'reserved_quantity' => $this->reserved_quantity,
+
+            'sold_quantity' => $this->sold_quantity,
 
             'unit' => $this->unit,
 
@@ -35,7 +54,84 @@ class HarvestListingResource extends JsonResource
 
             'status' => $this->status,
 
+            'is_featured' => $this->isCurrentlyFeatured(),
+
+            'featured_until' => $this->featured_until,
+
             'description' => $this->description,
+
+            'created_at' => $this->created_at,
+
+            'updated_at' => $this->updated_at,
+
+            'images' => HarvestListingImageResource::collection($this->whenLoaded('images')),
+
+            $this->mergeWhen($isDetailedResponse, [
+                'details' => [
+                    'listing' => [
+                        'id' => $this->id,
+                        'user_id' => $this->user_id,
+                        'farm_id' => $this->farm_id,
+                        'crop_id' => $this->crop_id,
+                        'quantity' => $this->quantity,
+                        'total_quantity' => $this->quantity,
+                        'available_quantity' => $this->available_quantity,
+                        'reserved_quantity' => $this->reserved_quantity,
+                        'sold_quantity' => $this->sold_quantity,
+                        'unit' => $this->unit,
+                        'price_per_unit' => $this->price_per_unit,
+                        'quality_grade' => $this->quality_grade,
+                        'harvest_date' => $this->harvest_date,
+                        'available_until' => $this->available_until,
+                        'status' => $this->status,
+                        'is_featured' => $this->isCurrentlyFeatured(),
+                        'featured_until' => $this->featured_until,
+                        'description' => $this->description,
+                        'created_at' => $this->created_at,
+                        'updated_at' => $this->updated_at,
+                        'images' => HarvestListingImageResource::collection($this->whenLoaded('images')),
+                    ],
+                    'farmer' => $this->whenLoaded('farmer', function () {
+                        return [
+                            'id' => $this->farmer->id,
+                            'name' => $this->farmer->name,
+                            'email' => $this->farmer->email,
+                            'phone' => $this->farmer->phone,
+                            'district' => $this->farmer->district,
+                        ];
+                    }),
+                    'farm' => FarmResource::make($this->whenLoaded('farm')),
+                    'crop' => CropResource::make($this->whenLoaded('crop')),
+                    'donation' => DonationResource::make($this->whenLoaded('donation')),
+                    'compost_listing' => CompostListingResource::make($this->whenLoaded('compostListing')),
+                    'order_summary' => $this->whenLoaded('orderItems', function () {
+                        $latestOrderItem = $this->orderItems
+                            ->filter(fn ($item) => $item->order !== null)
+                            ->sortByDesc(fn ($item) => $item->order->created_at?->getTimestamp() ?? 0)
+                            ->first();
+
+                        return [
+                            'order_items_count' => $this->orderItems->count(),
+                            'orders_count' => $this->orderItems->pluck('order_id')->filter()->unique()->count(),
+                            'total_quantity_ordered' => $this->orderItems->sum('quantity'),
+                            'total_revenue' => $this->orderItems->sum('subtotal'),
+                            'latest_order' => $latestOrderItem?->order ? [
+                                'id' => $latestOrderItem->order->id,
+                                'order_status' => $latestOrderItem->order->order_status,
+                                'payment_status' => $latestOrderItem->order->payment_status,
+                                'quantity' => $latestOrderItem->quantity,
+                                'subtotal' => $latestOrderItem->subtotal,
+                                'consumer' => $latestOrderItem->order->consumer ? [
+                                    'id' => $latestOrderItem->order->consumer->id,
+                                    'name' => $latestOrderItem->order->consumer->name,
+                                    'email' => $latestOrderItem->order->consumer->email,
+                                ] : null,
+                                'created_at' => $latestOrderItem->order->created_at,
+                            ] : null,
+                        ];
+                    }),
+                ],
+            ]),
 
         ];
     }

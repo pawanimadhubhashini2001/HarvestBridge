@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AuditLog;
 use App\Models\Crop;
 use App\Models\Farm;
+use App\Models\HarvestListing;
 use App\Models\MarketPrice;
 use App\Models\PredictionHistory;
 use App\Models\User;
@@ -111,6 +112,30 @@ class AdminService
         $marketPrice->update($data);
 
         return $marketPrice->fresh('crop');
+    }
+
+    public function updateHarvestListingFeatured(
+        HarvestListing $harvestListing,
+        array $data
+    ): HarvestListing {
+        $isFeatured = filter_var(
+            $data['is_featured'],
+            FILTER_VALIDATE_BOOLEAN
+        );
+
+        $harvestListing->update([
+            'is_featured' => $isFeatured,
+            'featured_until' => $isFeatured
+                ? ($data['featured_until'] ?? null)
+                : null,
+        ]);
+
+        return $harvestListing->fresh([
+            'crop',
+            'farm',
+            'farmer',
+            'images',
+        ]);
     }
 
     public function analytics(): array

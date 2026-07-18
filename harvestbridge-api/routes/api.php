@@ -63,6 +63,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/market-prices', [AdminController::class, 'marketPrices']);
         Route::post('/admin/market-prices', [AdminController::class, 'storeMarketPrice']);
         Route::put('/admin/market-prices/{marketPrice}', [AdminController::class, 'updateMarketPrice']);
+        Route::patch('/admin/harvest-listings/{harvestListing}/featured', [AdminController::class, 'updateHarvestListingFeatured']);
         Route::get('/admin/analytics', [AdminController::class, 'analytics']);
         Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs']);
         Route::get('/admin/reports', [AdminController::class, 'reports']);
@@ -86,11 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:farmer')->group(function () {
 
-        Route::get('/farmer/dashboard', function () {
-            return response()->json([
-                'message' => 'Welcome Farmer'
-            ]);
-        });
+        Route::get('/farmer/dashboard', [AnalyticsController::class, 'farmerMarketplaceDashboard']);
 
         Route::get('/farms', [FarmController::class, 'index']);
         Route::post('/farms', [FarmController::class, 'store']);
@@ -98,8 +95,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
 
         Route::get('/harvest-listings', [HarvestListingController::class, 'index']);
+        Route::get('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'show']);
         Route::post('/harvest-listings', [HarvestListingController::class, 'store']);
+        Route::post('/harvest-listings/{harvestListing}/images', [HarvestListingController::class, 'uploadImages']);
         Route::put('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'update']);
+        Route::delete('/harvest-listings/{harvestListing}/images/{image}', [HarvestListingController::class, 'deleteImage']);
         Route::delete('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'destroy']);
 
         Route::get(

@@ -10,13 +10,16 @@ use App\Http\Requests\AdminMarketPriceFilterRequest;
 use App\Http\Requests\AdminUpdateUserStatusRequest;
 use App\Http\Requests\AdminUserIndexRequest;
 use App\Http\Requests\StoreMarketPriceRequest;
+use App\Http\Requests\UpdateHarvestListingFeaturedRequest;
 use App\Http\Requests\UpdateMarketPriceRequest;
 use App\Http\Resources\AdminUserResource;
 use App\Http\Resources\AuditLogResource;
 use App\Http\Resources\CropResource;
 use App\Http\Resources\FarmResource;
+use App\Http\Resources\HarvestListingResource;
 use App\Http\Resources\MarketPriceResource;
 use App\Http\Resources\WeatherAlertResource;
+use App\Models\HarvestListing;
 use App\Models\MarketPrice;
 use App\Models\User;
 use App\Services\AdminService;
@@ -160,6 +163,30 @@ class AdminController extends Controller
         return ApiResponse::success(
             new MarketPriceResource($marketPrice),
             'Market price updated successfully.'
+        );
+    }
+
+    public function updateHarvestListingFeatured(
+        UpdateHarvestListingFeaturedRequest $request,
+        HarvestListing $harvestListing
+    )
+    {
+        $updatedListing = $this->adminService->updateHarvestListingFeatured(
+            $harvestListing,
+            $request->validated()
+        );
+
+        $this->auditLogService->log(
+            'admin.harvest-listing.featured.updated',
+            $request->user()->id,
+            $updatedListing,
+            $request->validated(),
+            $request
+        );
+
+        return ApiResponse::success(
+            new HarvestListingResource($updatedListing),
+            'Harvest listing featured status updated successfully.'
         );
     }
 

@@ -11,6 +11,10 @@ use Exception;
 
 class OrderService
 {
+    public function __construct(
+        protected HarvestListingService $harvestListingService
+    ) {}
+
     public function createOrder(
         User $consumer,
         array $data
@@ -43,31 +47,10 @@ class OrderService
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Check Status
-            |--------------------------------------------------------------------------
-            */
-
-            if ($listing->status !== 'available') {
-
-                throw new Exception(
-                    'Harvest is no longer available.'
-                );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Quantity Check
-            |--------------------------------------------------------------------------
-            */
-
-            if ($data['quantity'] > $listing->quantity) {
-
-                throw new Exception(
-                    'Requested quantity exceeds available stock.'
-                );
-            }
+            $listing = $this->harvestListingService->reserveStock(
+                $listing,
+                (float) $data['quantity']
+            );
 
             /*
             |--------------------------------------------------------------------------
@@ -149,55 +132,83 @@ class OrderService
         string $status,
         User $farmer
     ) {
-        $belongsToFarmer = $order->items()
-            ->whereHas('harvestListing', function ($query) use ($farmer) {
-                $query->where('user_id', $farmer->id);
-            })
-            ->exists();
+        return DB::transaction(function () use ($order, $status, $farmer) {
+            /** @var Order $lockedOrder */
+            $lockedOrder = Order::with([
+                'items.harvestListing',
+                'consumer',
+            ])
+                ->lockForUpdate()
+                ->findOrFail($order->id);
 
-        if (! $belongsToFarmer) {
-            throw new Exception(
-                'You are not authorized to update this order.'
-            );
-        }
+            $belongsToFarmer = $lockedOrder->items
+                ->contains(fn (OrderItem $item) => $item->harvestListing?->user_id === $farmer->id);
 
-        $current = $order->order_status;
+            if (! $belongsToFarmer) {
+                throw new Exception(
+                    'You are not authorized to update this order.'
+                );
+            }
 
-        $allowedTransitions = [
+            $current = $lockedOrder->order_status;
 
-            'pending' => [
-                'accepted',
-                'rejected'
-            ],
+            $allowedTransitions = [
 
-            'accepted' => [
-                'completed'
-            ],
+                'pending' => [
+                    'accepted',
+                    'rejected'
+                ],
 
-            'completed' => [],
+                'accepted' => [
+                    'completed'
+                ],
 
-            'rejected' => []
+                'completed' => [],
 
-        ];
+                'rejected' => []
 
-        if (
-            ! in_array(
-                $status,
-                $allowedTransitions[$current]
-            )
-        ) {
-            throw new Exception(
-                "Cannot change order from {$current} to {$status}."
-            );
-        }
+            ];
 
-        $order->update([
-            'order_status' => $status
-        ]);
+            if (
+                ! in_array(
+                    $status,
+                    $allowedTransitions[$current],
+                    true
+                )
+            ) {
+                throw new Exception(
+                    "Cannot change order from {$current} to {$status}."
+                );
+            }
 
-        return $order->fresh()->load([
-            'consumer',
-            'items.harvestListing.crop'
-        ]);
+            foreach ($lockedOrder->items as $item) {
+                if (! $item->harvestListing || $item->harvestListing->user_id !== $farmer->id) {
+                    continue;
+                }
+
+                if ($current === 'pending' && $status === 'rejected') {
+                    $this->harvestListingService->releaseReservedStock(
+                        $item->harvestListing,
+                        (float) $item->quantity
+                    );
+                }
+
+                if ($current === 'accepted' && $status === 'completed') {
+                    $this->harvestListingService->completeReservedStock(
+                        $item->harvestListing,
+                        (float) $item->quantity
+                    );
+                }
+            }
+
+            $lockedOrder->update([
+                'order_status' => $status
+            ]);
+
+            return $lockedOrder->fresh()->load([
+                'consumer',
+                'items.harvestListing.crop'
+            ]);
+        });
     }
 }
