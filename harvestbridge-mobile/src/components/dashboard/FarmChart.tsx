@@ -1,5 +1,4 @@
-import { useWindowDimensions, View } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
+import { Platform, useWindowDimensions, View } from 'react-native';
 import { Card, Chip, Text } from 'react-native-paper';
 
 import { useAppTheme } from '@/hooks/use-app-theme';
@@ -20,6 +19,10 @@ interface FarmChartProps {
   helperText?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const chartKit = Platform.OS === 'web' ? null : require('react-native-chart-kit');
+const PieChart = chartKit?.PieChart;
+
 function SkeletonBlock({ height, width }: { height: number; width: number | string }) {
   const theme = useAppTheme();
 
@@ -32,6 +35,61 @@ function SkeletonBlock({ height, width }: { height: number; width: number | stri
         backgroundColor: theme.colors.surfaceVariant,
       }}
     />
+  );
+}
+
+function WebFallbackPie({
+  data,
+}: {
+  data: {
+    name: string;
+    population: number;
+    color: string;
+  }[];
+}) {
+  const theme = useAppTheme();
+  const total = data.reduce((sum, item) => sum + item.population, 0);
+
+  return (
+    <View
+      className="gap-sm rounded-lg px-md py-md"
+      style={{ backgroundColor: theme.colors.surfaceVariant }}
+    >
+      {data.map((item) => {
+        const percentage = total > 0 ? Math.round((item.population / total) * 100) : 0;
+
+        return (
+          <View key={item.name} className="gap-xs">
+            <View className="flex-row items-center justify-between gap-sm">
+              <View className="flex-row items-center gap-sm">
+                <View
+                  className="h-3 w-3 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {item.name}
+                </Text>
+              </View>
+              <Text variant="labelMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                {item.population} ({percentage}%)
+              </Text>
+            </View>
+            <View
+              className="h-3 overflow-hidden rounded-full"
+              style={{ backgroundColor: theme.colors.outline }}
+            >
+              <View
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.max(percentage, 8)}%`,
+                  backgroundColor: item.color,
+                }}
+              />
+            </View>
+          </View>
+        );
+      })}
+    </View>
   );
 }
 
@@ -109,7 +167,15 @@ export function FarmChart({
             </View>
           ) : null}
 
-          {!loading && !errorMessage && chartData.length > 0 ? (
+          {!loading && !errorMessage && chartData.length > 0 && Platform.OS === 'web' ? (
+            <WebFallbackPie data={chartData} />
+          ) : null}
+
+          {!loading &&
+          !errorMessage &&
+          chartData.length > 0 &&
+          Platform.OS !== 'web' &&
+          PieChart ? (
             <View className="items-center overflow-hidden rounded-lg">
               <PieChart
                 data={chartData}

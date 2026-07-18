@@ -1,5 +1,4 @@
-import { useWindowDimensions, View } from 'react-native';
-import { BarChart, LineChart } from 'react-native-chart-kit';
+import { Platform, useWindowDimensions, View } from 'react-native';
 import { Card, Chip, Text } from 'react-native-paper';
 
 import { useAppTheme } from '@/hooks/use-app-theme';
@@ -15,6 +14,11 @@ interface RecommendationChartProps {
   emptyMessage?: string;
   formatValue?: (value: number) => string;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const chartKit = Platform.OS === 'web' ? null : require('react-native-chart-kit');
+const LineChart = chartKit?.LineChart;
+const BarChart = chartKit?.BarChart;
 
 function SkeletonBlock({ height, width }: { height: number; width: number | string }) {
   const theme = useAppTheme();
@@ -41,6 +45,56 @@ function formatLabel(label: string) {
   }
 
   return `${label.slice(0, 8)}...`;
+}
+
+function WebFallbackChart({
+  labels,
+  values,
+  type,
+}: {
+  labels: string[];
+  values: number[];
+  type: 'line' | 'bar';
+}) {
+  const theme = useAppTheme();
+  const maxValue = Math.max(...values, 1);
+
+  return (
+    <View
+      className="gap-sm rounded-lg px-md py-md"
+      style={{ backgroundColor: theme.colors.surfaceVariant }}
+    >
+      {values.map((value, index) => {
+        const widthPercentage = `${Math.max((value / maxValue) * 100, 8)}%`;
+        const label = labels[index] ?? `Item ${index + 1}`;
+
+        return (
+          <View key={`${label}-${index}`} className="gap-xs">
+            <View className="flex-row items-center justify-between gap-sm">
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {label}
+              </Text>
+              <Text variant="labelMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                {value}
+              </Text>
+            </View>
+            <View
+              className="h-3 overflow-hidden rounded-full"
+              style={{ backgroundColor: theme.colors.outline }}
+            >
+              <View
+                className="h-full rounded-full"
+                style={{
+                  width: widthPercentage,
+                  backgroundColor: type === 'line' ? '#2F6B3E' : '#9A6B2F',
+                }}
+              />
+            </View>
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 
 export function RecommendationChart({
@@ -142,7 +196,16 @@ export function RecommendationChart({
             </View>
           ) : null}
 
-          {!loading && !errorMessage && values.length > 0 ? (
+          {!loading && !errorMessage && values.length > 0 && Platform.OS === 'web' ? (
+            <WebFallbackChart labels={chartData.labels} values={values} type={type} />
+          ) : null}
+
+          {!loading &&
+          !errorMessage &&
+          values.length > 0 &&
+          Platform.OS !== 'web' &&
+          LineChart &&
+          BarChart ? (
             <View className="items-center overflow-hidden rounded-lg">
               {type === 'line' ? (
                 <LineChart
