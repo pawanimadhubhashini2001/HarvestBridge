@@ -5,10 +5,12 @@ import { Chip, Text } from 'react-native-paper';
 
 import { getFarms, getFarmsQueryKey } from '@/api/farm.api';
 import { getPredictionHistory, getPredictionHistoryQueryKey } from '@/api/recommendation.api';
+import { getAnalyticsQueryKey } from '@/api/analytics.api';
 import { getCurrentWeatherQueryKey } from '@/api/weather.api';
 import { AppButton } from '@/components/common/app-button';
 import { ErrorState } from '@/components/common/error-state';
 import { AIRecommendationCard } from '@/components/dashboard/AIRecommendationCard';
+import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
 import { FarmSummaryCard } from '@/components/dashboard/FarmSummaryCard';
 import { WeatherCard } from '@/components/dashboard/WeatherCard';
 import { LoadingState } from '@/components/common/loading-state';
@@ -52,9 +54,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const currentDateLabel = formatDate(now);
   const weatherCity = user?.district?.trim() || undefined;
   const isTwoColumn = width >= 720;
+  const analyticsQueryKey = getAnalyticsQueryKey('trends').slice(0, 2);
   const farmsQueryKey = getFarmsQueryKey();
   const aiHistoryQueryKey = getPredictionHistoryQueryKey();
   const weatherQueryKey = getCurrentWeatherQueryKey(weatherCity);
+  const analyticsFetchCount = useIsFetching({ queryKey: analyticsQueryKey });
   const farmsFetchCount = useIsFetching({ queryKey: farmsQueryKey });
   const aiHistoryFetchCount = useIsFetching({ queryKey: aiHistoryQueryKey });
   const weatherFetchCount = useIsFetching({ queryKey: weatherQueryKey });
@@ -73,6 +77,10 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     await Promise.all([
       farmsQuery.refetch(),
       aiHistoryQuery.refetch(),
+      queryClient.refetchQueries({
+        queryKey: analyticsQueryKey,
+        type: 'active',
+      }),
       weatherCity
         ? queryClient.refetchQueries({
             queryKey: weatherQueryKey,
@@ -92,7 +100,12 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     history.length === 0 &&
     !weatherCity;
 
-  if (farmsQuery.isLoading && !farmsQuery.data && aiHistoryQuery.isLoading && !aiHistoryQuery.data) {
+  if (
+    farmsQuery.isLoading &&
+    !farmsQuery.data &&
+    aiHistoryQuery.isLoading &&
+    !aiHistoryQuery.data
+  ) {
     return <LoadingState message="Loading your farmer dashboard..." />;
   }
 
@@ -117,6 +130,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         refreshing={
           farmsQuery.isRefetching ||
           aiHistoryQuery.isRefetching ||
+          analyticsFetchCount > 0 ||
           farmsFetchCount > 0 ||
           aiHistoryFetchCount > 0 ||
           weatherFetchCount > 0
@@ -157,6 +171,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
       refreshing={
         farmsQuery.isRefetching ||
         aiHistoryQuery.isRefetching ||
+        analyticsFetchCount > 0 ||
         farmsFetchCount > 0 ||
         aiHistoryFetchCount > 0 ||
         weatherFetchCount > 0
@@ -242,6 +257,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
       <WeatherCard city={weatherCity} />
       <FarmSummaryCard />
       <AIRecommendationCard />
+      <DashboardCharts />
     </Screen>
   );
 }
