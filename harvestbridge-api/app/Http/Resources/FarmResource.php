@@ -19,6 +19,7 @@ class FarmResource extends JsonResource
             'farm_size' => $this->farm_size,
             'farm_size_unit' => $this->farm_size_unit,
             'soil_type' => $this->soil_type,
+            'description' => $this->description,
             'active_crop_count' => $this->whenLoaded(
                 'activeHarvestListings',
                 fn () => $this->activeHarvestListings->pluck('crop_id')->filter()->unique()->count(),

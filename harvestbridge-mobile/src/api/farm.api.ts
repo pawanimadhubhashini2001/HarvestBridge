@@ -11,6 +11,7 @@ export interface FarmDto {
   farm_size: string | number;
   farm_size_unit: 'acres' | 'hectares';
   soil_type: string;
+  description?: string;
   active_crop_count?: number;
   created_at: string;
   updated_at?: string;

@@ -29,7 +29,9 @@ class StoreFarmRequest extends FormRequest
 
             'farm_size_unit' => 'required|in:acres,hectares',
 
-            'soil_type' => 'required|string|max:100'
+            'soil_type' => 'required|string|max:100',
+
+            'description' => 'nullable|string'
 
         ];
     }
