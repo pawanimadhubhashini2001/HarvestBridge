@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
 import { getFarms } from '@/api/farm.api';
@@ -14,7 +14,6 @@ import { APP_NAME, QUERY_STALE_TIME_MS } from '@/constants/app';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
-import { designTokens } from '@/theme';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 function getGreeting(date: Date) {
@@ -79,19 +78,19 @@ function DashboardCard({
 
   return (
     <View
+      className="min-h-[164px] flex-1 basis-[48%] gap-xs rounded-lg border px-lg py-lg"
       style={[
-        styles.card,
         {
           backgroundColor: theme.colors.surface,
           borderColor: theme.colors.outline,
         },
       ]}>
-      <View style={[styles.accent, { backgroundColor: accent }]} />
+      <View className="mb-xs h-[6px] w-12 rounded-full" style={{ backgroundColor: accent }} />
       <Text variant="titleMedium">{title}</Text>
-      <Text variant="headlineSmall" style={styles.cardValue}>
+      <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
         {value}
       </Text>
-      <Text variant="bodyMedium" style={[styles.cardSubtitle, { color: theme.colors.onSurface }]}>
+      <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, fontWeight: '500' }}>
         {subtitle}
       </Text>
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -169,17 +168,18 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     return (
       <Screen
         scrollable
+        contentClassName="gap-lg"
         refreshing={dashboardQuery.isRefetching}
         onRefresh={() => {
           void dashboardQuery.refetch();
         }}>
-        <View style={styles.emptyState}>
+        <View className="flex-1 justify-center gap-md">
           <Text variant="headlineSmall">Your dashboard is ready</Text>
-          <Text variant="bodyLarge" style={styles.emptyCopy}>
+          <Text variant="bodyLarge" style={{ textAlign: 'center' }}>
             Add your first farm or generate an AI recommendation to start filling the {APP_NAME}{' '}
             home dashboard.
           </Text>
-          <View style={styles.emptyActions}>
+          <View className="gap-md">
             <AppButton
               label="Add Farm"
               onPress={() => {
@@ -207,14 +207,14 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         void dashboardQuery.refetch();
       }}>
       <View
+        className="gap-sm rounded-lg border px-lg py-lg"
         style={[
-          styles.hero,
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
         ]}>
         <Chip style={{ alignSelf: 'flex-start' }} compact>
           Farmer Dashboard
         </Chip>
-        <Text variant="headlineMedium" style={styles.heroTitle}>
+        <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
           {greeting}, {user?.name ?? 'Farmer'}
         </Text>
         <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -225,13 +225,13 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         </Text>
       </View>
 
-      <View style={[styles.quickActions, isTwoColumn && styles.quickActionsWide]}>
+      <View className={isTwoColumn ? 'flex-row flex-wrap gap-md' : 'gap-md'}>
         <Pressable
+          className="min-h-[92px] justify-center gap-xs rounded-md border px-md py-md"
           onPress={() => {
             navigation.navigate('AIRecommendationForm');
           }}
           style={[
-            styles.quickAction,
             { backgroundColor: theme.colors.secondaryContainer, borderColor: theme.colors.outline },
           ]}>
           <Text variant="titleSmall">AI Recommendation</Text>
@@ -241,11 +241,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         </Pressable>
 
         <Pressable
+          className="min-h-[92px] justify-center gap-xs rounded-md border px-md py-md"
           onPress={() => {
             navigation.navigate('Farms');
           }}
           style={[
-            styles.quickAction,
             { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
           ]}>
           <Text variant="titleSmall">My Farms</Text>
@@ -255,11 +255,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         </Pressable>
 
         <Pressable
+          className="min-h-[92px] justify-center gap-xs rounded-md border px-md py-md"
           onPress={() => {
             navigation.navigate('WeatherDetails', { district: weatherCity });
           }}
           style={[
-            styles.quickAction,
             { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
           ]}>
           <Text variant="titleSmall">Weather</Text>
@@ -269,11 +269,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         </Pressable>
 
         <Pressable
+          className="min-h-[92px] justify-center gap-xs rounded-md border px-md py-md"
           onPress={() => {
             navigation.navigate('Recommendations');
           }}
           style={[
-            styles.quickAction,
             { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
           ]}>
           <Text variant="titleSmall">Recommendation History</Text>
@@ -283,7 +283,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         </Pressable>
       </View>
 
-      <View style={[styles.cardsGrid, isTwoColumn && styles.cardsGridWide]}>
+      <View className={isTwoColumn ? 'flex-row flex-wrap gap-md' : 'gap-md'}>
         <DashboardCard
           title="Weather Summary"
           value={
@@ -347,8 +347,8 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
 
       {dashboardQuery.isError ? (
         <View
+          className="rounded-md border px-md py-md"
           style={[
-            styles.inlineError,
             {
               backgroundColor: theme.colors.surfaceVariant,
               borderColor: theme.colors.error,
@@ -362,74 +362,3 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  hero: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.sm,
-  },
-  heroTitle: {
-    fontWeight: '700',
-  },
-  quickActions: {
-    gap: designTokens.spacing.md,
-  },
-  quickActionsWide: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  quickAction: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.md,
-    padding: designTokens.spacing.md,
-    gap: designTokens.spacing.xs,
-    minHeight: 92,
-    justifyContent: 'center',
-  },
-  cardsGrid: {
-    gap: designTokens.spacing.md,
-  },
-  cardsGridWide: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  card: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.xs,
-    minHeight: 164,
-    flexBasis: '48%',
-    flexGrow: 1,
-  },
-  accent: {
-    width: 48,
-    height: 6,
-    borderRadius: designTokens.radius.pill,
-    marginBottom: designTokens.spacing.xs,
-  },
-  cardValue: {
-    fontWeight: '700',
-  },
-  cardSubtitle: {
-    fontWeight: '500',
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: designTokens.spacing.md,
-  },
-  emptyCopy: {
-    textAlign: 'center',
-  },
-  emptyActions: {
-    gap: designTokens.spacing.md,
-  },
-  inlineError: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.md,
-    padding: designTokens.spacing.md,
-  },
-});

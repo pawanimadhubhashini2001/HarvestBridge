@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import { useAppTheme } from '@/hooks/use-app-theme';
 import { BottomTabs } from '@/navigation/BottomTabs';
 import type { AppStackParamList } from '@/navigation/types';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
@@ -9,19 +10,31 @@ const Stack = createNativeStackNavigator<AppStackParamList>();
 function StackPlaceholder({
   title,
   description,
+  badgeLabel,
 }: {
   title: string;
   description: string;
+  badgeLabel: string;
 }) {
-  return <PlaceholderScreen title={title} description={description} />;
+  return <PlaceholderScreen title={title} description={description} badgeLabel={badgeLabel} />;
 }
 
 export function AppNavigator() {
+  const theme = useAppTheme();
+
   return (
     <Stack.Navigator
       initialRouteName="MainTabs"
       screenOptions={{
         headerBackTitleVisible: false,
+        headerStyle: {
+          backgroundColor: theme.colors.surface,
+        },
+        headerTintColor: theme.colors.primary,
+        headerTitleStyle: {
+          fontWeight: '700',
+        },
+        headerShadowVisible: false,
       }}>
       <Stack.Screen
         name="MainTabs"
@@ -30,84 +43,92 @@ export function AppNavigator() {
       />
       <Stack.Screen
         name="FarmDetails"
-        options={{ title: 'Farm Details' }}
-        children={() => (
+        options={{ title: 'Farm Details' }}>
+        {() => (
           <StackPlaceholder
             title="Farm Details"
             description="Prepared for viewing a specific farm record."
+            badgeLabel="Farm Module"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="AddFarm"
-        options={{ title: 'Add Farm' }}
-        children={() => (
+        options={{ title: 'Add Farm' }}>
+        {() => (
           <StackPlaceholder
             title="Add Farm"
             description="Prepared for the farm creation flow."
+            badgeLabel="Farm Module"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="EditFarm"
-        options={{ title: 'Edit Farm' }}
-        children={() => (
+        options={{ title: 'Edit Farm' }}>
+        {() => (
           <StackPlaceholder
             title="Edit Farm"
             description="Prepared for updating farm information."
+            badgeLabel="Farm Module"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="RecommendationDetails"
-        options={{ title: 'Recommendation Details' }}
-        children={() => (
+        options={{ title: 'Recommendation Details' }}>
+        {() => (
           <StackPlaceholder
             title="Recommendation Details"
             description="Prepared for recommendation detail viewing."
+            badgeLabel="AI Module"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="AIRecommendationForm"
-        options={{ title: 'AI Recommendation Form' }}
-        children={() => (
+        options={{ title: 'AI Recommendation Form' }}>
+        {() => (
           <StackPlaceholder
             title="AI Recommendation Form"
             description="Prepared for the AI recommendation request form."
+            badgeLabel="AI Module"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="RecommendationResult"
-        options={{ title: 'Recommendation Result' }}
-        children={() => (
+        options={{ title: 'Recommendation Result' }}>
+        {() => (
           <StackPlaceholder
             title="Recommendation Result"
             description="Prepared for displaying AI recommendation results."
+            badgeLabel="AI Module"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="WeatherDetails"
-        options={{ title: 'Weather Details' }}
-        children={() => (
+        options={{ title: 'Weather Details' }}>
+        {() => (
           <StackPlaceholder
             title="Weather Details"
             description="Prepared for detailed weather insights."
+            badgeLabel="Weather"
           />
         )}
-      />
+      </Stack.Screen>
       <Stack.Screen
         name="Settings"
-        options={{ title: 'Settings' }}
-        children={() => (
+        options={{ title: 'Settings' }}>
+        {() => (
           <StackPlaceholder
             title="Settings"
             description="Prepared for global app and account settings."
+            badgeLabel="Account"
           />
         )}
-      />
+      </Stack.Screen>
     </Stack.Navigator>
   );
 }

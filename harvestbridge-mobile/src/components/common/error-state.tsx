@@ -1,9 +1,8 @@
-import { StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { View } from 'react-native';
+import { Chip, Text } from 'react-native-paper';
 
 import { AppButton } from '@/components/common/app-button';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import { designTokens } from '@/theme';
 
 interface ErrorStateProps {
   title?: string;
@@ -21,30 +20,22 @@ export function ErrorState({
   const theme = useAppTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.error }]}>
+    <View
+      className="flex-1 items-center justify-center gap-md px-lg"
+      style={{ backgroundColor: theme.colors.background }}>
+      <Chip
+        compact
+        style={{ backgroundColor: theme.colors.surfaceVariant }}
+        textStyle={{ color: theme.colors.error }}>
+        Attention Needed
+      </Chip>
+      <Text variant="headlineSmall" style={{ color: theme.colors.error, textAlign: 'center' }}>
         {title}
       </Text>
-      <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onBackground }]}>
+      <Text variant="bodyMedium" style={{ color: theme.colors.onBackground, textAlign: 'center' }}>
         {message}
       </Text>
       {onAction ? <AppButton label={actionLabel} onPress={onAction} /> : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  message: {
-    textAlign: 'center',
-  },
-});

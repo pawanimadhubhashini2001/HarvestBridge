@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, TouchableOpacity, View } from 'react-native';
 import { Divider, RadioButton, Text, TextInput as PaperTextInput } from 'react-native-paper';
 import { z } from 'zod';
 
@@ -13,7 +13,6 @@ import { Screen } from '@/components/layout/screen';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AuthScreenProps } from '@/navigation/types';
-import { designTokens } from '@/theme';
 import type { AppError } from '@/types/api';
 import type { UserRole } from '@/types/auth';
 
@@ -34,10 +33,10 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 type RegisterMutationVariables = RegisterFormValues;
 
-const roleOptions: Array<{
+const roleOptions: {
   value: Exclude<UserRole, 'admin'>;
   label: string;
-}> = [
+}[] = [
   { value: 'farmer', label: 'Farmer' },
   { value: 'consumer', label: 'Consumer' },
   { value: 'ngo', label: 'NGO' },
@@ -79,7 +78,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
       setSuccessMessage(null);
       setApiError(error.message);
 
-      const fields: Array<keyof RegisterFormValues> = [
+      const fields: (keyof RegisterFormValues)[] = [
         'name',
         'email',
         'role',
@@ -106,13 +105,11 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
   });
 
   return (
-    <Screen scrollable>
+    <Screen scrollable contentClassName="justify-center">
       <View
-        style={[
-          styles.container,
-          { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-        ]}>
-        <View style={styles.header}>
+        className="min-h-[540px] gap-lg rounded-lg border px-lg py-xl"
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+        <View className="gap-sm">
           <Text variant="headlineMedium" style={{ color: theme.colors.onSurface }}>
             Create Account
           </Text>
@@ -121,12 +118,13 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
           </Text>
         </View>
 
-        <View style={styles.form}>
+        <View className="gap-sm">
           <Controller
             control={control}
             name="name"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppTextInput
+                containerClassName="gap-0"
                 label="Full Name"
                 value={value}
                 onChangeText={onChange}
@@ -143,6 +141,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppTextInput
+                containerClassName="gap-0"
                 label="Email"
                 value={value}
                 onChangeText={onChange}
@@ -160,17 +159,17 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
             control={control}
             name="role"
             render={({ field: { onChange, value } }) => (
-              <View style={styles.roleGroup}>
+              <View className="gap-sm">
                 <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
                   Select Role
                 </Text>
                 <RadioButton.Group onValueChange={onChange} value={value}>
                   {roleOptions.map((option) => (
                     <Pressable
+                      className="mb-xs rounded-md border"
                       key={option.value}
                       onPress={() => onChange(option.value)}
                       style={[
-                        styles.roleOption,
                         {
                           borderColor:
                             value === option.value
@@ -182,7 +181,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                               : theme.colors.surface,
                         },
                       ]}>
-                      <View style={styles.roleOptionInner}>
+                      <View className="flex-row items-center px-sm py-xs">
                         <RadioButton value={option.value} />
                         <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
                           {option.label}
@@ -205,6 +204,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppTextInput
+                containerClassName="gap-0"
                 label="Password"
                 value={value}
                 onChangeText={onChange}
@@ -229,6 +229,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
             name="password_confirmation"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppTextInput
+                containerClassName="gap-0"
                 label="Confirm Password"
                 value={value}
                 onChangeText={onChange}
@@ -270,7 +271,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
 
         <Divider />
 
-        <View style={styles.footer}>
+        <View className="flex-row flex-wrap items-center gap-xs">
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             Already have an account?
           </Text>
@@ -284,40 +285,3 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.lg,
-    minHeight: 540,
-    justifyContent: 'center',
-  },
-  header: {
-    gap: designTokens.spacing.sm,
-  },
-  form: {
-    gap: designTokens.spacing.sm,
-  },
-  roleGroup: {
-    gap: designTokens.spacing.sm,
-  },
-  roleOption: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.md,
-    marginBottom: designTokens.spacing.xs,
-  },
-  roleOptionInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: designTokens.spacing.sm,
-    paddingVertical: designTokens.spacing.xs,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: designTokens.spacing.xs,
-    flexWrap: 'wrap',
-  },
-});

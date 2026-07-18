@@ -4,7 +4,17 @@ export function RecommendationsScreen() {
   return (
     <PlaceholderScreen
       title="Recommendations"
-      description="AI recommendation history and actions will be layered onto this tab in later lessons."
+      badgeLabel="AI Module"
+      description="AI recommendation history, saved predictions, and follow-up actions will be layered into this tab next."
+      actions={[
+        {
+          label: 'New Recommendation',
+        },
+        {
+          label: 'Favorites',
+          mode: 'outline',
+        },
+      ]}
     />
   );
 }

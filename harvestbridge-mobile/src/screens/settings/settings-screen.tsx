@@ -1,23 +1,20 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { AppButton } from '@/components/common/app-button';
 import { Screen } from '@/components/layout/screen';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import { designTokens } from '@/theme';
 
 export function SettingsScreen() {
   const { clearSession, user } = useAuth();
   const theme = useAppTheme();
 
   return (
-    <Screen scrollable>
+    <Screen scrollable contentClassName="justify-center">
       <View
-        style={[
-          styles.card,
-          { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-        ]}>
+        className="gap-md rounded-lg border px-lg py-xl"
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
         <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
           Session Details
         </Text>
@@ -32,12 +29,3 @@ export function SettingsScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-  },
-});

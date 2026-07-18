@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, TouchableOpacity, View } from 'react-native';
 import { Checkbox, Divider, Text, TextInput as PaperTextInput } from 'react-native-paper';
 import { z } from 'zod';
 
@@ -13,7 +13,6 @@ import { Screen } from '@/components/layout/screen';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AuthScreenProps } from '@/navigation/types';
-import { designTokens } from '@/theme';
 import type { AppError } from '@/types/api';
 
 const loginSchema = z.object({
@@ -84,13 +83,11 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
   });
 
   return (
-    <Screen scrollable>
+    <Screen scrollable contentClassName="justify-center">
       <View
-        style={[
-          styles.container,
-          { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
-        ]}>
-        <View style={styles.header}>
+        className="min-h-[420px] gap-lg rounded-lg border px-lg py-xl"
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+        <View className="gap-sm">
           <Text variant="headlineMedium" style={{ color: theme.colors.onSurface }}>
             Welcome Back
           </Text>
@@ -99,12 +96,13 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
           </Text>
         </View>
 
-        <View style={styles.form}>
+        <View className="gap-sm">
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppTextInput
+                containerClassName="gap-0"
                 label="Email"
                 value={value}
                 onChangeText={onChange}
@@ -123,6 +121,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppTextInput
+                containerClassName="gap-0"
                 label="Password"
                 value={value}
                 onChangeText={onChange}
@@ -146,7 +145,9 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
             control={control}
             name="rememberMe"
             render={({ field: { onChange, value } }) => (
-              <Pressable onPress={() => onChange(!value)} style={styles.checkboxRow}>
+              <Pressable
+                className="-ml-2 flex-row items-center"
+                onPress={() => onChange(!value)}>
                 <Checkbox
                   status={value ? 'checked' : 'unchecked'}
                   onPress={() => onChange(!value)}
@@ -175,7 +176,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={() => navigation.navigate('ForgotPassword')}
-          style={styles.linkRow}>
+          className="self-start">
           <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
             Forgot Password?
           </Text>
@@ -183,7 +184,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
 
         <Divider />
 
-        <View style={styles.footer}>
+        <View className="flex-row flex-wrap items-center gap-xs">
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             Don&apos;t have an account?
           </Text>
@@ -197,34 +198,3 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.lg,
-    minHeight: 420,
-    justifyContent: 'center',
-  },
-  header: {
-    gap: designTokens.spacing.sm,
-  },
-  form: {
-    gap: designTokens.spacing.sm,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: -8,
-  },
-  linkRow: {
-    alignSelf: 'flex-start',
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: designTokens.spacing.xs,
-    flexWrap: 'wrap',
-  },
-});

@@ -1,8 +1,7 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Text } from 'react-native-paper';
+import { ActivityIndicator, View } from 'react-native';
+import { Chip, Text } from 'react-native-paper';
 
 import { useAppTheme } from '@/hooks/use-app-theme';
-import { designTokens } from '@/theme';
 
 interface LoadingStateProps {
   message?: string;
@@ -17,30 +16,18 @@ export function LoadingState({
 
   return (
     <View
-      style={[
-        styles.container,
-        fullScreen && styles.fullScreen,
-        { backgroundColor: theme.colors.background },
-      ]}>
+      className={`${fullScreen ? 'flex-1' : ''} items-center justify-center gap-md px-lg`}
+      style={{ backgroundColor: theme.colors.background }}>
+      <Chip
+        compact
+        style={{ backgroundColor: theme.colors.primaryContainer }}
+        textStyle={{ color: theme.colors.primary }}>
+        HarvestBridge
+      </Chip>
       <ActivityIndicator size="large" color={theme.colors.primary} />
-      <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onBackground }]}>
+      <Text variant="bodyMedium" style={{ color: theme.colors.onBackground, textAlign: 'center' }}>
         {message}
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: designTokens.spacing.md,
-    padding: designTokens.spacing.lg,
-  },
-  fullScreen: {
-    flex: 1,
-  },
-  message: {
-    textAlign: 'center',
-  },
-});

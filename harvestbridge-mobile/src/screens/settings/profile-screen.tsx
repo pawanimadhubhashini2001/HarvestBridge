@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Avatar, Text } from 'react-native-paper';
 
 import { AppButton } from '@/components/common/app-button';
@@ -9,7 +9,6 @@ import { Screen } from '@/components/layout/screen';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
-import { designTokens } from '@/theme';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 function getInitials(name?: string | null) {
@@ -47,11 +46,13 @@ function formatRole(role?: string | null) {
 
 function ProfileField({ label, value }: { label: string; value: string }) {
   return (
-    <View style={styles.field}>
-      <Text variant="labelMedium" style={styles.fieldLabel}>
+    <View className="gap-xs">
+      <Text
+        variant="labelMedium"
+        style={{ opacity: 0.72, textTransform: 'uppercase', letterSpacing: 0.4 }}>
         {label}
       </Text>
-      <Text variant="bodyLarge" style={styles.fieldValue}>
+      <Text variant="bodyLarge" style={{ fontWeight: '600' }}>
         {value}
       </Text>
     </View>
@@ -95,9 +96,9 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
   if (!profile) {
     return (
       <Screen>
-        <View style={styles.centerState}>
+        <View className="flex-1 justify-center gap-md">
           <Text variant="headlineSmall">Profile unavailable</Text>
-          <Text variant="bodyMedium" style={styles.centerText}>
+          <Text variant="bodyMedium" style={{ textAlign: 'center' }}>
             We could not find profile information for this account yet.
           </Text>
           <AppButton
@@ -114,16 +115,17 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
   return (
     <Screen
       scrollable
+      contentClassName="gap-lg"
       refreshing={profileQuery.isRefetching}
       onRefresh={() => {
         void profileQuery.refetch();
       }}>
       <View
+        className="items-center gap-sm rounded-lg border px-lg py-lg"
         style={[
-          styles.hero,
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
         ]}>
-        <View style={styles.avatarWrap}>
+        <View className="mb-sm">
           {profile.profile_photo ? (
             <Avatar.Image size={84} source={{ uri: profile.profile_photo }} />
           ) : (
@@ -131,20 +133,20 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
           )}
         </View>
 
-        <Text variant="headlineSmall" style={styles.name}>
+        <Text variant="headlineSmall" style={{ textAlign: 'center', fontWeight: '700' }}>
           {profile.name}
         </Text>
-        <Text variant="bodyLarge" style={styles.role}>
+        <Text variant="bodyLarge" style={{ textAlign: 'center' }}>
           {formatRole(profile.role)}
         </Text>
-        <Text variant="bodyMedium" style={styles.email}>
+        <Text variant="bodyMedium" style={{ textAlign: 'center' }}>
           {profile.email}
         </Text>
       </View>
 
       <View
+        className="gap-md rounded-lg border px-lg py-lg"
         style={[
-          styles.section,
           { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
         ]}>
         <Text variant="titleMedium">Profile Details</Text>
@@ -156,20 +158,20 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
 
       {profileQuery.isError ? (
         <View
+          className="rounded-md border px-md py-md"
           style={[
-            styles.inlineError,
             {
               backgroundColor: theme.colors.surfaceVariant,
               borderColor: theme.colors.error,
             },
           ]}>
-          <Text variant="bodyMedium" style={styles.inlineErrorText}>
+          <Text variant="bodyMedium" style={{ textAlign: 'center' }}>
             {getErrorMessage(profileQuery.error)}
           </Text>
         </View>
       ) : null}
 
-      <View style={styles.actions}>
+      <View className="gap-md">
         <AppButton
           label="Edit Profile"
           mode="outline"
@@ -189,72 +191,9 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
         />
       </View>
 
-      <Text variant="bodySmall" style={styles.note}>
+      <Text variant="bodySmall" style={{ textAlign: 'center', opacity: 0.7 }}>
         Edit Profile is reserved for the next lesson and is intentionally not active yet.
       </Text>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  hero: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    alignItems: 'center',
-    gap: designTokens.spacing.sm,
-  },
-  avatarWrap: {
-    marginBottom: designTokens.spacing.sm,
-  },
-  name: {
-    textAlign: 'center',
-    fontWeight: '700',
-  },
-  role: {
-    textAlign: 'center',
-  },
-  email: {
-    textAlign: 'center',
-  },
-  section: {
-    borderWidth: 1,
-    borderRadius: designTokens.radius.lg,
-    padding: designTokens.spacing.lg,
-    gap: designTokens.spacing.md,
-  },
-  field: {
-    gap: designTokens.spacing.xs,
-  },
-  fieldLabel: {
-    opacity: 0.72,
-    textTransform: 'uppercase',
-    letterSpacing: 0.4,
-  },
-  fieldValue: {
-    fontWeight: '600',
-  },
-  actions: {
-    gap: designTokens.spacing.md,
-  },
-  note: {
-    textAlign: 'center',
-    opacity: 0.7,
-  },
-  centerState: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: designTokens.spacing.md,
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  inlineError: {
-    borderWidth: 1,
-    padding: designTokens.spacing.md,
-    borderRadius: designTokens.radius.md,
-  },
-  inlineErrorText: {
-    textAlign: 'center',
-  },
-});
