@@ -20,11 +20,12 @@ export interface StoreFarmPayload {
   farm_name: string;
   district: string;
   address: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   farm_size: number;
   farm_size_unit: 'acres' | 'hectares';
   soil_type: string;
+  description?: string;
 }
 
 export type UpdateFarmPayload = Partial<StoreFarmPayload>;

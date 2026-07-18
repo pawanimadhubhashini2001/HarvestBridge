@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { BottomTabs } from '@/navigation/BottomTabs';
 import type { AppStackParamList } from '@/navigation/types';
+import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -26,7 +27,6 @@ export function AppNavigator() {
     <Stack.Navigator
       initialRouteName="MainTabs"
       screenOptions={{
-        headerBackTitleVisible: false,
         headerStyle: {
           backgroundColor: theme.colors.surface,
         },
@@ -54,15 +54,9 @@ export function AppNavigator() {
       </Stack.Screen>
       <Stack.Screen
         name="AddFarm"
-        options={{ title: 'Add Farm' }}>
-        {() => (
-          <StackPlaceholder
-            title="Add Farm"
-            description="Prepared for the farm creation flow."
-            badgeLabel="Farm Module"
-          />
-        )}
-      </Stack.Screen>
+        component={AddFarmScreen}
+        options={{ title: 'Add Farm' }}
+      />
       <Stack.Screen
         name="EditFarm"
         options={{ title: 'Edit Farm' }}>
