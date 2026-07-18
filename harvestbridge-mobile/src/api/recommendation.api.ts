@@ -30,6 +30,10 @@ export interface PredictionHistoryDto {
   season: string;
   recommended_crop: string;
   confidence: number;
+  market_demand: string;
+  temperature: number | string;
+  rainfall: number | string;
+  humidity: number | string;
   created_at: string;
 }
 
@@ -50,6 +54,10 @@ export interface SearchRecommendationsParams {
   season?: string;
   from?: string;
   to?: string;
+}
+
+export function getPredictionHistoryQueryKey() {
+  return ['ai', 'history'] as const;
 }
 
 export async function predict(payload: PredictionPayload) {

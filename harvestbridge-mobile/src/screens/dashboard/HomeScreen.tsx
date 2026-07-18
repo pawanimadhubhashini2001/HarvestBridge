@@ -4,10 +4,11 @@ import { Pressable, useWindowDimensions, View } from 'react-native';
 import { Chip, Text } from 'react-native-paper';
 
 import { getFarms, getFarmsQueryKey } from '@/api/farm.api';
-import { getPredictionHistory } from '@/api/recommendation.api';
+import { getPredictionHistory, getPredictionHistoryQueryKey } from '@/api/recommendation.api';
 import { getCurrentWeatherQueryKey } from '@/api/weather.api';
 import { AppButton } from '@/components/common/app-button';
 import { ErrorState } from '@/components/common/error-state';
+import { AIRecommendationCard } from '@/components/dashboard/AIRecommendationCard';
 import { FarmSummaryCard } from '@/components/dashboard/FarmSummaryCard';
 import { WeatherCard } from '@/components/dashboard/WeatherCard';
 import { LoadingState } from '@/components/common/loading-state';
@@ -41,68 +42,6 @@ function formatDate(date: Date) {
   }).format(date);
 }
 
-function formatRelativeDate(value?: string) {
-  if (!value) {
-    return 'No recent activity';
-  }
-
-  const date = new Date(value);
-
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-}
-
-function formatConfidence(value?: number) {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return 'No score';
-  }
-
-  return `${Math.round(value)}% confidence`;
-}
-
-function DashboardCard({
-  title,
-  subtitle,
-  value,
-  helper,
-  accent,
-}: {
-  title: string;
-  subtitle: string;
-  value: string;
-  helper: string;
-  accent: string;
-}) {
-  const theme = useAppTheme();
-
-  return (
-    <View
-      className="min-h-[164px] flex-1 basis-[48%] gap-xs rounded-lg border px-lg py-lg"
-      style={[
-        {
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.outline,
-        },
-      ]}
-    >
-      <View className="mb-xs h-[6px] w-12 rounded-full" style={{ backgroundColor: accent }} />
-      <Text variant="titleMedium">{title}</Text>
-      <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
-        {value}
-      </Text>
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, fontWeight: '500' }}>
-        {subtitle}
-      </Text>
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {helper}
-      </Text>
-    </View>
-  );
-}
-
 export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
@@ -114,29 +53,26 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const weatherCity = user?.district?.trim() || undefined;
   const isTwoColumn = width >= 720;
   const farmsQueryKey = getFarmsQueryKey();
+  const aiHistoryQueryKey = getPredictionHistoryQueryKey();
   const weatherQueryKey = getCurrentWeatherQueryKey(weatherCity);
   const farmsFetchCount = useIsFetching({ queryKey: farmsQueryKey });
+  const aiHistoryFetchCount = useIsFetching({ queryKey: aiHistoryQueryKey });
   const weatherFetchCount = useIsFetching({ queryKey: weatherQueryKey });
   const farmsQuery = useQuery({
     queryKey: farmsQueryKey,
     queryFn: getFarms,
     staleTime: QUERY_STALE_TIME_MS,
   });
-
-  const dashboardQuery = useQuery({
-    queryKey: ['dashboard', 'home', weatherCity ?? 'no-city'],
+  const aiHistoryQuery = useQuery({
+    queryKey: aiHistoryQueryKey,
     staleTime: QUERY_STALE_TIME_MS,
-    queryFn: async () => {
-      return {
-        history: await getPredictionHistory(),
-      };
-    },
+    queryFn: getPredictionHistory,
   });
 
   const handleRefresh = async () => {
     await Promise.all([
       farmsQuery.refetch(),
-      dashboardQuery.refetch(),
+      aiHistoryQuery.refetch(),
       weatherCity
         ? queryClient.refetchQueries({
             queryKey: weatherQueryKey,
@@ -147,33 +83,27 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   };
 
   const farms = farmsQuery.data ?? [];
-  const history = dashboardQuery.data?.history ?? [];
-  const latestRecommendation = history[0] ?? null;
-  const averageConfidence = history.length
-    ? Math.round(
-        history.reduce((total, item) => total + (Number(item.confidence) || 0), 0) / history.length,
-      )
-    : null;
+  const history = aiHistoryQuery.data ?? [];
 
   const isEmpty =
-    !dashboardQuery.isLoading &&
     !farmsQuery.isLoading &&
+    !aiHistoryQuery.isLoading &&
     farms.length === 0 &&
     history.length === 0 &&
     !weatherCity;
 
-  if (dashboardQuery.isLoading && !dashboardQuery.data) {
+  if (farmsQuery.isLoading && !farmsQuery.data && aiHistoryQuery.isLoading && !aiHistoryQuery.data) {
     return <LoadingState message="Loading your farmer dashboard..." />;
   }
 
-  if (dashboardQuery.isError && !dashboardQuery.data) {
+  if (farmsQuery.isError && !farmsQuery.data) {
     return (
       <ErrorState
         title="Unable to load dashboard"
-        message={getErrorMessage(dashboardQuery.error)}
+        message={getErrorMessage(farmsQuery.error)}
         actionLabel="Reload dashboard"
         onAction={() => {
-          void dashboardQuery.refetch();
+          void farmsQuery.refetch();
         }}
       />
     );
@@ -185,9 +115,10 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         scrollable
         contentClassName="gap-lg"
         refreshing={
-          dashboardQuery.isRefetching ||
           farmsQuery.isRefetching ||
+          aiHistoryQuery.isRefetching ||
           farmsFetchCount > 0 ||
+          aiHistoryFetchCount > 0 ||
           weatherFetchCount > 0
         }
         onRefresh={() => {
@@ -224,9 +155,10 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
     <Screen
       scrollable
       refreshing={
-        dashboardQuery.isRefetching ||
         farmsQuery.isRefetching ||
+        aiHistoryQuery.isRefetching ||
         farmsFetchCount > 0 ||
+        aiHistoryFetchCount > 0 ||
         weatherFetchCount > 0
       }
       onRefresh={() => {
@@ -309,52 +241,7 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
 
       <WeatherCard city={weatherCity} />
       <FarmSummaryCard />
-
-      <View className={isTwoColumn ? 'flex-row flex-wrap gap-md' : 'gap-md'}>
-        <DashboardCard
-          title="AI Recommendation Summary"
-          value={`${history.length}`}
-          subtitle={history.length === 1 ? 'prediction saved' : 'predictions saved'}
-          helper={
-            averageConfidence !== null
-              ? `Average confidence: ${averageConfidence}%`
-              : 'Generate your first recommendation'
-          }
-          accent={theme.colors.tertiary ?? theme.colors.primary}
-        />
-
-        <DashboardCard
-          title="Latest Recommendation"
-          value={latestRecommendation?.recommended_crop ?? 'No result yet'}
-          subtitle={
-            latestRecommendation
-              ? `${latestRecommendation.season} season in ${latestRecommendation.district}`
-              : 'Your latest prediction will appear here'
-          }
-          helper={
-            latestRecommendation
-              ? `${formatConfidence(latestRecommendation.confidence)} | ${formatRelativeDate(latestRecommendation.created_at)}`
-              : 'Use AI Recommendation to get started'
-          }
-          accent={theme.colors.error}
-        />
-      </View>
-
-      {dashboardQuery.isError ? (
-        <View
-          className="rounded-md border px-md py-md"
-          style={[
-            {
-              backgroundColor: theme.colors.surfaceVariant,
-              borderColor: theme.colors.error,
-            },
-          ]}
-        >
-          <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-            {getErrorMessage(dashboardQuery.error)}
-          </Text>
-        </View>
-      ) : null}
+      <AIRecommendationCard />
     </Screen>
   );
 }
