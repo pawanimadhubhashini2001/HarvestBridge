@@ -1,7 +1,7 @@
-import { apiClient } from '@/api/apiClient';
 import { clearStoredToken, getStoredToken, storeToken } from '@/services/auth-storage';
+import { logout } from '@/api/auth.api';
+import { getProfile } from '@/api/profile.api';
 import type { AuthSession, AuthUser, SessionOptions } from '@/types/auth';
-import type { ApiSuccessResponse } from '@/types/api';
 
 export async function loadPersistedToken(): Promise<string | null> {
   return getStoredToken();
@@ -24,11 +24,9 @@ export async function clearPersistedSession(): Promise<void> {
 }
 
 export async function fetchProfile(): Promise<AuthUser> {
-  const response = await apiClient.get<ApiSuccessResponse<AuthUser>>('/profile');
-
-  return response.data.data;
+  return getProfile();
 }
 
 export async function logoutRequest(): Promise<void> {
-  await apiClient.post('/logout');
+  await logout();
 }

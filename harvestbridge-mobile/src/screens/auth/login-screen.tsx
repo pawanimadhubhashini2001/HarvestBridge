@@ -28,7 +28,7 @@ type LoginMutationVariables = LoginFormValues;
 
 export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
   const theme = useAppTheme();
-  const { setSession } = useAuth();
+  const { setSession, authError, clearAuthError } = useAuth();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const {
@@ -53,6 +53,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
         password: values.password,
       }),
     onSuccess: async (session, variables) => {
+      clearAuthError();
       setApiError(null);
       await setSession(session, { persist: variables.rememberMe });
     },
@@ -77,6 +78,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    clearAuthError();
     setApiError(null);
     await loginMutation.mutateAsync(values);
   });
@@ -156,9 +158,9 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
             )}
           />
 
-          {apiError ? (
+          {apiError ?? authError ? (
             <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-              {apiError}
+              {apiError ?? authError}
             </Text>
           ) : null}
 

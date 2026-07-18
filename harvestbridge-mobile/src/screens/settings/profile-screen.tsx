@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { StyleSheet, View } from 'react-native';
-import { Avatar, Surface, Text } from 'react-native-paper';
+import { Avatar, Text } from 'react-native-paper';
 
 import { AppButton } from '@/components/common/app-button';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { useAuth } from '@/hooks/use-auth';
+import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
 import { designTokens } from '@/theme';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -58,6 +59,7 @@ function ProfileField({ label, value }: { label: string; value: string }) {
 }
 
 export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
+  const theme = useAppTheme();
   const { user, clearSession, refreshProfile, isAuthenticated } = useAuth();
 
   const profileQuery = useQuery({
@@ -116,7 +118,11 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
       onRefresh={() => {
         void profileQuery.refetch();
       }}>
-      <Surface style={styles.hero} elevation={1}>
+      <View
+        style={[
+          styles.hero,
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
+        ]}>
         <View style={styles.avatarWrap}>
           {profile.profile_photo ? (
             <Avatar.Image size={84} source={{ uri: profile.profile_photo }} />
@@ -134,22 +140,33 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
         <Text variant="bodyMedium" style={styles.email}>
           {profile.email}
         </Text>
-      </Surface>
+      </View>
 
-      <Surface style={styles.section} elevation={1}>
+      <View
+        style={[
+          styles.section,
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
+        ]}>
         <Text variant="titleMedium">Profile Details</Text>
         <ProfileField label="Name" value={getDisplayValue(profile.name)} />
         <ProfileField label="Email" value={getDisplayValue(profile.email)} />
         <ProfileField label="Phone" value={getDisplayValue(profile.phone)} />
         <ProfileField label="Role" value={formatRole(profile.role)} />
-      </Surface>
+      </View>
 
       {profileQuery.isError ? (
-        <Surface style={styles.inlineError} elevation={0}>
+        <View
+          style={[
+            styles.inlineError,
+            {
+              backgroundColor: theme.colors.surfaceVariant,
+              borderColor: theme.colors.error,
+            },
+          ]}>
           <Text variant="bodyMedium" style={styles.inlineErrorText}>
             {getErrorMessage(profileQuery.error)}
           </Text>
-        </Surface>
+        </View>
       ) : null}
 
       <View style={styles.actions}>
@@ -181,6 +198,7 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
 
 const styles = StyleSheet.create({
   hero: {
+    borderWidth: 1,
     borderRadius: designTokens.radius.lg,
     padding: designTokens.spacing.lg,
     alignItems: 'center',
@@ -200,6 +218,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   section: {
+    borderWidth: 1,
     borderRadius: designTokens.radius.lg,
     padding: designTokens.spacing.lg,
     gap: designTokens.spacing.md,
@@ -231,6 +250,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   inlineError: {
+    borderWidth: 1,
     padding: designTokens.spacing.md,
     borderRadius: designTokens.radius.md,
   },

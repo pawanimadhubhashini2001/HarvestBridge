@@ -85,3 +85,7 @@ export function normalizeApiError(error: unknown): AppError {
     message: 'Something went wrong.',
   });
 }
+
+export function getErrorMessage(error: unknown): string {
+  return normalizeApiError(error).message;
+}

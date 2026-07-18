@@ -15,10 +15,15 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use(async (requestConfig) => {
-  const token = await getStoredToken();
+  const existingAuthorizationHeader =
+    requestConfig.headers?.Authorization ?? requestConfig.headers?.authorization;
 
-  if (token) {
-    requestConfig.headers.Authorization = `Bearer ${token}`;
+  if (!existingAuthorizationHeader) {
+    const token = await getStoredToken();
+
+    if (token) {
+      requestConfig.headers.Authorization = `Bearer ${token}`;
+    }
   }
 
   if (config.isDevelopment) {
@@ -40,7 +45,7 @@ apiClient.interceptors.response.use(
 
     if (normalizedError.status === 401) {
       await clearStoredToken();
-      await notifyUnauthorized();
+      await notifyUnauthorized('expired');
     }
 
     return Promise.reject(normalizedError);

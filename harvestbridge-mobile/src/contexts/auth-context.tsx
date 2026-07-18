@@ -1,5 +1,6 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
+import { queryClient } from '@/api/query-client';
 import { apiClient } from '@/api/apiClient';
 import {
   clearPersistedSession,
@@ -18,24 +19,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isHydrating, setIsHydrating] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const tokenRef = useRef<string | null>(null);
+  const isClearingSessionRef = useRef(false);
 
-  async function clearSession() {
+  const clearAuthHeader = useCallback(() => {
+    delete apiClient.defaults.headers.common.Authorization;
+  }, []);
+
+  const applyAuthenticatedState = useCallback((nextToken: string, nextUser: AuthUser) => {
+    tokenRef.current = nextToken;
+    setToken(nextToken);
+    setUser(nextUser);
+    setAuthError(null);
+    apiClient.defaults.headers.common.Authorization = `Bearer ${nextToken}`;
+  }, []);
+
+  const clearLocalSession = useCallback(
+    async (errorMessage: string | null = null) => {
+      tokenRef.current = null;
+      setUser(null);
+      setToken(null);
+      setAuthError(errorMessage);
+      clearAuthHeader();
+      await clearPersistedSession();
+      queryClient.clear();
+    },
+    [clearAuthHeader],
+  );
+
+  const clearSession = useCallback(async () => {
+    if (isClearingSessionRef.current) {
+      return;
+    }
+
+    isClearingSessionRef.current = true;
+
     try {
-      if (token) {
+      if (tokenRef.current) {
         await logoutRequest();
       }
     } catch {
       // Ignore network errors during logout cleanup.
     } finally {
-      setUser(null);
-      setToken(null);
-      delete apiClient.defaults.headers.common.Authorization;
-      await clearPersistedSession();
+      await clearLocalSession();
+      isClearingSessionRef.current = false;
     }
-  }
+  }, [clearLocalSession]);
 
-  async function refreshProfile() {
-    if (!token) {
+  const handleUnauthorized = useCallback(
+    async (message = 'Your session expired. Please sign in again.') => {
+      if (isClearingSessionRef.current) {
+        return;
+      }
+
+      isClearingSessionRef.current = true;
+
+      try {
+        await clearLocalSession(message);
+      } finally {
+        isClearingSessionRef.current = false;
+      }
+    },
+    [clearLocalSession],
+  );
+
+  const refreshProfile = useCallback(async () => {
+    if (!tokenRef.current) {
       setUser(null);
       return null;
     }
@@ -48,48 +98,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const normalized = normalizeApiError(error);
 
       if (normalized.status === 401) {
-        await clearSession();
+        await handleUnauthorized(normalized.message);
       }
 
       throw normalized;
     }
-  }
+  }, [handleUnauthorized]);
 
-  async function checkAuthentication() {
+  const checkAuthentication = useCallback(async () => {
     try {
       const storedToken = await loadPersistedToken();
 
       if (!storedToken) {
-        setToken(null);
-        setUser(null);
-        delete apiClient.defaults.headers.common.Authorization;
+        await clearLocalSession();
         return false;
       }
 
-      setToken(storedToken);
       apiClient.defaults.headers.common.Authorization = `Bearer ${storedToken}`;
       const profile = await fetchProfile();
-      setUser(profile);
+      applyAuthenticatedState(storedToken, profile);
 
       return true;
-    } catch {
-      await clearPersistedSession();
-      setToken(null);
-      setUser(null);
-      delete apiClient.defaults.headers.common.Authorization;
+    } catch (error) {
+      const normalized = normalizeApiError(error);
+      await clearLocalSession(
+        normalized.status === 401 ? 'Your session expired. Please sign in again.' : null,
+      );
 
       return false;
     }
-  }
+  }, [applyAuthenticatedState, clearLocalSession]);
 
-  async function setSession(session: AuthSession, options?: SessionOptions) {
-    setToken(session.token);
-    setUser(session.user);
-    apiClient.defaults.headers.common.Authorization = `Bearer ${session.token}`;
+  const setSession = useCallback(async (session: AuthSession, options?: SessionOptions) => {
+    applyAuthenticatedState(session.token, session.user);
     await persistSession(session, options);
-    const profile = await fetchProfile();
-    setUser(profile);
-  }
+
+    try {
+      const profile = await fetchProfile();
+      applyAuthenticatedState(session.token, profile);
+    } catch (error) {
+      const normalized = normalizeApiError(error);
+
+      if (normalized.status === 401) {
+        await handleUnauthorized(normalized.message);
+        throw normalized;
+      }
+
+      setAuthError('Signed in, but we could not refresh your profile yet.');
+    }
+  }, [applyAuthenticatedState, handleUnauthorized]);
+
+  const clearAuthError = useCallback(() => {
+    setAuthError(null);
+  }, []);
 
   useEffect(() => {
     async function bootstrap() {
@@ -101,19 +162,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     void bootstrap();
-  }, []);
+  }, [checkAuthentication]);
 
-  useEffect(() => registerUnauthorizedHandler(() => clearSession()), [token]);
+  useEffect(
+    () =>
+      registerUnauthorizedHandler((reason) =>
+        handleUnauthorized(
+          reason === 'expired'
+            ? 'Your session expired. Please sign in again.'
+            : 'Authentication is required. Please sign in again.',
+        ),
+      ),
+    [handleUnauthorized],
+  );
 
   const value: AuthContextValue = {
     user,
     token,
     isAuthenticated: Boolean(token && user),
     isHydrating,
+    authError,
     setSession,
     clearSession,
     refreshProfile,
     checkAuthentication,
+    clearAuthError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

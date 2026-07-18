@@ -32,8 +32,10 @@ export interface AuthContextValue {
   token: string | null;
   isAuthenticated: boolean;
   isHydrating: boolean;
+  authError: string | null;
   setSession: (session: AuthSession, options?: SessionOptions) => Promise<void>;
   clearSession: () => Promise<void>;
   refreshProfile: () => Promise<AuthUser | null>;
   checkAuthentication: () => Promise<boolean>;
+  clearAuthError: () => void;
 }
