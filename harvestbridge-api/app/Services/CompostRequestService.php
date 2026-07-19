@@ -10,6 +10,14 @@ use Exception;
 
 class CompostRequestService
 {
+    private const REQUEST_RELATIONS = [
+        'business',
+        'compostListing.farmer',
+        'compostListing.farmerStore',
+        'compostListing.harvestListing.farm',
+        'compostListing.images',
+    ];
+
     public function create(
         User $business,
         array $data
@@ -43,7 +51,7 @@ class CompostRequestService
 
             'status' => 'pending'
 
-        ]);
+        ])->load(self::REQUEST_RELATIONS);
     }
     public function updateStatus(
         CompostRequest $request,
@@ -93,21 +101,12 @@ class CompostRequestService
                 ]);
             }
 
-            return $request->fresh()->load([
-                'business',
-                'compostListing'
-            ]);
+            return $request->fresh()->load(self::REQUEST_RELATIONS);
         });
     }
     public function getFarmerRequests($farmer)
     {
-        return CompostRequest::with([
-
-            'business',
-
-            'compostListing'
-
-        ])
+        return CompostRequest::with(self::REQUEST_RELATIONS)
 
             ->whereHas(
 
@@ -142,6 +141,10 @@ class CompostRequestService
             );
         }
 
+        if ($request->status === 'completed' || $request->compostListing?->collectionStatus() === 'collected') {
+            return $request->fresh()->load(self::REQUEST_RELATIONS);
+        }
+
         if ($request->status != 'approved') {
 
             throw new Exception(
@@ -161,11 +164,12 @@ class CompostRequestService
 
         $request->compostListing->update([
 
-            'status' => 'collected'
+            'status' => 'collected',
+            'collected_at' => now(),
 
         ]);
 
-        return $request->fresh();
+        return $request->fresh()->load(self::REQUEST_RELATIONS);
     }
     public function complete(
         CompostRequest $request,
@@ -183,11 +187,17 @@ class CompostRequestService
 
         $request->compostListing->update([
 
-            'status' => 'completed'
+            'status' => 'completed',
+            'collected_at' => $request->compostListing->collected_at ?? now(),
 
         ]);
 
-        return $request->compostListing->fresh();
+        return $request->compostListing->fresh()->load([
+            'farmer',
+            'farmerStore',
+            'harvestListing.farm',
+            'images',
+        ]);
     }
     public function businessDashboard(User $business)
     {
@@ -223,9 +233,7 @@ class CompostRequestService
 
             ],
 
-            'requests' => CompostRequest::with([
-                'compostListing'
-            ])
+            'requests' => CompostRequest::with(self::REQUEST_RELATIONS)
                 ->where(
                     'business_id',
                     $business->id
@@ -239,9 +247,7 @@ class CompostRequestService
         User $business,
         ?string $status = null
     ) {
-        $query = CompostRequest::with([
-            'compostListing'
-        ])
+        $query = CompostRequest::with(self::REQUEST_RELATIONS)
             ->where(
                 'business_id',
                 $business->id

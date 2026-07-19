@@ -619,6 +619,14 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
             >
               Edit Store
             </Button>
+            <Button
+              mode="contained-tonal"
+              onPress={() => {
+                navigation.navigate('MyStories');
+              }}
+            >
+              My Stories
+            </Button>
             <DeleteStoreButton
               storeId={store.id}
               label="Delete Store"

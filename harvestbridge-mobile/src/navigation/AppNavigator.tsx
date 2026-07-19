@@ -11,6 +11,9 @@ import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
+import { CreateStoryScreen } from '@/screens/stories/CreateStoryScreen';
+import { MyStoriesScreen } from '@/screens/stories/MyStoriesScreen';
+import { StoryFeedScreen } from '@/screens/stories/StoryFeedScreen';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
@@ -61,6 +64,23 @@ export function AppNavigator() {
         name="EditFarm"
         component={EditFarmScreen}
         options={{ title: 'Edit Store Profile' }}
+      />
+      <Stack.Screen
+        name="MyStories"
+        component={MyStoriesScreen}
+        options={{ title: 'My Stories' }}
+      />
+      <Stack.Screen
+        name="CreateStory"
+        component={CreateStoryScreen}
+        options={({ route }) => ({
+          title: route.params?.storyId ? 'Edit Story' : 'Create Story',
+        })}
+      />
+      <Stack.Screen
+        name="StoryFeed"
+        component={StoryFeedScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="RecommendationDetails"

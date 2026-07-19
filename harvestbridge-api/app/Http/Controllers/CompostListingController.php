@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Http\Requests\CompostMarketplaceFilterRequest;
 use App\Http\Requests\StoreCompostListingRequest;
 use App\Http\Requests\UpdateCompostListingRequest;
 use App\Http\Resources\CompostListingResource;
@@ -89,24 +90,25 @@ class CompostListingController extends Controller
             'Compost listing deleted successfully.'
         );
     }
-    public function marketplace(Request $request)
+    public function marketplace(CompostMarketplaceFilterRequest $request)
     {
-        $listings = $this->service->marketplace(
-            $request->only([
-                'waste_type',
-                'pickup_location',
-                'date'
-            ])
-        );
+        $validated = $request->validated();
+        $hasCoordinates =
+            array_key_exists('latitude', $validated)
+            && array_key_exists('longitude', $validated)
+            && $validated['latitude'] !== null
+            && $validated['longitude'] !== null;
+        $listings = $this->service->marketplace($validated);
+        $resourceCollection = CompostListingResource::collection($listings)
+            ->response()
+            ->getData(true);
 
         return ApiResponse::success(
-
-            CompostListingResource::collection(
-                $listings
-            ),
-
+            [
+                'listings' => $resourceCollection['data'],
+                'radius' => $hasCoordinates ? ($validated['radius'] ?? 50) : null,
+            ],
             'Marketplace listings retrieved successfully.'
-
         );
     }
 }

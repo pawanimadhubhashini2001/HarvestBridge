@@ -44,7 +44,8 @@
           "photosPermission": "HarvestBridge uses your photo library so you can upload an optional store image."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-video"
     ],
     "experiments": {
       "reactCompiler": true

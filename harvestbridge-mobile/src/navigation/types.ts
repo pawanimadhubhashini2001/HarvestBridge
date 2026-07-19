@@ -39,6 +39,17 @@ export type AppStackParamList = {
   EditFarm: {
     farmId?: string;
   };
+  MyStories: undefined;
+  CreateStory: {
+    storyId?: string;
+  } | undefined;
+  StoryFeed: {
+    initialStoryId?: number;
+    latitude?: number;
+    longitude?: number;
+    radius?: number;
+    sort?: 'distance' | 'newest';
+  } | undefined;
   RecommendationDetails: {
     recommendationId?: string;
   };
@@ -113,6 +124,9 @@ export const linking: LinkingOptions<RootStackParamList> = {
           FarmDetails: 'store/:farmId',
           AddFarm: 'store/new',
           EditFarm: 'store/:farmId/edit',
+          MyStories: 'store/stories',
+          CreateStory: 'store/stories/new',
+          StoryFeed: 'marketplace/stories',
           RecommendationDetails: 'recommendations/:recommendationId',
           AIRecommendationForm: 'recommendations/new',
           RecommendationResult: 'recommendations/result/:predictionId',

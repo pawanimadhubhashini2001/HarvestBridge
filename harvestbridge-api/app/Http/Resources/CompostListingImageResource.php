@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+
+class CompostListingImageResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'url' => Storage::disk('public')->url($this->image_path),
+            'sort_order' => $this->sort_order,
+            'is_primary' => $this->isPrimary(),
+        ];
+    }
+}

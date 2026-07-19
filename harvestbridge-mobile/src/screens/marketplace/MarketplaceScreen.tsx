@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Linking, Pressable, ScrollView, View } from 'react-native';
@@ -15,8 +15,10 @@ import {
   type MarketplaceQueryParams,
   type NearbyProductSuggestionDto,
 } from '@/api/marketplace.api';
+import { getStoryFeed, getStoryFeedQueryKey } from '@/api/story-feed.api';
 import { ErrorState } from '@/components/common/error-state';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
+import { StoriesRow } from '@/components/stories/StoriesRow';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -157,10 +159,28 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
       return meta.current_page + 1;
     },
   });
+  const storyFeedQuery = useQuery({
+    queryKey: getStoryFeedQueryKey({
+      latitude: shouldUseLocation ? coordinates?.latitude : undefined,
+      longitude: shouldUseLocation ? coordinates?.longitude : undefined,
+      radius: shouldUseLocation && typeof selectedRadius === 'number' ? selectedRadius : undefined,
+      sort: shouldUseLocation ? 'distance' : 'newest',
+      per_page: 10,
+    }),
+    queryFn: () =>
+      getStoryFeed({
+        latitude: shouldUseLocation ? coordinates?.latitude : undefined,
+        longitude: shouldUseLocation ? coordinates?.longitude : undefined,
+        radius: shouldUseLocation && typeof selectedRadius === 'number' ? selectedRadius : undefined,
+        sort: shouldUseLocation ? 'distance' : 'newest',
+        per_page: 10,
+      }),
+  });
 
   const listings = marketplaceQuery.data?.pages.flatMap((page) => page.listings) ?? [];
   const summary = marketplaceQuery.data?.pages[0] ?? null;
   const nearbySuggestions = summary?.nearby_suggestions ?? [];
+  const storyFeed = storyFeedQuery.data?.stories ?? [];
   const isInitialLoading = marketplaceQuery.isLoading && listings.length === 0;
   const isRefreshing = marketplaceQuery.isRefetching && !marketplaceQuery.isFetchingNextPage;
 
@@ -174,6 +194,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
     }
 
     await marketplaceQuery.refetch();
+    await storyFeedQuery.refetch();
   }
 
   function handleSearchSubmit() {
@@ -343,6 +364,39 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                 })}
               </View>
             </ScrollView>
+
+            <StoriesRow
+              stories={storyFeed}
+              title={shouldUseLocation ? 'Nearby Stories' : 'Latest Stories'}
+              subtitle={
+                shouldUseLocation
+                  ? 'Browse active farmer updates from stores around your selected search radius.'
+                  : 'See the newest active stories from farmer stores.'
+              }
+              onStoryPress={(story) => {
+                navigation.navigate('StoryFeed', {
+                  initialStoryId: story.id,
+                  latitude: coordinates?.latitude,
+                  longitude: coordinates?.longitude,
+                  radius:
+                    shouldUseLocation && typeof selectedRadius === 'number'
+                      ? selectedRadius
+                      : undefined,
+                  sort: shouldUseLocation ? 'distance' : 'newest',
+                });
+              }}
+              onViewAllPress={() => {
+                navigation.navigate('StoryFeed', {
+                  latitude: coordinates?.latitude,
+                  longitude: coordinates?.longitude,
+                  radius:
+                    shouldUseLocation && typeof selectedRadius === 'number'
+                      ? selectedRadius
+                      : undefined,
+                  sort: shouldUseLocation ? 'distance' : 'newest',
+                });
+              }}
+            />
 
             {isResolvingLocation ? (
               <View className="flex-row items-center gap-sm px-sm">

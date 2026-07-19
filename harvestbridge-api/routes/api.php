@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\StoreStoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
 use App\Http\Controllers\MarketplaceController;
@@ -107,6 +108,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/stores/{store}/cover', [StoreController::class, 'deleteCover']);
         Route::put('/stores/{store}/location', [StoreController::class, 'updateLocation']);
         Route::delete('/stores/{store}', [StoreController::class, 'destroy']);
+        Route::get('/stores/me/stories', [StoreStoryController::class, 'index']);
+        Route::post('/stores/{store}/stories', [StoreStoryController::class, 'store']);
+        Route::put('/stores/{store}/stories/{story}', [StoreStoryController::class, 'update']);
+        Route::delete('/stores/{store}/stories/{story}', [StoreStoryController::class, 'destroy']);
 
         Route::get('/harvest-listings', [HarvestListingController::class, 'index']);
         Route::get('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'show']);
@@ -311,6 +316,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stores/public/{store}', [StoreController::class, 'publicShow']);
     Route::get('/stores/public/{store}/products', [StoreController::class, 'publicProducts']);
     Route::get('/stores/{store}/location', [StoreController::class, 'location']);
+    Route::get('/stories/feed', [StoreStoryController::class, 'feed']);
+    Route::post('/stories/{story}/view', [StoreStoryController::class, 'recordView']);
     Route::get(
         '/marketplace',
         [MarketplaceController::class, 'index']

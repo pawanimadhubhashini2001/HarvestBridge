@@ -5,156 +5,347 @@ namespace App\Services;
 use App\Models\Donation;
 use App\Models\HarvestListing;
 use App\Models\User;
-use Exception;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class DonationService
 {
+    private const EARTH_RADIUS_KM = 6371;
+    private const DEFAULT_RADIUS_KM = 50;
+    private const MAX_RADIUS_KM = 200;
+    private const DEFAULT_PAGE_SIZE = 15;
+    private const MAX_PAGE_SIZE = 50;
+
     public function getAll(User $farmer)
     {
-        return Donation::with([
-            'harvestListing',
-            'ngo'
-        ])
+        return Donation::query()
+            ->with($this->resourceRelations())
             ->where('farmer_id', $farmer->id)
             ->latest()
             ->get();
     }
 
-    public function create(User $farmer, array $data)
+    public function getAvailableForNgo(array $filters): LengthAwarePaginator
     {
-        $listing = HarvestListing::findOrFail(
-            $data['harvest_listing_id']
+        $sort = $this->normalizeMarketplaceSort(
+            $filters['sort'] ?? null,
+            $this->hasLocationSearch($filters)
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Ownership Check
-        |--------------------------------------------------------------------------
-        */
+        $query = Donation::query()
+            ->with($this->resourceRelations())
+            ->where('status', Donation::STATUS_AVAILABLE)
+            ->where(function (Builder $builder) {
+                $builder->whereNull('available_until')
+                    ->orWhereDate('available_until', '>=', now()->toDateString());
+            });
 
-        if ($listing->user_id != $farmer->id) {
+        $this->applyMarketplaceJoins($query, $filters);
+        $this->applySearch($query, $filters['search'] ?? null);
+        $this->applyLocationFilter($query, $filters);
+        $this->applyMarketplaceSorting($query, $sort);
 
-            throw new Exception(
-                'You can only donate your own harvest listings.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Listing Availability
-        |--------------------------------------------------------------------------
-        */
-
-        if ($listing->status !== 'available') {
-
-            throw new Exception(
-                'Harvest listing is not available.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prevent Duplicate Donation
-        |--------------------------------------------------------------------------
-        */
-
-        if ($listing->donation()->exists()) {
-
-            throw new Exception(
-                'This harvest has already been donated.'
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Quantity Validation
-        |--------------------------------------------------------------------------
-        */
-
-        if ($data['quantity'] > $listing->quantity) {
-
-            throw new Exception(
-                'Donation quantity exceeds available stock.'
-            );
-        }
-
-        $data['farmer_id'] = $farmer->id;
-
-        $data['status'] = 'available';
-
-        return Donation::create($data);
+        return $query
+            ->paginate($this->resolvePerPage($filters['per_page'] ?? null))
+            ->withQueryString();
     }
 
-    public function update(
-        Donation $donation,
-        array $data
-    ) {
+    public function create(User $farmer, array $data): Donation
+    {
+        $listing = HarvestListing::query()
+            ->with(['crop', 'farm', 'farmer'])
+            ->findOrFail($data['harvest_listing_id']);
+
+        $this->assertListingOwnership($listing, $farmer);
+        $this->assertListingAvailableForDonation($listing);
+        $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
+
+        $payload = [
+            'farmer_id' => $farmer->id,
+            'harvest_listing_id' => $listing->id,
+            'quantity' => $data['quantity'],
+            'unit' => $data['unit'],
+            'description' => $data['description'],
+            'pickup_location' => $data['pickup_location'],
+            'pickup_date' => $data['pickup_date'] ?? null,
+            'pickup_time' => $data['pickup_time'] ?? null,
+            'available_until' => $data['available_until'],
+            'collected_at' => null,
+            'status' => Donation::STATUS_AVAILABLE,
+            'notes' => $data['notes'] ?? null,
+        ];
+
+        return Donation::query()->create($payload)->load($this->resourceRelations());
+    }
+
+    public function update(Donation $donation, array $data): Donation
+    {
+        $listing = $donation->harvestListing;
+
+        if (
+            array_key_exists('harvest_listing_id', $data)
+            && (int) $data['harvest_listing_id'] !== (int) $donation->harvest_listing_id
+        ) {
+            throw ValidationException::withMessages([
+                'harvest_listing_id' => [
+                    'Changing the harvest listing of an existing donation is not supported.',
+                ],
+            ]);
+        }
+
+        if (array_key_exists('quantity', $data) && $listing !== null) {
+            $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
+        }
+
         $donation->update($data);
 
-        return $donation;
+        return $donation->fresh()->load($this->resourceRelations());
     }
 
-    public function delete(
-        Donation $donation
-    ) {
+    public function delete(Donation $donation): void
+    {
         $donation->delete();
     }
-    public function schedulePickup(
-        Donation $donation,
-        array $data,
-        User $ngo
-    ) {
-        if ($donation->ngo_id != $ngo->id) {
 
-            throw new \Exception(
-                'This donation is not assigned to you.'
-            );
+    public function schedulePickup(Donation $donation, array $data, User $ngo): Donation
+    {
+        if ((int) $donation->ngo_id !== (int) $ngo->id) {
+            throw ValidationException::withMessages([
+                'donation' => ['This donation is not assigned to you.'],
+            ]);
         }
 
-        if ($donation->status !== 'approved') {
-
-            throw new \Exception(
-                'Donation is not ready for pickup.'
-            );
+        if ($donation->status !== Donation::STATUS_APPROVED) {
+            throw ValidationException::withMessages([
+                'donation' => ['Donation is not ready for pickup.'],
+            ]);
         }
 
         $donation->update([
-
             'pickup_date' => $data['pickup_date'],
-
             'pickup_time' => $data['pickup_time'],
-
-            'status' => 'picked_up'
-
+            'status' => Donation::STATUS_PICKED_UP,
         ]);
 
-        return $donation;
+        return $donation->fresh()->load($this->resourceRelations());
     }
 
-    public function complete(
-        Donation $donation,
-        User $ngo
-    ) {
-        if ($donation->ngo_id != $ngo->id) {
-
-            throw new \Exception(
-                'Unauthorized.'
-            );
+    public function complete(Donation $donation, User $ngo): Donation
+    {
+        if ((int) $donation->ngo_id !== (int) $ngo->id) {
+            throw ValidationException::withMessages([
+                'donation' => ['Unauthorized.'],
+            ]);
         }
 
-        if ($donation->status !== 'picked_up') {
+        if ($donation->collectionStatus() === 'collected') {
+            return $donation->fresh()->load($this->resourceRelations());
+        }
 
-            throw new \Exception(
-                'Donation has not been picked up.'
-            );
+        if (! in_array($donation->status, [Donation::STATUS_APPROVED, Donation::STATUS_PICKED_UP], true)) {
+            throw ValidationException::withMessages([
+                'donation' => ['Donation is not ready to be marked as collected.'],
+            ]);
         }
 
         $donation->update([
-
-            'status' => 'completed'
-
+            'status' => Donation::STATUS_COMPLETED,
+            'collected_at' => now(),
         ]);
 
-        return $donation;
+        return $donation->fresh()->load($this->resourceRelations());
+    }
+
+    private function resourceRelations(): array
+    {
+        return [
+            'farmer:id,name,email,phone',
+            'ngo:id,name,email,phone',
+            'harvestListing:id,user_id,farm_id,crop_id,description,quantity,available_quantity,unit,available_until,status',
+            'harvestListing.crop:id,name,category',
+            'harvestListing.farm:id,farm_name,store_logo_path,phone_number,district,address,latitude,longitude,business_status',
+        ];
+    }
+
+    private function assertListingOwnership(HarvestListing $listing, User $farmer): void
+    {
+        if ((int) $listing->user_id !== (int) $farmer->id) {
+            throw ValidationException::withMessages([
+                'harvest_listing_id' => ['You can only donate your own harvest listings.'],
+            ]);
+        }
+    }
+
+    private function assertListingAvailableForDonation(HarvestListing $listing): void
+    {
+        if ($listing->status !== HarvestListing::STATUS_AVAILABLE) {
+            throw ValidationException::withMessages([
+                'harvest_listing_id' => ['Harvest listing is not available.'],
+            ]);
+        }
+
+        if ($listing->donation()->exists()) {
+            throw ValidationException::withMessages([
+                'harvest_listing_id' => ['This harvest listing already has a donation listing.'],
+            ]);
+        }
+    }
+
+    private function assertDonationQuantityWithinAvailableStock(HarvestListing $listing, float $quantity): void
+    {
+        $availableQuantity = $listing->available_quantity !== null
+            ? (float) $listing->available_quantity
+            : (float) $listing->quantity;
+
+        if ($quantity > $availableQuantity) {
+            throw ValidationException::withMessages([
+                'quantity' => ['Donation quantity exceeds the available stock of this listing.'],
+            ]);
+        }
+    }
+
+    private function applyMarketplaceJoins(Builder $query, array $filters): void
+    {
+        if (
+            ! $this->hasLocationSearch($filters)
+            && empty($filters['search'])
+        ) {
+            return;
+        }
+
+        $query->join('harvest_listings as donation_listings', 'donation_listings.id', '=', 'donations.harvest_listing_id')
+            ->join('farms as donation_farms', 'donation_farms.id', '=', 'donation_listings.farm_id')
+            ->join('users as donation_farmers', 'donation_farmers.id', '=', 'donations.farmer_id')
+            ->leftJoin('crops as donation_crops', 'donation_crops.id', '=', 'donation_listings.crop_id')
+            ->select('donations.*');
+    }
+
+    private function applySearch(Builder $query, ?string $search): void
+    {
+        $search = trim((string) $search);
+
+        if ($search === '') {
+            return;
+        }
+
+        $query->where(function (Builder $builder) use ($search) {
+            $pattern = '%'.$search.'%';
+
+            $builder->where('donations.description', 'like', $pattern)
+                ->orWhere('donations.notes', 'like', $pattern)
+                ->orWhere('donations.pickup_location', 'like', $pattern)
+                ->orWhere('donation_crops.name', 'like', $pattern)
+                ->orWhere('donation_farms.farm_name', 'like', $pattern)
+                ->orWhere('donation_farms.district', 'like', $pattern)
+                ->orWhere('donation_farmers.name', 'like', $pattern);
+        });
+    }
+
+    private function applyLocationFilter(Builder $query, array $filters): void
+    {
+        if (! $this->hasLocationSearch($filters)) {
+            return;
+        }
+
+        $latitude = (float) $filters['latitude'];
+        $longitude = (float) $filters['longitude'];
+        $radius = $this->resolveRadius($filters['radius'] ?? null);
+        $distanceFormula = $this->distanceFormula();
+        $bindings = [
+            $latitude,
+            $longitude,
+            $latitude,
+        ];
+
+        $query->whereNotNull('donation_farms.latitude')
+            ->whereNotNull('donation_farms.longitude')
+            ->selectRaw("ROUND(($distanceFormula)::numeric, 2) as distance_km", $bindings)
+            ->whereRaw("($distanceFormula) <= ?", [
+                ...$bindings,
+                $radius,
+            ]);
+    }
+
+    private function applyMarketplaceSorting(Builder $query, string $sort): void
+    {
+        match ($sort) {
+            'nearest' => $query->orderBy('distance_km')
+                ->orderByDesc('quantity')
+                ->latest('donations.created_at'),
+            'quantity' => $query->orderByDesc('quantity')
+                ->orderBy('available_until')
+                ->latest('donations.created_at'),
+            default => $query->latest('donations.created_at'),
+        };
+    }
+
+    private function normalizeMarketplaceSort(?string $sort, bool $hasLocationSearch): string
+    {
+        if ($sort === 'nearest' && $hasLocationSearch) {
+            return 'nearest';
+        }
+
+        if ($sort === 'quantity') {
+            return 'quantity';
+        }
+
+        return $hasLocationSearch ? 'nearest' : 'newest';
+    }
+
+    private function hasLocationSearch(array $filters): bool
+    {
+        return array_key_exists('latitude', $filters)
+            && array_key_exists('longitude', $filters)
+            && $filters['latitude'] !== null
+            && $filters['longitude'] !== null;
+    }
+
+    private function resolveRadius(mixed $radius): float
+    {
+        if ($radius === null) {
+            return self::DEFAULT_RADIUS_KM;
+        }
+
+        $resolvedRadius = (float) $radius;
+
+        if ($resolvedRadius < 1) {
+            return self::DEFAULT_RADIUS_KM;
+        }
+
+        return min($resolvedRadius, self::MAX_RADIUS_KM);
+    }
+
+    private function resolvePerPage(mixed $perPage): int
+    {
+        if ($perPage === null) {
+            return self::DEFAULT_PAGE_SIZE;
+        }
+
+        $resolvedPerPage = (int) $perPage;
+
+        if ($resolvedPerPage < 1) {
+            return self::DEFAULT_PAGE_SIZE;
+        }
+
+        return min($resolvedPerPage, self::MAX_PAGE_SIZE);
+    }
+
+    private function distanceFormula(string $tableAlias = 'donation_farms'): string
+    {
+        return '('.self::EARTH_RADIUS_KM.' * acos(
+            LEAST(
+                1.0,
+                GREATEST(
+                    -1.0,
+                    cos(radians(?))
+                    * cos(radians('.$tableAlias.'.latitude))
+                    * cos(radians('.$tableAlias.'.longitude) - radians(?))
+                    + sin(radians(?))
+                    * sin(radians('.$tableAlias.'.latitude))
+                )
+            )
+        ))';
     }
 }

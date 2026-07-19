@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Http\Requests\DonationMarketplaceFilterRequest;
 use App\Http\Requests\StoreDonationRequest;
 use App\Http\Requests\UpdateDonationPickupRequest;
 use App\Http\Requests\UpdateDonationRequest;
 use App\Http\Resources\DonationResource;
 use App\Models\Donation;
-use App\Services\DonationService;
 use Illuminate\Http\Request;
+use App\Services\DonationService;
 
 class DonationController extends Controller
 {
@@ -115,23 +116,32 @@ class DonationController extends Controller
 
         );
     }
-    public function available()
+    public function available(DonationMarketplaceFilterRequest $request)
     {
+        $validated = $request->validated();
+        $hasCoordinates =
+            array_key_exists('latitude', $validated)
+            && array_key_exists('longitude', $validated)
+            && $validated['latitude'] !== null
+            && $validated['longitude'] !== null;
+        $resolvedSort = $validated['sort'] ?? ($hasCoordinates ? 'nearest' : 'newest');
+        $resolvedRadius = $hasCoordinates ? ($validated['radius'] ?? 50) : null;
+        $donations = $this->service->getAvailableForNgo($validated);
+        $resourceCollection = DonationResource::collection($donations)
+            ->response()
+            ->getData(true);
+
         return ApiResponse::success(
-
-            DonationResource::collection(
-
-                Donation::where(
-                    'status',
-                    'available'
-                )
-                    ->latest()
-                    ->get()
-
-            ),
-
-            'Available donations.'
-
+            [
+                'donations' => $resourceCollection['data'],
+                'sort' => $resolvedSort,
+                'radius' => $resolvedRadius,
+                'pagination' => [
+                    'links' => $resourceCollection['links'] ?? null,
+                    'meta' => $resourceCollection['meta'] ?? null,
+                ],
+            ],
+            'Available donations retrieved successfully.'
         );
     }
     public function schedulePickup(
@@ -179,7 +189,7 @@ class DonationController extends Controller
 
             new DonationResource($donation),
 
-            'Donation completed successfully.'
+            'Donation marked as collected successfully.'
 
         );
     }

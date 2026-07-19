@@ -119,6 +119,17 @@ class Farm extends Model
         return $this->hasMany(Prediction::class);
     }
 
+    public function stories(): HasMany
+    {
+        return $this->hasMany(StoreStory::class);
+    }
+
+    public function activeStories(): HasMany
+    {
+        return $this->hasMany(StoreStory::class)
+            ->where('expires_at', '>', now());
+    }
+
     public function scopeOwnedBy($query, User $user)
     {
         return $query->where('user_id', $user->id);
