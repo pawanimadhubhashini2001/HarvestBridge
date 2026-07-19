@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -34,7 +34,6 @@ import type { AppError } from '@/types/api';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 const seasonOptions = ['Yala', 'Maha'] as const;
-const marketDemandOptions = ['Low', 'Medium', 'High'] as const;
 
 const smartRecommendationSchema = z.object({
   season: z.enum(seasonOptions, {
@@ -45,40 +44,10 @@ const smartRecommendationSchema = z.object({
     .trim()
     .min(1, 'Soil type is required.')
     .max(100, 'Soil type is too long.'),
-  soil_ph: z
+  previous_crop: z
     .string()
     .trim()
-    .min(1, 'Soil pH is required.')
-    .refine((value) => !Number.isNaN(Number(value)), 'Soil pH must be a number.')
-    .refine(
-      (value) => Number(value) >= 0 && Number(value) <= 14,
-      'Soil pH must be between 0 and 14.',
-    ),
-  nitrogen: z
-    .string()
-    .trim()
-    .min(1, 'Nitrogen is required.')
-    .refine((value) => !Number.isNaN(Number(value)), 'Nitrogen must be a number.')
-    .refine((value) => Number(value) >= 0, 'Nitrogen must be 0 or greater.'),
-  phosphorus: z
-    .string()
-    .trim()
-    .min(1, 'Phosphorus is required.')
-    .refine((value) => !Number.isNaN(Number(value)), 'Phosphorus must be a number.')
-    .refine((value) => Number(value) >= 0, 'Phosphorus must be 0 or greater.'),
-  potassium: z
-    .string()
-    .trim()
-    .min(1, 'Potassium is required.')
-    .refine((value) => !Number.isNaN(Number(value)), 'Potassium must be a number.')
-    .refine((value) => Number(value) >= 0, 'Potassium must be 0 or greater.'),
-  market_demand: z.enum(marketDemandOptions, {
-    message: 'Please select market demand.',
-  }),
-  additional_notes: z
-    .string()
-    .trim()
-    .max(500, 'Additional notes are too long.')
+    .max(100, 'Previous crop is too long.')
     .optional()
     .or(z.literal('')),
 });
@@ -88,12 +57,7 @@ type SmartRecommendationFormValues = z.infer<typeof smartRecommendationSchema>;
 const formFieldNames = [
   'season',
   'soil_type',
-  'soil_ph',
-  'nitrogen',
-  'phosphorus',
-  'potassium',
-  'market_demand',
-  'additional_notes',
+  'previous_crop',
 ] as const satisfies readonly (keyof SmartRecommendationFormValues)[];
 
 function SelectorField({
@@ -153,8 +117,10 @@ function toSmartPayload(
     District: store.district,
     Season: values.season,
     Soil_Type: values.soil_type.trim(),
-    pH: Number(values.soil_ph),
-    Market_Demand: values.market_demand,
+    Previous_Crop: values.previous_crop?.trim() || null,
+    pH: null,
+    Market_Demand: null,
+    Previous_Yield_t_ha: null,
   };
 }
 
@@ -175,36 +141,10 @@ export function SmartRecommendationScreen({
     defaultValues: {
       season: 'Yala',
       soil_type: '',
-      soil_ph: '',
-      nitrogen: '',
-      phosphorus: '',
-      potassium: '',
-      market_demand: 'Medium',
-      additional_notes: '',
+      previous_crop: '',
     },
     resolver: zodResolver(smartRecommendationSchema),
     mode: 'onChange',
-  });
-
-  const soilPhValue = useWatch({
-    control,
-    name: 'soil_ph',
-  });
-  const nitrogenValue = useWatch({
-    control,
-    name: 'nitrogen',
-  });
-  const phosphorusValue = useWatch({
-    control,
-    name: 'phosphorus',
-  });
-  const potassiumValue = useWatch({
-    control,
-    name: 'potassium',
-  });
-  const additionalNotesValue = useWatch({
-    control,
-    name: 'additional_notes',
   });
 
   const storeQuery = useQuery({
@@ -237,12 +177,8 @@ export function SmartRecommendationScreen({
           },
           form: {
             season: payload.Season,
-            soil_ph: Number(soilPhValue),
-            nitrogen: Number(nitrogenValue),
-            phosphorus: Number(phosphorusValue),
-            potassium: Number(potassiumValue),
-            market_demand: payload.Market_Demand,
-            additional_notes: additionalNotesValue?.trim() || undefined,
+            soil_type: payload.Soil_Type,
+            previous_crop: payload.Previous_Crop ?? null,
           },
         };
 
@@ -255,7 +191,7 @@ export function SmartRecommendationScreen({
         queryClient.invalidateQueries({ queryKey: ['analytics', 'ai'] }),
       ]);
 
-      navigation.navigate('RecommendationResult', { predictionId: undefined });
+      navigation.navigate('RecommendationResult', {});
     },
     onError: (error: AppError) => {
       setErrorMessage(error.message);
@@ -275,6 +211,13 @@ export function SmartRecommendationScreen({
   const onSubmit = handleSubmit(async (values) => {
     if (!store) {
       setErrorMessage('Create your store profile before requesting a smart recommendation.');
+      return;
+    }
+
+    if (!weatherQuery.data) {
+      setErrorMessage(
+        'Live weather data is required before generating a recommendation. Please retry after the weather section loads.',
+      );
       return;
     }
 
@@ -362,8 +305,8 @@ export function SmartRecommendationScreen({
               Smart Crop Recommendation
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Use your saved store location, confirm growing conditions, and let the AI service
-              request a crop recommendation with live district weather context.
+              Enter your season, soil type, and previous crop. Live district weather is added
+              automatically before the AI service recommends a crop.
             </Text>
           </View>
 
@@ -419,106 +362,16 @@ export function SmartRecommendationScreen({
 
                   <Controller
                     control={control}
-                    name="soil_ph"
+                    name="previous_crop"
                     render={({ field: { onChange, onBlur, value } }) => (
                       <AppTextInput
                         containerClassName="gap-0"
-                        label="Soil pH"
+                        label="Previous Crop (optional)"
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        keyboardType="decimal-pad"
-                        errorMessage={errors.soil_ph?.message}
-                        disabled={smartRecommendationMutation.isPending}
-                      />
-                    )}
-                  />
-
-                  <View className={isWide ? 'flex-row gap-md' : 'gap-md'}>
-                    <View style={{ flex: 1 }}>
-                      <Controller
-                        control={control}
-                        name="nitrogen"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <AppTextInput
-                            containerClassName="gap-0"
-                            label="Nitrogen"
-                            value={value}
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            keyboardType="decimal-pad"
-                            errorMessage={errors.nitrogen?.message}
-                            disabled={smartRecommendationMutation.isPending}
-                          />
-                        )}
-                      />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Controller
-                        control={control}
-                        name="phosphorus"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <AppTextInput
-                            containerClassName="gap-0"
-                            label="Phosphorus"
-                            value={value}
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            keyboardType="decimal-pad"
-                            errorMessage={errors.phosphorus?.message}
-                            disabled={smartRecommendationMutation.isPending}
-                          />
-                        )}
-                      />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Controller
-                        control={control}
-                        name="potassium"
-                        render={({ field: { onChange, onBlur, value } }) => (
-                          <AppTextInput
-                            containerClassName="gap-0"
-                            label="Potassium"
-                            value={value}
-                            onChangeText={onChange}
-                            onBlur={onBlur}
-                            keyboardType="decimal-pad"
-                            errorMessage={errors.potassium?.message}
-                            disabled={smartRecommendationMutation.isPending}
-                          />
-                        )}
-                      />
-                    </View>
-                  </View>
-
-                  <Controller
-                    control={control}
-                    name="market_demand"
-                    render={({ field: { onChange, value } }) => (
-                      <SelectorField
-                        label="Market Demand"
-                        value={value}
-                        options={marketDemandOptions}
-                        onSelect={onChange}
-                        errorMessage={errors.market_demand?.message}
-                        disabled={smartRecommendationMutation.isPending}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    control={control}
-                    name="additional_notes"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <AppTextInput
-                        containerClassName="gap-0"
-                        label="Additional Notes (optional)"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        multiline
-                        numberOfLines={4}
-                        errorMessage={errors.additional_notes?.message}
+                        autoCapitalize="words"
+                        errorMessage={errors.previous_crop?.message}
                         disabled={smartRecommendationMutation.isPending}
                       />
                     )}
@@ -542,7 +395,9 @@ export function SmartRecommendationScreen({
                       void onSubmit();
                     }}
                     loading={smartRecommendationMutation.isPending}
-                    disabled={smartRecommendationMutation.isPending || !isValid}
+                    disabled={
+                      smartRecommendationMutation.isPending || !isValid || !weatherQuery.data
+                    }
                   />
                 </View>
               </Card.Content>
@@ -615,9 +470,9 @@ export function SmartRecommendationScreen({
                     ) : weatherQuery.data ? (
                       <View className="gap-sm">
                         <View className="flex-row flex-wrap gap-sm">
-                          <Chip compact>{weatherQuery.data.temperature} deg C</Chip>
-                          <Chip compact>{weatherQuery.data.humidity}% humidity</Chip>
-                          <Chip compact>{weatherQuery.data.rainfall} mm rain</Chip>
+                          <Chip compact>Temperature_C: {weatherQuery.data.temperature}</Chip>
+                          <Chip compact>Humidity_pct: {weatherQuery.data.humidity}</Chip>
+                          <Chip compact>Rainfall_mm: {weatherQuery.data.rainfall}</Chip>
                         </View>
                         <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
                           {weatherQuery.data.condition_description ||
@@ -626,6 +481,9 @@ export function SmartRecommendationScreen({
                         </Text>
                         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
                           {weatherQuery.data.location || store.district}
+                        </Text>
+                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                          These weather values are attached automatically when you submit the form.
                         </Text>
                       </View>
                     ) : (

@@ -255,7 +255,10 @@ export function AIRecommendationCard() {
 
           <View className={isWide ? 'flex-row flex-wrap gap-sm' : 'gap-sm'}>
             <SummaryMetric label="Confidence Score" value={formatConfidence(latestRecommendation.confidence)} />
-            <SummaryMetric label="Market Demand" value={latestRecommendation.market_demand} />
+            <SummaryMetric
+              label="Market Demand"
+              value={latestRecommendation.market_demand || 'Not provided'}
+            />
             <SummaryMetric label="Weather Summary" value={formatWeatherSummary(latestRecommendation)} />
           </View>
 

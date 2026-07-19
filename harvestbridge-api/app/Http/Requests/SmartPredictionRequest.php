@@ -21,13 +21,13 @@ class SmartPredictionRequest extends FormRequest
 
             'Soil_Type' => 'required|string',
 
-            'pH' => 'required|numeric',
+            'pH' => 'nullable|numeric',
 
             'Previous_Crop' => 'nullable|string',
 
             'Previous_Yield_t_ha' => 'nullable|numeric',
 
-            'Market_Demand' => 'required|string',
+            'Market_Demand' => 'nullable|string',
 
         ];
     }

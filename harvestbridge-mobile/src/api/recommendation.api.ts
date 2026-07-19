@@ -18,10 +18,10 @@ export interface SmartPredictionPayload {
   District: string;
   Season: string;
   Soil_Type: string;
-  pH: number;
+  pH?: number | null;
   Previous_Crop?: string | null;
   Previous_Yield_t_ha?: number | null;
-  Market_Demand: string;
+  Market_Demand?: string | null;
 }
 
 export interface RecommendationExplanation {
@@ -69,12 +69,8 @@ export interface CachedSmartRecommendationResult {
   };
   form: {
     season: string;
-    soil_ph: number;
-    nitrogen: number;
-    phosphorus: number;
-    potassium: number;
-    market_demand: string;
-    additional_notes?: string;
+    soil_type: string;
+    previous_crop?: string | null;
   };
 }
 
@@ -84,7 +80,7 @@ export interface PredictionHistoryDto {
   season: string;
   recommended_crop: string;
   confidence: number;
-  market_demand: string;
+  market_demand?: string | null;
   temperature: number | string;
   rainfall: number | string;
   humidity: number | string;
@@ -98,7 +94,7 @@ export interface RecommendationHistoryDto {
   district: string;
   season: string;
   soil_type: string;
-  market_demand: string;
+  market_demand?: string | null;
   is_favorite: boolean;
   created_at: string;
 }

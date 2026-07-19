@@ -146,7 +146,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
           AIRecommendationForm: 'recommendations/new',
           PlantDiseaseDetection: 'recommendations/disease-detect',
           PlantDiseasePrediction: 'recommendations/disease-result',
-          RecommendationResult: 'recommendations/result/:predictionId',
+          RecommendationResult: 'recommendations/result',
           WeatherDetails: 'weather/:district',
           Settings: 'settings',
         },

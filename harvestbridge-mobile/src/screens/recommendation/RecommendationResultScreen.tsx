@@ -243,9 +243,8 @@ function findMatchingRecommendation(
     const matchesDistrict = item.district === cachedResult.request.District;
     const matchesSeason = item.season === cachedResult.request.Season;
     const matchesSoil = item.soil_type === cachedResult.request.Soil_Type;
-    const matchesDemand = item.market_demand === cachedResult.request.Market_Demand;
 
-    return matchesCrop && matchesDistrict && matchesSeason && matchesSoil && matchesDemand;
+    return matchesCrop && matchesDistrict && matchesSeason && matchesSoil;
   });
 }
 
@@ -452,7 +451,6 @@ export function RecommendationResultScreen({
               value={cachedResult.response.prediction.recommended_crop}
             />
             <DetailRow label="Confidence Percentage" value={confidence} />
-            <DetailRow label="Market Demand" value={cachedResult.request.Market_Demand} />
             <DetailRow label="Recommendation Time" value={formatRecommendationTime(recommendationTime)} />
             <DetailRow label="District" value={cachedResult.request.District} />
             <DetailRow label="Season" value={cachedResult.request.Season} />
@@ -485,13 +483,9 @@ export function RecommendationResultScreen({
         <View style={{ flex: 1 }} className="gap-md">
           <SummarySection title="Soil Summary" subtitle={`Store: ${cachedResult.store.name}`}>
             <DetailRow label="Soil Type" value={cachedResult.request.Soil_Type} />
-            <DetailRow label="Soil pH" value={`${cachedResult.form.soil_ph}`} />
-            <DetailRow label="Nitrogen" value={`${cachedResult.form.nitrogen}`} />
-            <DetailRow label="Phosphorus" value={`${cachedResult.form.phosphorus}`} />
-            <DetailRow label="Potassium" value={`${cachedResult.form.potassium}`} />
             <DetailRow
-              label="Additional Notes"
-              value={cachedResult.form.additional_notes || 'Not provided'}
+              label="Previous Crop"
+              value={cachedResult.form.previous_crop || 'Not provided'}
             />
           </SummarySection>
 
@@ -569,7 +563,7 @@ export function RecommendationResultScreen({
         recommendedCrop={cachedResult.response.prediction.recommended_crop}
         soilType={cachedResult.request.Soil_Type}
         season={cachedResult.request.Season}
-        marketDemand={cachedResult.request.Market_Demand}
+        marketDemand={cachedResult.request.Market_Demand ?? 'Not provided'}
         district={cachedResult.request.District}
         weatherSummary={weatherSummary}
         confidence={cachedResult.response.prediction.confidence}
