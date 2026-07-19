@@ -123,6 +123,19 @@ export interface PublicStoreDetailsDto {
     open_maps_action?: MarketplaceOpenMapsActionDto | null;
     share_url?: string | null;
   };
+  reviews: {
+    average_rating?: number | null;
+    review_count: number;
+    total_ratings: number;
+    rating_breakdown: {
+      five_star_count: number;
+      four_star_count: number;
+      three_star_count: number;
+      two_star_count: number;
+      one_star_count: number;
+    };
+  };
+  is_favorite: boolean;
   created_at: string;
   updated_at?: string | null;
 }

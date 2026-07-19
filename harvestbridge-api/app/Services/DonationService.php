@@ -37,6 +37,7 @@ class DonationService
         $query = Donation::query()
             ->with($this->resourceRelations())
             ->where('status', Donation::STATUS_AVAILABLE)
+            ->whereHas('harvestListing.farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
             ->where(function (Builder $builder) {
                 $builder->whereNull('available_until')
                     ->orWhereDate('available_until', '>=', now()->toDateString());

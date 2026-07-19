@@ -30,6 +30,7 @@ class MarketplaceProductResource extends JsonResource
                 'status_label' => $this->statusLabel(),
                 'is_available' => $this->isAvailableForConsumers(),
                 'is_featured' => $this->isCurrentlyFeatured(),
+                'is_favorite' => (bool) ($this->is_favorite ?? false),
                 'featured_until' => $this->featured_until,
                 'images' => HarvestListingImageResource::collection(
                     $this->whenLoaded('images')
@@ -66,6 +67,7 @@ class MarketplaceProductResource extends JsonResource
                 'whatsapp_number' => $this->farm->whatsapp_number,
                 'business_hours' => $this->farm->business_hours,
                 'business_status' => $this->farm->business_status,
+                'is_favorite' => (bool) ($this->farm?->is_favorite ?? false),
             ]),
             'store_location' => $this->whenLoaded('farm', fn () => [
                 'district' => $this->farm->district,

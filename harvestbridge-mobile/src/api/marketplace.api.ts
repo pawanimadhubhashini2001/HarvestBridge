@@ -11,6 +11,7 @@ export interface MarketplaceImageDto {
 export interface MarketplaceStoreSummaryDto {
   id: number;
   store_name: string;
+  phone_number?: string | null;
   business_status?: string | null;
   district?: string | null;
   address?: string | null;
@@ -48,6 +49,7 @@ export interface MarketplaceListingDto {
   available_until?: string | null;
   status: string;
   is_featured: boolean;
+  is_favorite?: boolean;
   featured_until?: string | null;
   description?: string | null;
   created_at: string;
@@ -128,6 +130,7 @@ export interface MarketplaceProductDetailDto {
     status_label?: string | null;
     is_available: boolean;
     is_featured: boolean;
+    is_favorite: boolean;
     featured_until?: string | null;
     images: MarketplaceImageDto[];
     primary_image?: MarketplaceImageDto | null;
@@ -153,6 +156,7 @@ export interface MarketplaceProductDetailDto {
     whatsapp_number?: string | null;
     business_hours?: string | null;
     business_status?: string | null;
+    is_favorite?: boolean;
   } | null;
   store_location?: {
     district?: string | null;

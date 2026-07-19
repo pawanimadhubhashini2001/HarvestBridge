@@ -35,6 +35,7 @@ class FarmResource extends JsonResource
             'email' => $this->email,
             'business_hours' => $this->business_hours,
             'business_status' => $this->business_status,
+            'is_suspended' => (bool) ($this->is_suspended ?? false),
             'farm_size' => $this->farm_size,
             'farm_size_unit' => $this->farm_size_unit,
             'soil_type' => $this->soil_type,

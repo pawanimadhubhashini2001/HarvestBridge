@@ -52,6 +52,22 @@ class PublicStoreResource extends JsonResource
                 'open_maps_action' => $this->openMapsAction(),
                 'share_url' => url('/api/stores/public/'.$this->getKey()),
             ],
+            'reviews' => [
+                'average_rating' => isset($this->visible_reviews_average_rating)
+                    && $this->visible_reviews_average_rating !== null
+                    ? round((float) $this->visible_reviews_average_rating, 2)
+                    : null,
+                'review_count' => (int) ($this->visible_reviews_count ?? 0),
+                'total_ratings' => (int) ($this->visible_reviews_count ?? 0),
+                'rating_breakdown' => [
+                    'five_star_count' => (int) ($this->visible_reviews_five_star_count ?? 0),
+                    'four_star_count' => (int) ($this->visible_reviews_four_star_count ?? 0),
+                    'three_star_count' => (int) ($this->visible_reviews_three_star_count ?? 0),
+                    'two_star_count' => (int) ($this->visible_reviews_two_star_count ?? 0),
+                    'one_star_count' => (int) ($this->visible_reviews_one_star_count ?? 0),
+                ],
+            ],
+            'is_favorite' => (bool) ($this->is_favorite ?? false),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

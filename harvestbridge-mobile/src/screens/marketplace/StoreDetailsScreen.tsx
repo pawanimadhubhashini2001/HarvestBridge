@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import {
   FlatList,
@@ -15,10 +15,12 @@ import {
   Card,
   Chip,
   Divider,
+  IconButton,
   Snackbar,
   Text,
 } from 'react-native-paper';
 
+import { favoriteStore, getFavoritesQueryKey, unfavoriteStore } from '@/api/favorites.api';
 import type { MarketplaceListingDto } from '@/api/marketplace.api';
 import {
   getPublicStoreDetails,
@@ -30,6 +32,7 @@ import {
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
+import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -43,13 +46,28 @@ function formatDistance(distance?: number | null) {
   return `${distance.toFixed(distance % 1 === 0 ? 0 : 1)} km away`;
 }
 
+function renderStarRating(averageRating?: number | null) {
+  if (typeof averageRating !== 'number' || !Number.isFinite(averageRating)) {
+    return '☆☆☆☆☆';
+  }
+
+  const filledStars = Math.round(averageRating);
+
+  return `${'★'.repeat(Math.max(0, Math.min(5, filledStars)))}${'☆'.repeat(
+    Math.max(0, 5 - Math.max(0, Math.min(5, filledStars))),
+  )}`;
+}
+
 export function StoreDetailsScreen({
   navigation,
   route,
 }: AppStackScreenProps<'StoreDetails'>) {
   const theme = useAppTheme();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const storeId = route.params?.storeId;
   const [actionError, setActionError] = useState<string | null>(null);
+  const isConsumer = user?.role === 'consumer';
 
   const queryParams: PublicStoreQueryParams =
     typeof route.params?.latitude === 'number' && typeof route.params?.longitude === 'number'
@@ -132,6 +150,32 @@ export function StoreDetailsScreen({
   const distanceLabel =
     formatDistance(detailsQuery.data?.distance_km ?? route.params?.distanceKm ?? null);
 
+  const favoriteMutation = useMutation({
+    mutationFn: async (shouldFavorite: boolean) => {
+      if (!storeId) {
+        throw new Error('The selected store could not be identified.');
+      }
+
+      if (shouldFavorite) {
+        return favoriteStore(storeId);
+      }
+
+      return unfavoriteStore(storeId);
+    },
+    onSuccess: async (_, shouldFavorite) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getPublicStoreDetailsQueryKey(storeId ?? 'missing', queryParams) }),
+        queryClient.invalidateQueries({ queryKey: getFavoritesQueryKey() }),
+      ]);
+      setActionError(
+        shouldFavorite ? 'Store saved to favorites.' : 'Store removed from favorites.',
+      );
+    },
+    onError: (error) => {
+      setActionError(getErrorMessage(error));
+    },
+  });
+
   const renderProduct: ListRenderItem<MarketplaceListingDto> = ({ item }) => (
     <View className="px-md pb-md">
       <MarketplaceProductCard
@@ -209,6 +253,7 @@ export function StoreDetailsScreen({
   }
 
   const store = detailsQuery.data;
+  const isFavorite = Boolean(store.is_favorite);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -289,12 +334,29 @@ export function StoreDetailsScreen({
 
                     <View className="flex-1 gap-sm">
                       <View className="gap-xs">
-                        <Chip compact style={{ alignSelf: 'flex-start' }}>
-                          Public Store
-                        </Chip>
-                        <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
-                          {store.store_name}
-                        </Text>
+                        <View className="flex-row items-center justify-between gap-sm">
+                          <View className="gap-xs">
+                            <Chip compact style={{ alignSelf: 'flex-start' }}>
+                              Public Store
+                            </Chip>
+                            <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
+                              {store.store_name}
+                            </Text>
+                          </View>
+                          {isConsumer ? (
+                            <IconButton
+                              icon={isFavorite ? 'heart' : 'heart-outline'}
+                              iconColor={isFavorite ? theme.colors.error : theme.colors.primary}
+                              disabled={favoriteMutation.isPending}
+                              onPress={() => {
+                                void favoriteMutation.mutateAsync(!isFavorite);
+                              }}
+                              accessibilityLabel={
+                                isFavorite ? 'Remove store from favorites' : 'Save store to favorites'
+                              }
+                            />
+                          ) : null}
+                        </View>
                         <Text
                           variant="bodyMedium"
                           style={{ color: theme.colors.onSurfaceVariant }}>
@@ -340,6 +402,30 @@ export function StoreDetailsScreen({
                     <Button mode="contained-tonal" icon="share-variant-outline" onPress={() => void shareStore()}>
                       Share Store
                     </Button>
+                    <Button
+                      mode="outlined"
+                      icon="star-outline"
+                      onPress={() => {
+                        navigation.navigate('StoreReviews', {
+                          storeId: String(store.id),
+                          storeName: store.store_name,
+                        });
+                      }}>
+                      View Reviews
+                    </Button>
+                    {isConsumer ? (
+                      <Button
+                        mode="contained-tonal"
+                        icon="pencil-outline"
+                        onPress={() => {
+                          navigation.navigate('WriteStoreReview', {
+                            storeId: String(store.id),
+                            storeName: store.store_name,
+                          });
+                        }}>
+                        Write Review
+                      </Button>
+                    ) : null}
                   </View>
                 </View>
               </View>
@@ -365,6 +451,26 @@ export function StoreDetailsScreen({
                     Address: {store.location.address ?? 'Not available'}
                   </Text>
                 </View>
+
+                <Divider />
+
+                <Text variant="titleMedium" style={{ fontWeight: '700' }}>
+                  Customer Reviews
+                </Text>
+                <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
+                  {renderStarRating(store.reviews.average_rating)}
+                </Text>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  Average rating:{' '}
+                  {typeof store.reviews.average_rating === 'number'
+                    ? `${store.reviews.average_rating.toFixed(
+                        store.reviews.average_rating % 1 === 0 ? 0 : 1,
+                      )} / 5`
+                    : 'No ratings yet'}
+                </Text>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {store.reviews.total_ratings} review{store.reviews.total_ratings === 1 ? '' : 's'}
+                </Text>
 
                 <Divider />
 

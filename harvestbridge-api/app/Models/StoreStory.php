@@ -18,6 +18,7 @@ class StoreStory extends Model
         'media_type',
         'media_path',
         'caption',
+        'is_hidden',
         'expires_at',
     ];
 
@@ -25,6 +26,7 @@ class StoreStory extends Model
     {
         return [
             'expires_at' => 'datetime',
+            'is_hidden' => 'boolean',
         ];
     }
 
@@ -40,7 +42,9 @@ class StoreStory extends Model
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where('expires_at', '>', now());
+        return $query
+            ->where('expires_at', '>', now())
+            ->where('is_hidden', false);
     }
 
     public function isExpired(): bool

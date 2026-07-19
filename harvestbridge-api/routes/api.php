@@ -8,10 +8,13 @@ use App\Http\Controllers\CompostListingController;
 use App\Http\Controllers\CompostRequestController;
 use App\Http\Controllers\CropController;
 use App\Http\Controllers\FarmController;
+use App\Http\Controllers\AdminModerationController;
+use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\StoreReviewController;
 use App\Http\Controllers\StoreStoryController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HarvestListingController;
@@ -57,7 +60,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/admin/users', [AdminController::class, 'users']);
+        Route::get('/admin/users/{user}', [AdminController::class, 'showUser']);
         Route::patch('/admin/users/{user}/status', [AdminController::class, 'updateUserStatus']);
+        Route::patch('/admin/users/{user}/suspend', [AdminController::class, 'suspendUser']);
+        Route::patch('/admin/users/{user}/activate', [AdminController::class, 'activateUser']);
+        Route::get('/admin/moderation/products', [AdminModerationController::class, 'products']);
+        Route::patch('/admin/moderation/products/{harvestListing}/hide', [AdminModerationController::class, 'hideProduct']);
+        Route::delete('/admin/moderation/products/{harvestListing}', [AdminModerationController::class, 'deleteProduct']);
+        Route::get('/admin/moderation/stores', [AdminModerationController::class, 'stores']);
+        Route::patch('/admin/moderation/stores/{store}/suspend', [AdminModerationController::class, 'suspendStore']);
+        Route::get('/admin/moderation/stories', [AdminModerationController::class, 'stories']);
+        Route::patch('/admin/moderation/stories/{story}/hide', [AdminModerationController::class, 'hideStory']);
+        Route::delete('/admin/moderation/stories/{story}', [AdminModerationController::class, 'deleteStory']);
+        Route::get('/admin/moderation/donations', [AdminModerationController::class, 'donations']);
+        Route::patch('/admin/moderation/donations/{donation}/hide', [AdminModerationController::class, 'hideDonation']);
+        Route::delete('/admin/moderation/donations/{donation}', [AdminModerationController::class, 'deleteDonation']);
+        Route::get('/admin/moderation/compost-listings', [AdminModerationController::class, 'compostListings']);
+        Route::patch('/admin/moderation/compost-listings/{compostListing}/hide', [AdminModerationController::class, 'hideCompostListing']);
+        Route::delete('/admin/moderation/compost-listings/{compostListing}', [AdminModerationController::class, 'deleteCompostListing']);
+        Route::get('/admin/moderation/reports', [AdminModerationController::class, 'reports']);
         Route::get('/admin/farms', [AdminController::class, 'farms']);
         Route::get('/admin/crops', [AdminController::class, 'crops']);
         Route::get('/admin/ai-logs', [AdminController::class, 'aiLogs']);
@@ -226,6 +247,14 @@ Route::middleware('auth:sanctum')->group(function () {
             '/orders',
             [OrderController::class, 'index']
         );
+        Route::get('/favorites', [FavoriteController::class, 'index']);
+        Route::post('/favorites/stores/{store}', [FavoriteController::class, 'favoriteStore']);
+        Route::delete('/favorites/stores/{store}', [FavoriteController::class, 'unfavoriteStore']);
+        Route::post('/favorites/products/{harvestListing}', [FavoriteController::class, 'favoriteProduct']);
+        Route::delete('/favorites/products/{harvestListing}', [FavoriteController::class, 'unfavoriteProduct']);
+        Route::post('/stores/{store}/reviews', [StoreReviewController::class, 'store']);
+        Route::put('/stores/{store}/reviews/{review}', [StoreReviewController::class, 'update']);
+        Route::delete('/stores/{store}/reviews/{review}', [StoreReviewController::class, 'destroy']);
     });
 
     /*
@@ -315,6 +344,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/crops/categories', [CropController::class, 'categories']);
     Route::get('/stores/public/{store}', [StoreController::class, 'publicShow']);
     Route::get('/stores/public/{store}/products', [StoreController::class, 'publicProducts']);
+    Route::get('/stores/public/{store}/reviews', [StoreReviewController::class, 'index']);
     Route::get('/stores/{store}/location', [StoreController::class, 'location']);
     Route::get('/stories/feed', [StoreStoryController::class, 'feed']);
     Route::post('/stories/{story}/view', [StoreStoryController::class, 'recordView']);

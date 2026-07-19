@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Linking, Pressable, ScrollView, View } from 'react-native';
+import { FlatList, Linking, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator, Button, Chip, Searchbar, Snackbar, Text } from 'react-native-paper';
 
@@ -342,24 +342,21 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                   const isSelected = selectedRadius === option.value;
 
                   return (
-                    <Pressable
+                    <Chip
                       key={option.label}
-                      accessibilityRole="button"
                       accessibilityLabel={`Filter results within ${option.label}`}
                       onPress={() => {
                         setSelectedRadius(option.value);
+                      }}
+                      selected={isSelected}
+                      showSelectedCheck={false}
+                      style={{
+                        backgroundColor: isSelected
+                          ? theme.colors.primaryContainer
+                          : theme.colors.surface,
                       }}>
-                      <Chip
-                        selected={isSelected}
-                        showSelectedCheck={false}
-                        style={{
-                          backgroundColor: isSelected
-                            ? theme.colors.primaryContainer
-                            : theme.colors.surface,
-                        }}>
-                        {option.label}
-                      </Chip>
-                    </Pressable>
+                      {option.label}
+                    </Chip>
                   );
                 })}
               </View>

@@ -7,6 +7,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 
 class HarvestListing extends Model
@@ -187,5 +188,15 @@ class HarvestListing extends Model
         return $this->hasMany(HarvestListingImage::class)
             ->orderBy('sort_order')
             ->orderBy('id');
+    }
+
+    public function favoritedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favorite_products',
+            'harvest_listing_id',
+            'user_id'
+        )->withTimestamps();
     }
 }

@@ -108,6 +108,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'reviewed_user_id');
     }
+
+    public function storeReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewer_id')
+            ->whereNotNull('farm_id');
+    }
     public function consumerOrders()
     {
         return $this->hasMany(
@@ -145,5 +151,15 @@ class User extends Authenticatable
     public function auditLogs()
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    public function favoriteStores(): HasMany
+    {
+        return $this->hasMany(FavoriteStore::class);
+    }
+
+    public function favoriteProducts(): HasMany
+    {
+        return $this->hasMany(FavoriteProduct::class);
     }
 }

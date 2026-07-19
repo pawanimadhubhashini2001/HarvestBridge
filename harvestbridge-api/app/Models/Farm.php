@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Farm extends Model
@@ -31,6 +32,7 @@ class Farm extends Model
         'description',
         'business_hours',
         'business_status',
+        'is_suspended',
     ];
 
     protected function casts(): array
@@ -38,7 +40,8 @@ class Farm extends Model
         return [
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
-        'farm_size' => 'decimal:2',
+            'farm_size' => 'decimal:2',
+            'is_suspended' => 'boolean',
         ];
     }
 
@@ -127,7 +130,29 @@ class Farm extends Model
     public function activeStories(): HasMany
     {
         return $this->hasMany(StoreStory::class)
-            ->where('expires_at', '>', now());
+            ->where('expires_at', '>', now())
+            ->where('is_hidden', false);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function visibleReviews(): HasMany
+    {
+        return $this->hasMany(Review::class)
+            ->where('is_visible', true);
+    }
+
+    public function favoritedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favorite_stores',
+            'farm_id',
+            'user_id'
+        )->withTimestamps();
     }
 
     public function scopeOwnedBy($query, User $user)

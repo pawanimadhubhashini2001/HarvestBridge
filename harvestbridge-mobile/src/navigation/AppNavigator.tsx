@@ -7,7 +7,10 @@ import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
+import { FavoritesScreen } from '@/screens/marketplace/FavoritesScreen';
 import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
+import { StoreReviewsScreen } from '@/screens/marketplace/StoreReviewsScreen';
+import { WriteReviewScreen } from '@/screens/marketplace/WriteReviewScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
@@ -112,6 +115,21 @@ export function AppNavigator() {
         name="StoreDetails"
         component={StoreDetailsScreen}
         options={{ title: 'Store Details' }}
+      />
+      <Stack.Screen
+        name="StoreReviews"
+        component={StoreReviewsScreen}
+        options={{ title: 'Store Reviews' }}
+      />
+      <Stack.Screen
+        name="WriteStoreReview"
+        component={WriteReviewScreen}
+        options={{ title: 'Write Review' }}
+      />
+      <Stack.Screen
+        name="Favorites"
+        component={FavoritesScreen}
+        options={{ title: 'Favorites' }}
       />
       <Stack.Screen
         name="WeatherDetails"

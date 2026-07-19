@@ -48,6 +48,7 @@ class StoreStoryService
 
         $query = StoreStory::query()
             ->active()
+            ->whereHas('store', fn ($storeQuery) => $storeQuery->where('is_suspended', false))
             ->with([
                 'store:id,farm_name,store_logo_path,district,address,latitude,longitude,phone_number',
             ]);
@@ -129,9 +130,17 @@ class StoreStoryService
 
     public function recordView(User $user, StoreStory $story): StoreStory
     {
-        if ($story->isExpired()) {
+        $story->loadMissing('store');
+
+        if ($story->isExpired() || $story->is_hidden) {
             throw ValidationException::withMessages([
                 'story' => ['The selected story is no longer active.'],
+            ]);
+        }
+
+        if ($story->store?->is_suspended) {
+            throw ValidationException::withMessages([
+                'story' => ['The selected story is no longer available.'],
             ]);
         }
 

@@ -17,6 +17,11 @@ class AdminUserResource extends JsonResource
             'status' => $this->status,
             'phone' => $this->phone,
             'district' => $this->district,
+            'organization_name' => $this->organization_name,
+            'company_name' => $this->company_name,
+            'profile_photo' => $this->profile_photo,
+            'can_suspend' => $this->status === 'active',
+            'can_activate' => $this->status !== 'active',
             'created_at' => $this->created_at?->toDateTimeString(),
         ];
     }

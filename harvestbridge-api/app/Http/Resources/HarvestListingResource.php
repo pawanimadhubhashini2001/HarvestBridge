@@ -83,6 +83,8 @@ class HarvestListingResource extends JsonResource
 
             'is_available' => $this->isAvailableForConsumers(),
 
+            'is_favorite' => (bool) ($this->is_favorite ?? false),
+
             'featured_until' => $this->featured_until,
 
             'description' => $this->description,
@@ -104,6 +106,7 @@ class HarvestListingResource extends JsonResource
                 return [
                     'id' => $this->farm?->id,
                     'store_name' => $this->farm?->farm_name,
+                    'phone_number' => $this->farm?->phone_number,
                     'business_status' => $this->farm?->business_status,
                     'district' => $this->farm?->district,
                     'address' => $this->farm?->address,

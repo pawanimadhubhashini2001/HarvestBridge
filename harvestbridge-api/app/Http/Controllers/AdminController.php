@@ -12,6 +12,7 @@ use App\Http\Requests\AdminUserIndexRequest;
 use App\Http\Requests\StoreMarketPriceRequest;
 use App\Http\Requests\UpdateHarvestListingFeaturedRequest;
 use App\Http\Requests\UpdateMarketPriceRequest;
+use App\Http\Resources\AdminUserProfileResource;
 use App\Http\Resources\AdminUserResource;
 use App\Http\Resources\AuditLogResource;
 use App\Http\Resources\CropResource;
@@ -51,6 +52,16 @@ class AdminController extends Controller
         );
     }
 
+    public function showUser(User $user)
+    {
+        return ApiResponse::success(
+            new AdminUserProfileResource(
+                $this->adminService->userProfile($user)
+            ),
+            'User profile retrieved successfully.'
+        );
+    }
+
     public function updateUserStatus(AdminUpdateUserStatusRequest $request, User $user)
     {
         $updatedUser = $this->adminService->updateUserStatus(
@@ -71,6 +82,46 @@ class AdminController extends Controller
         return ApiResponse::success(
             new AdminUserResource($updatedUser),
             'User status updated successfully.'
+        );
+    }
+
+    public function suspendUser(Request $request, User $user)
+    {
+        $updatedUser = $this->adminService->suspendUser($user);
+
+        $this->auditLogService->log(
+            'admin.user.suspended',
+            $request->user()->id,
+            $updatedUser,
+            [
+                'status' => $updatedUser->status,
+            ],
+            $request
+        );
+
+        return ApiResponse::success(
+            new AdminUserResource($updatedUser),
+            'User suspended successfully.'
+        );
+    }
+
+    public function activateUser(Request $request, User $user)
+    {
+        $updatedUser = $this->adminService->activateUser($user);
+
+        $this->auditLogService->log(
+            'admin.user.activated',
+            $request->user()->id,
+            $updatedUser,
+            [
+                'status' => $updatedUser->status,
+            ],
+            $request
+        );
+
+        return ApiResponse::success(
+            new AdminUserResource($updatedUser),
+            'User activated successfully.'
         );
     }
 

@@ -69,6 +69,16 @@ export type AppStackParamList = {
     longitude?: number;
     distanceKm?: number | null;
   };
+  StoreReviews: {
+    storeId?: string;
+    storeName?: string;
+  };
+  WriteStoreReview: {
+    storeId?: string;
+    storeName?: string;
+    reviewId?: string;
+  };
+  Favorites: undefined;
   WeatherDetails: {
     district?: string;
   };
@@ -121,6 +131,9 @@ export const linking: LinkingOptions<RootStackParamList> = {
           },
           MarketplaceProductDetails: 'marketplace/:listingId',
           StoreDetails: 'marketplace/store/:storeId',
+          StoreReviews: 'marketplace/store/:storeId/reviews',
+          WriteStoreReview: 'marketplace/store/:storeId/reviews/write',
+          Favorites: 'favorites',
           FarmDetails: 'store/:farmId',
           AddFarm: 'store/new',
           EditFarm: 'store/:farmId/edit',

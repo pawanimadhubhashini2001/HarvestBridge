@@ -36,7 +36,7 @@ class MarketplaceService
         $hasLocationSearch = $this->hasLocationSearch($filters);
         $hasSearch = $this->hasSearch($filters);
 
-        $query = $this->marketplaceIndexQuery();
+        $query = $this->marketplaceIndexQuery($filters);
 
         $this->applyStatusScope($query, $filters);
         $this->applyLocationSearch($query, $filters);
@@ -86,6 +86,7 @@ class MarketplaceService
         $this->harvestListingService->expireElapsedFeaturedListings();
 
         $query = HarvestListing::query()
+            ->whereHas('farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
             ->whereKey($harvestListing->getKey())
             ->whereIn('status', self::ACTIVE_STATUSES)
             ->where('available_quantity', '>', 0)
@@ -96,6 +97,12 @@ class MarketplaceService
                 'farm.user:id,name,phone',
                 'images:id,harvest_listing_id,image_path,sort_order',
             ]);
+
+        if (! empty($filters['user_id'])) {
+            $query->withExists([
+                'favoritedByUsers as is_favorite' => fn ($favoriteQuery) => $favoriteQuery->where('users.id', $filters['user_id']),
+            ]);
+        }
 
         if ($this->hasLocationSearch($filters)) {
             $latitude = (float) $filters['latitude'];
@@ -117,6 +124,17 @@ class MarketplaceService
         }
 
         $listing = $query->firstOrFail();
+
+        if (! empty($filters['user_id']) && $listing->farm !== null) {
+            $listing->farm->setAttribute(
+                'is_favorite',
+                $listing->farm
+                    ->favoritedByUsers()
+                    ->where('users.id', $filters['user_id'])
+                    ->exists()
+            );
+        }
+
         $listing->setRelation(
             'relatedProducts',
             $this->getRelatedProducts($listing, $filters)
@@ -608,6 +626,7 @@ class MarketplaceService
         }
 
         $query = HarvestListing::query()
+            ->whereHas('farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
             ->with([
                 'crop:id,name,category',
                 'farm:id,farm_name,district,address,latitude,longitude',
@@ -663,7 +682,7 @@ class MarketplaceService
         $hasLocationSearch = $this->hasLocationSearch($filters);
         $hasSearch = $this->hasSearch($filters);
 
-        $query = $this->marketplaceIndexQuery(false);
+        $query = $this->marketplaceIndexQuery($filters, false);
 
         $this->applyStatusScope($query, $filters);
         $this->applyLocationSearch($query, $filters);
@@ -732,20 +751,35 @@ class MarketplaceService
         ];
     }
 
-    private function marketplaceIndexQuery(bool $withRelations = true): Builder
+    private function marketplaceIndexQuery(array $filters = [], bool $withRelations = true): Builder
     {
-        $query = HarvestListing::query();
+        $query = HarvestListing::query()
+            ->whereHas('farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false));
 
         if (! $withRelations) {
+            if (! empty($filters['user_id'])) {
+                $query->withExists([
+                    'favoritedByUsers as is_favorite' => fn ($favoriteQuery) => $favoriteQuery->where('users.id', $filters['user_id']),
+                ]);
+            }
+
             return $query;
         }
 
-        return $query->with([
+        $query->with([
             'crop:id,name,category',
             'farm:id,farm_name,district,address,latitude,longitude',
             'farmer:id,name',
             'images:id,harvest_listing_id,image_path,sort_order',
         ]);
+
+        if (! empty($filters['user_id'])) {
+            $query->withExists([
+                'favoritedByUsers as is_favorite' => fn ($favoriteQuery) => $favoriteQuery->where('users.id', $filters['user_id']),
+            ]);
+        }
+
+        return $query;
     }
 
     private function getRelatedProducts(
@@ -754,6 +788,7 @@ class MarketplaceService
     ): Collection {
         $query = HarvestListing::query()
             ->where('farm_id', $listing->farm_id)
+            ->whereHas('farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
             ->whereKeyNot($listing->getKey())
             ->whereIn('status', self::ACTIVE_STATUSES)
             ->where('available_quantity', '>', 0)

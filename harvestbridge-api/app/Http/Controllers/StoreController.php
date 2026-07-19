@@ -59,11 +59,16 @@ class StoreController extends Controller
 
     public function publicShow(ShowPublicStoreRequest $request, Farm $store)
     {
+        $filters = $request->validated();
+        $filters['user_id'] = $request->user()?->role === 'consumer'
+            ? $request->user()?->id
+            : null;
+
         return ApiResponse::success(
             new PublicStoreResource(
                 $this->farmService->getPublicStoreDetails(
                     $store,
-                    $request->validated()
+                    $filters
                 )
             ),
             'Public store retrieved successfully'

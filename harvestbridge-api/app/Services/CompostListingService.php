@@ -121,6 +121,7 @@ class CompostListingService
     {
         $query = CompostListing::query()
             ->where('status', CompostListing::STATUS_AVAILABLE)
+            ->whereHas('farmerStore', fn ($storeQuery) => $storeQuery->where('is_suspended', false))
             ->whereDate('available_from', '<=', now()->toDateString())
             ->where(function ($builder) {
                 $builder->whereNull('available_until')

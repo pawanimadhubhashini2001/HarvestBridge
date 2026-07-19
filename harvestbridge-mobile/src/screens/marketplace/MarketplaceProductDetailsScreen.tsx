@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Linking, ScrollView, Share, View } from 'react-native';
-import { Button, Card, Chip, Divider, Snackbar, Text } from 'react-native-paper';
+import { Button, Card, Chip, Divider, IconButton, Snackbar, Text } from 'react-native-paper';
 
+import { favoriteProduct, getFavoritesQueryKey, unfavoriteProduct } from '@/api/favorites.api';
 import {
   getMarketplaceProduct,
   getMarketplaceProductQueryKey,
@@ -12,6 +13,7 @@ import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
+import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -70,8 +72,11 @@ export function MarketplaceProductDetailsScreen({
   route,
 }: AppStackScreenProps<'MarketplaceProductDetails'>) {
   const theme = useAppTheme();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const listingId = route.params?.listingId;
   const [actionError, setActionError] = useState<string | null>(null);
+  const isConsumer = user?.role === 'consumer';
   const detailQueryParams: Pick<MarketplaceQueryParams, 'latitude' | 'longitude'> =
     typeof route.params?.latitude === 'number' && typeof route.params?.longitude === 'number'
       ? {
@@ -83,6 +88,35 @@ export function MarketplaceProductDetailsScreen({
     queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing', detailQueryParams),
     queryFn: () => getMarketplaceProduct(listingId ?? '', detailQueryParams),
     enabled: Boolean(listingId),
+  });
+
+  const favoriteMutation = useMutation({
+    mutationFn: async (shouldFavorite: boolean) => {
+      if (!listingId) {
+        throw new Error('The selected marketplace product could not be identified.');
+      }
+
+      if (shouldFavorite) {
+        return favoriteProduct(listingId);
+      }
+
+      return unfavoriteProduct(listingId);
+    },
+    onSuccess: async (_, shouldFavorite) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing', detailQueryParams),
+        }),
+        queryClient.invalidateQueries({ queryKey: ['marketplace'] }),
+        queryClient.invalidateQueries({ queryKey: getFavoritesQueryKey() }),
+      ]);
+      setActionError(
+        shouldFavorite ? 'Product saved to favorites.' : 'Product removed from favorites.',
+      );
+    },
+    onError: (error) => {
+      setActionError(getErrorMessage(error));
+    },
   });
 
   async function openExternalUrl(url?: string | null) {
@@ -157,6 +191,7 @@ export function MarketplaceProductDetailsScreen({
     store_location: storeLocation,
     related_products: relatedProducts,
   } = detailsQuery.data;
+  const isFavorite = Boolean(product.is_favorite);
   const hasImages = product.images.length > 0;
   const distanceLabel = formatDistance(storeLocation?.distance_km ?? route.params?.distanceKm ?? null);
   const estimatedDirection = estimateTravelDirection(
@@ -180,15 +215,32 @@ export function MarketplaceProductDetailsScreen({
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
         <View className="gap-md p-lg">
           <View className="gap-sm">
-            <Chip compact style={{ alignSelf: 'flex-start' }}>
-              Product Details
-            </Chip>
-            <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
-              {product.crop_name ?? 'Marketplace Product'}
-            </Text>
-            <Text variant="titleLarge" style={{ color: theme.colors.primary }}>
-              {formatCurrency(product.price_per_unit, product.unit)}
-            </Text>
+            <View className="flex-row items-start justify-between gap-sm">
+              <View className="flex-1 gap-sm">
+                <Chip compact style={{ alignSelf: 'flex-start' }}>
+                  Product Details
+                </Chip>
+                <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
+                  {product.crop_name ?? 'Marketplace Product'}
+                </Text>
+                <Text variant="titleLarge" style={{ color: theme.colors.primary }}>
+                  {formatCurrency(product.price_per_unit, product.unit)}
+                </Text>
+              </View>
+              {isConsumer ? (
+                <IconButton
+                  icon={isFavorite ? 'heart' : 'heart-outline'}
+                  iconColor={isFavorite ? theme.colors.error : theme.colors.primary}
+                  disabled={favoriteMutation.isPending}
+                  onPress={() => {
+                    void favoriteMutation.mutateAsync(!isFavorite);
+                  }}
+                  accessibilityLabel={
+                    isFavorite ? 'Remove product from favorites' : 'Save product to favorites'
+                  }
+                />
+              ) : null}
+            </View>
           </View>
 
           {hasImages ? (

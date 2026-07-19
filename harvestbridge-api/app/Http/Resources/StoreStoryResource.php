@@ -34,6 +34,7 @@ class StoreStoryResource extends JsonResource
             'media_type' => $this->media_type,
             'media_url' => Storage::disk('public')->url($this->media_path),
             'caption' => $this->caption,
+            'is_hidden' => (bool) ($this->is_hidden ?? false),
             'distance' => $this->when(
                 isset($this->distance_km),
                 fn () => round((float) $this->distance_km, 2)

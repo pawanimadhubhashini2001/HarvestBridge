@@ -172,6 +172,15 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
       ) : null}
 
       <View className="gap-md">
+        {profile.role === 'consumer' ? (
+          <AppButton
+            label="Favorites"
+            mode="outline"
+            onPress={() => {
+              navigation.navigate('Favorites');
+            }}
+          />
+        ) : null}
         <AppButton
           label="Edit Profile"
           mode="outline"

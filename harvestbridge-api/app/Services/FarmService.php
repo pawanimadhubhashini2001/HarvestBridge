@@ -63,10 +63,28 @@ class FarmService
     {
         $query = Farm::query()
             ->whereKey($farm->getKey())
+            ->where('is_suspended', false)
             ->with([
                 'user:id,name,phone',
                 'activeHarvestListings:id,farm_id,crop_id',
+            ])
+            ->withCount([
+                'visibleReviews as visible_reviews_count',
+                'visibleReviews as visible_reviews_five_star_count' => fn ($query) => $query->where('rating', 5),
+                'visibleReviews as visible_reviews_four_star_count' => fn ($query) => $query->where('rating', 4),
+                'visibleReviews as visible_reviews_three_star_count' => fn ($query) => $query->where('rating', 3),
+                'visibleReviews as visible_reviews_two_star_count' => fn ($query) => $query->where('rating', 2),
+                'visibleReviews as visible_reviews_one_star_count' => fn ($query) => $query->where('rating', 1),
+            ])
+            ->withAvg([
+                'visibleReviews as visible_reviews_average_rating',
+            ], 'rating');
+
+        if (! empty($filters['user_id'])) {
+            $query->withExists([
+                'favoritedByUsers as is_favorite' => fn ($favoriteQuery) => $favoriteQuery->where('users.id', $filters['user_id']),
             ]);
+        }
 
         if ($this->hasLocationSearch($filters)) {
             $latitude = (float) $filters['latitude'];
@@ -90,6 +108,7 @@ class FarmService
     {
         $query = HarvestListing::query()
             ->where('farm_id', $farm->getKey())
+            ->whereHas('farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
             ->whereIn('status', HarvestListing::marketplaceVisibleStatuses())
             ->where('available_quantity', '>', 0)
             ->with([
