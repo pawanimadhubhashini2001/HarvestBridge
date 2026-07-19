@@ -1,5 +1,5 @@
 param(
-    [string]$Host = "127.0.0.1",
+    [string]$BindHost = "127.0.0.1",
     [int]$Port = 8010
 )
 
@@ -13,7 +13,7 @@ if (-not (Test-Path $pythonPath)) {
 
 Set-Location $projectRoot
 
-Write-Host "Starting HarvestBridge AI on http://$Host`:$Port" -ForegroundColor Green
+Write-Host "Starting HarvestBridge AI on http://$BindHost`:$Port" -ForegroundColor Green
 Write-Host "Press Ctrl+C to stop the server." -ForegroundColor Yellow
 
-& $pythonPath -m uvicorn app.main:app --host $Host --port $Port
+& $pythonPath -m uvicorn app.main:app --host $BindHost --port $Port

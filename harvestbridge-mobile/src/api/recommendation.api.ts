@@ -32,6 +32,15 @@ export interface RecommendationExplanation {
   [key: string]: string | undefined;
 }
 
+export interface RankedRecommendationCandidate {
+  id?: number | null;
+  name: string;
+  category?: string | null;
+  description?: string | null;
+  confidence: number;
+  confidence_percentage?: number;
+}
+
 export interface MarketPriceSnapshot {
   crop?: string | null;
   market_name: string;
@@ -53,6 +62,7 @@ export interface SmartPredictionResponse {
   prediction: {
     recommended_crop: string;
     confidence: number;
+    recommended_crops?: RankedRecommendationCandidate[];
     explanation: RecommendationExplanation | string[] | string;
   };
   market_price?: MarketPriceSnapshot | null;
@@ -70,6 +80,8 @@ export interface CachedSmartRecommendationResult {
   form: {
     season: string;
     soil_type: string;
+    soil_ph: number;
+    market_demand: string;
     previous_crop?: string | null;
   };
 }

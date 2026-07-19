@@ -102,10 +102,14 @@ export function ConfidenceMeter({
     };
   }, [normalizedConfidence]);
 
-  const radius = (resolvedSize - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset =
-    circumference - (animatedConfidence / 100) * circumference;
+  const center = resolvedSize / 2;
+  const radius = Math.max((resolvedSize - strokeWidth) / 2, 0);
+  const circumference = Math.max(2 * Math.PI * radius, 0);
+  const strokeDashoffset = Math.max(
+    circumference - (animatedConfidence / 100) * circumference,
+    0,
+  );
+  const strokeDasharray = `${circumference} ${circumference}`;
   const confidenceLabel = getConfidenceLabel(normalizedConfidence);
   const progressColor =
     normalizedConfidence >= 95
@@ -123,27 +127,26 @@ export function ConfidenceMeter({
         { width: resolvedSize, height: resolvedSize, alignSelf: 'center' },
       ]}
     >
-      <Svg width={resolvedSize} height={resolvedSize}>
+      <Svg width={resolvedSize} height={resolvedSize} viewBox={`0 0 ${resolvedSize} ${resolvedSize}`}>
         <Circle
-          cx={resolvedSize / 2}
-          cy={resolvedSize / 2}
+          cx={center}
+          cy={center}
           r={radius}
           stroke={theme.colors.surfaceVariant}
           strokeWidth={strokeWidth}
           fill="none"
         />
         <Circle
-          cx={resolvedSize / 2}
-          cy={resolvedSize / 2}
+          cx={center}
+          cy={center}
           r={radius}
           stroke={progressColor}
           strokeWidth={strokeWidth}
           fill="none"
           strokeLinecap="round"
-          strokeDasharray={circumference}
+          strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
-          rotation={-90}
-          origin={`${resolvedSize / 2}, ${resolvedSize / 2}`}
+          transform={`rotate(-90 ${center} ${center})`}
         />
       </Svg>
 

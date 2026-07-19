@@ -34,6 +34,7 @@ import type { AppError } from '@/types/api';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 const seasonOptions = ['Yala', 'Maha'] as const;
+const marketDemandOptions = ['Low', 'Medium', 'High'] as const;
 
 const smartRecommendationSchema = z.object({
   season: z.enum(seasonOptions, {
@@ -44,6 +45,18 @@ const smartRecommendationSchema = z.object({
     .trim()
     .min(1, 'Soil type is required.')
     .max(100, 'Soil type is too long.'),
+  soil_ph: z
+    .string()
+    .trim()
+    .min(1, 'Soil pH is required.')
+    .refine((value) => !Number.isNaN(Number(value)), 'Soil pH must be a number.')
+    .refine(
+      (value) => Number(value) >= 0 && Number(value) <= 14,
+      'Soil pH must be between 0 and 14.',
+    ),
+  market_demand: z.enum(marketDemandOptions, {
+    message: 'Please select market demand.',
+  }),
   previous_crop: z
     .string()
     .trim()
@@ -57,6 +70,8 @@ type SmartRecommendationFormValues = z.infer<typeof smartRecommendationSchema>;
 const formFieldNames = [
   'season',
   'soil_type',
+  'soil_ph',
+  'market_demand',
   'previous_crop',
 ] as const satisfies readonly (keyof SmartRecommendationFormValues)[];
 
@@ -117,9 +132,9 @@ function toSmartPayload(
     District: store.district,
     Season: values.season,
     Soil_Type: values.soil_type.trim(),
+    pH: Number(values.soil_ph),
     Previous_Crop: values.previous_crop?.trim() || null,
-    pH: null,
-    Market_Demand: null,
+    Market_Demand: values.market_demand,
     Previous_Yield_t_ha: null,
   };
 }
@@ -141,6 +156,8 @@ export function SmartRecommendationScreen({
     defaultValues: {
       season: 'Yala',
       soil_type: '',
+      soil_ph: '',
+      market_demand: 'Medium',
       previous_crop: '',
     },
     resolver: zodResolver(smartRecommendationSchema),
@@ -178,6 +195,8 @@ export function SmartRecommendationScreen({
           form: {
             season: payload.Season,
             soil_type: payload.Soil_Type,
+            soil_ph: payload.pH ?? 0,
+            market_demand: payload.Market_Demand ?? 'Medium',
             previous_crop: payload.Previous_Crop ?? null,
           },
         };
@@ -305,8 +324,8 @@ export function SmartRecommendationScreen({
               Smart Crop Recommendation
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Enter your season, soil type, and previous crop. Live district weather is added
-              automatically before the AI service recommends a crop.
+              Enter your season, soil type, soil pH, market demand, and previous crop. Live
+              district weather is added automatically before the AI service recommends a crop.
             </Text>
           </View>
 
@@ -355,6 +374,38 @@ export function SmartRecommendationScreen({
                         onBlur={onBlur}
                         autoCapitalize="words"
                         errorMessage={errors.soil_type?.message}
+                        disabled={smartRecommendationMutation.isPending}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    control={control}
+                    name="soil_ph"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <AppTextInput
+                        containerClassName="gap-0"
+                        label="Soil pH"
+                        value={value}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        keyboardType="decimal-pad"
+                        errorMessage={errors.soil_ph?.message}
+                        disabled={smartRecommendationMutation.isPending}
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    control={control}
+                    name="market_demand"
+                    render={({ field: { onChange, value } }) => (
+                      <SelectorField
+                        label="Market Demand"
+                        value={value}
+                        options={marketDemandOptions}
+                        onSelect={onChange}
+                        errorMessage={errors.market_demand?.message}
                         disabled={smartRecommendationMutation.isPending}
                       />
                     )}

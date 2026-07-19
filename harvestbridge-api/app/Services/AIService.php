@@ -43,6 +43,10 @@ class AIService
             );
         }
 
+        if (! array_key_exists('recommended_crops', $payload) || ! is_array($payload['recommended_crops'])) {
+            $payload['recommended_crops'] = [];
+        }
+
         return $payload;
     }
 
@@ -315,6 +319,10 @@ class AIService
             'Temperature_C' => $data['Temperature_C'] ?? $weather['temperature'],
             'Rainfall_mm' => $data['Rainfall_mm'] ?? $weather['rainfall'],
             'Humidity_pct' => $data['Humidity_pct'] ?? $weather['humidity'],
+            'pH' => $data['pH'] ?? null,
+            'Previous_Crop' => $data['Previous_Crop'] ?? null,
+            'Previous_Yield_t_ha' => $data['Previous_Yield_t_ha'] ?? null,
+            'Market_Demand' => $data['Market_Demand'] ?? null,
         ];
     }
 
@@ -323,6 +331,12 @@ class AIService
         $recommendedCropName = (string) ($prediction['recommended_crop'] ?? '');
         $confidenceScore = round((float) ($prediction['confidence'] ?? 0), 4);
         $crop = $this->findCropByName($recommendedCropName);
+        $rankedRecommendations = $this->normalizeRankedRecommendations(
+            $prediction['recommended_crops'] ?? [],
+            $recommendedCropName,
+            $confidenceScore,
+            $crop
+        );
 
         return [
             'input' => [
@@ -332,17 +346,13 @@ class AIService
                 'temperature' => round((float) $payload['Temperature_C'], 2),
                 'rainfall' => round((float) $payload['Rainfall_mm'], 2),
                 'humidity' => round((float) $payload['Humidity_pct'], 2),
+                'ph' => isset($payload['pH']) ? round((float) $payload['pH'], 2) : null,
+                'previous_crop' => $payload['Previous_Crop'] ?? null,
+                'market_demand' => $payload['Market_Demand'] ?? null,
             ],
             'prediction' => [
                 'recommended_crop' => $recommendedCropName,
-                'recommended_crops' => [
-                    [
-                        'id' => $crop?->id,
-                        'name' => $recommendedCropName,
-                        'category' => $crop?->category,
-                        'description' => $crop?->description,
-                    ],
-                ],
+                'recommended_crops' => $rankedRecommendations,
                 'confidence' => $confidenceScore,
                 'confidence_score' => $confidenceScore,
                 'confidence_percentage' => round($confidenceScore * 100, 2),
@@ -435,6 +445,53 @@ class AIService
             ->filter(fn (?string $tip) => $tip !== null && trim($tip) !== '')
             ->values()
             ->all();
+    }
+
+    private function normalizeRankedRecommendations(
+        array $recommendations,
+        string $fallbackCropName,
+        float $fallbackConfidence,
+        ?Crop $fallbackCrop
+    ): array {
+        $normalized = collect($recommendations)
+            ->map(function ($item) {
+                if (! is_array($item)) {
+                    return null;
+                }
+
+                $name = trim((string) ($item['name'] ?? $item['recommended_crop'] ?? ''));
+
+                if ($name === '') {
+                    return null;
+                }
+
+                $crop = $this->findCropByName($name);
+                $confidence = round((float) ($item['confidence'] ?? 0), 4);
+
+                return [
+                    'id' => $crop?->id,
+                    'name' => $name,
+                    'category' => $crop?->category,
+                    'description' => $crop?->description,
+                    'confidence' => $confidence,
+                    'confidence_percentage' => round($confidence * 100, 2),
+                ];
+            })
+            ->filter()
+            ->values();
+
+        if ($normalized->isEmpty()) {
+            return [[
+                'id' => $fallbackCrop?->id,
+                'name' => $fallbackCropName,
+                'category' => $fallbackCrop?->category,
+                'description' => $fallbackCrop?->description,
+                'confidence' => $fallbackConfidence,
+                'confidence_percentage' => round($fallbackConfidence * 100, 2),
+            ]];
+        }
+
+        return $normalized->all();
     }
 
     private function normalizeDiseasePrediction(array $payload): array

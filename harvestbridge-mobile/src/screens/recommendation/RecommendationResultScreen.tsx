@@ -17,6 +17,7 @@ import {
   getRecommendationsQueryKey,
   toggleRecommendationFavorite,
   type CachedSmartRecommendationResult,
+  type RankedRecommendationCandidate,
   type RecommendationReportPayload,
   type RecommendationHistoryDto,
 } from '@/api/recommendation.api';
@@ -233,6 +234,49 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function AlternativeRecommendationCard({
+  candidate,
+  isPrimary,
+}: {
+  candidate: RankedRecommendationCandidate;
+  isPrimary: boolean;
+}) {
+  const theme = useAppTheme();
+
+  return (
+    <View
+      className="gap-sm rounded-lg border px-md py-md"
+      style={{
+        borderColor: isPrimary ? theme.colors.primary : theme.colors.outline,
+        backgroundColor: isPrimary ? theme.colors.primaryContainer : theme.colors.surface,
+      }}
+    >
+      <View className="flex-row items-center justify-between gap-md">
+        <Text
+          variant="titleMedium"
+          style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }}
+        >
+          {candidate.name}
+        </Text>
+        <Chip compact>{formatConfidence(candidate.confidence)}</Chip>
+      </View>
+      {candidate.category ? (
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          Category: {candidate.category}
+        </Text>
+      ) : null}
+      {candidate.description ? (
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {candidate.description}
+        </Text>
+      ) : null}
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {isPrimary ? 'Top-ranked match from the current AI model.' : 'Alternative AI match.'}
+      </Text>
+    </View>
+  );
+}
+
 function findMatchingRecommendation(
   cachedResult: CachedSmartRecommendationResult,
   recommendations: RecommendationHistoryDto[],
@@ -418,6 +462,15 @@ export function RecommendationResultScreen({
 
   const recommendationTime = matchingRecommendation?.created_at ?? cachedResult.submitted_at;
   const confidence = formatConfidence(cachedResult.response.prediction.confidence);
+  const rankedRecommendations =
+    cachedResult.response.prediction.recommended_crops?.length
+      ? cachedResult.response.prediction.recommended_crops
+      : [
+          {
+            name: cachedResult.response.prediction.recommended_crop,
+            confidence: cachedResult.response.prediction.confidence,
+          },
+        ];
   const weather = cachedResult.response.weather;
   const isFavorite = Boolean(matchingRecommendation?.is_favorite);
   const weatherSummary = [
@@ -451,9 +504,25 @@ export function RecommendationResultScreen({
               value={cachedResult.response.prediction.recommended_crop}
             />
             <DetailRow label="Confidence Percentage" value={confidence} />
+            <DetailRow label="Market Demand" value={cachedResult.request.Market_Demand ?? 'Not provided'} />
             <DetailRow label="Recommendation Time" value={formatRecommendationTime(recommendationTime)} />
             <DetailRow label="District" value={cachedResult.request.District} />
             <DetailRow label="Season" value={cachedResult.request.Season} />
+          </SummarySection>
+
+          <SummarySection
+            title="Top AI Matches"
+            subtitle="These are the real ranked crops returned by the current model for your input."
+          >
+            <View className="gap-sm">
+              {rankedRecommendations.map((candidate, index) => (
+                <AlternativeRecommendationCard
+                  key={`${candidate.name}-${index}`}
+                  candidate={candidate}
+                  isPrimary={index === 0}
+                />
+              ))}
+            </View>
           </SummarySection>
 
           <SummarySection title="Weather Summary">
@@ -483,6 +552,7 @@ export function RecommendationResultScreen({
         <View style={{ flex: 1 }} className="gap-md">
           <SummarySection title="Soil Summary" subtitle={`Store: ${cachedResult.store.name}`}>
             <DetailRow label="Soil Type" value={cachedResult.request.Soil_Type} />
+            <DetailRow label="Soil pH" value={`${cachedResult.form.soil_ph}`} />
             <DetailRow
               label="Previous Crop"
               value={cachedResult.form.previous_crop || 'Not provided'}
@@ -563,7 +633,7 @@ export function RecommendationResultScreen({
         recommendedCrop={cachedResult.response.prediction.recommended_crop}
         soilType={cachedResult.request.Soil_Type}
         season={cachedResult.request.Season}
-        marketDemand={cachedResult.request.Market_Demand ?? 'Not provided'}
+        marketDemand={cachedResult.request.Market_Demand ?? cachedResult.form.market_demand}
         district={cachedResult.request.District}
         weatherSummary={weatherSummary}
         confidence={cachedResult.response.prediction.confidence}

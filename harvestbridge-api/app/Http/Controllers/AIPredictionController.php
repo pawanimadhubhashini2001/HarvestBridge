@@ -149,6 +149,8 @@ class AIPredictionController extends Controller
 
                 'recommended_crop' => $prediction['recommended_crop'],
 
+                'recommended_crops' => $prediction['recommended_crops'] ?? [],
+
                 'confidence' => $prediction['confidence'],
 
                 'explanation' => $explanation,
