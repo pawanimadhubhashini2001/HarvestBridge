@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class CompostListingResource extends JsonResource
 {
@@ -62,7 +62,7 @@ class CompostListingResource extends JsonResource
                     'address' => $store?->address,
                     'phone_number' => $store?->phone_number,
                     'store_logo_url' => $store?->store_logo_path
-                    ? Storage::disk('public')->url($store->store_logo_path)
+                    ? MediaStorage::url($store->store_logo_path, $request)
                     : null,
                 ]
             ),

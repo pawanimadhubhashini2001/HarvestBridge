@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Farm;
 use App\Models\StoreStory;
 use App\Models\StoreStoryView;
+use App\Support\MediaStorage;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,7 +16,6 @@ use Illuminate\Validation\ValidationException;
 
 class StoreStoryService
 {
-    private const MEDIA_DISK = 'public';
     private const MEDIA_DIRECTORY = 'stores/stories';
     private const EARTH_RADIUS_KM = 6371;
     private const DEFAULT_PAGE_SIZE = 20;
@@ -71,9 +71,9 @@ class StoreStoryService
             return StoreStory::query()->create([
                 'farm_id' => $store->id,
                 'media_type' => $this->resolveMediaType($media),
-                'media_path' => $media->store(
-                    self::MEDIA_DIRECTORY.'/'.$store->id,
-                    self::MEDIA_DISK
+                'media_path' => MediaStorage::storeUploadedFile(
+                    $media,
+                    self::MEDIA_DIRECTORY.'/'.$store->id
                 ),
                 'caption' => $data['caption'] ?? null,
                 'expires_at' => now()->addDay(),
@@ -101,12 +101,12 @@ class StoreStoryService
                 /** @var UploadedFile $media */
                 $media = $data['media'];
 
-                Storage::disk(self::MEDIA_DISK)->delete($story->media_path);
+                MediaStorage::delete($story->media_path);
 
                 $payload['media_type'] = $this->resolveMediaType($media);
-                $payload['media_path'] = $media->store(
-                    self::MEDIA_DIRECTORY.'/'.$store->id,
-                    self::MEDIA_DISK
+                $payload['media_path'] = MediaStorage::storeUploadedFile(
+                    $media,
+                    self::MEDIA_DIRECTORY.'/'.$store->id
                 );
             }
 
@@ -123,7 +123,7 @@ class StoreStoryService
         $this->assertStoryBelongsToStore($store, $story);
 
         DB::transaction(function () use ($story) {
-            Storage::disk(self::MEDIA_DISK)->delete($story->media_path);
+            MediaStorage::delete($story->media_path);
             $story->delete();
         });
     }

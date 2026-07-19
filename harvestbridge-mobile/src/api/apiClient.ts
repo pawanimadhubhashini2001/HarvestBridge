@@ -26,6 +26,11 @@ apiClient.interceptors.request.use(async (requestConfig) => {
     }
   }
 
+  if (typeof FormData !== 'undefined' && requestConfig.data instanceof FormData) {
+    delete requestConfig.headers['Content-Type'];
+    delete requestConfig.headers['content-type'];
+  }
+
   if (config.isDevelopment) {
     console.log('[API Request]', {
       method: requestConfig.method?.toUpperCase(),

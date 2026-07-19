@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Farm;
 use App\Models\HarvestListing;
+use App\Support\MediaStorage;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,7 +16,6 @@ use Illuminate\Validation\ValidationException;
 
 class FarmService
 {
-    private const MEDIA_DISK = 'public';
     private const STORE_LOGO_DIRECTORY = 'stores/logos';
     private const STORE_COVER_DIRECTORY = 'stores/covers';
     private const EARTH_RADIUS_KM = 6371;
@@ -336,7 +336,7 @@ class FarmService
             return;
         }
 
-        Storage::disk(self::MEDIA_DISK)->delete($path);
+        MediaStorage::delete($path);
     }
 
     private function storeLogo(UploadedFile $image, ?string $existingPath = null): string
@@ -347,7 +347,7 @@ class FarmService
 
         return $image->store(
             self::STORE_LOGO_DIRECTORY,
-            self::MEDIA_DISK
+            MediaStorage::disk()
         );
     }
 
@@ -357,9 +357,9 @@ class FarmService
             $this->deleteStoredMedia($existingPath);
         }
 
-        return $image->store(
-            self::STORE_COVER_DIRECTORY,
-            self::MEDIA_DISK
+        return MediaStorage::storeUploadedFile(
+            $image,
+            self::STORE_COVER_DIRECTORY
         );
     }
 

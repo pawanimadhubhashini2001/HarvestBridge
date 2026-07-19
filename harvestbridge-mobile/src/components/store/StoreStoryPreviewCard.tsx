@@ -25,6 +25,14 @@ export function StoreStoryPreviewCard({
   fileName,
 }: StoreStoryPreviewCardProps) {
   const theme = useAppTheme();
+  const portraitFrameStyle = {
+    width: '100%' as const,
+    maxWidth: 360,
+    aspectRatio: 9 / 16,
+    alignSelf: 'center' as const,
+    borderRadius: 16,
+    backgroundColor: theme.colors.surfaceVariant,
+  };
 
   return (
     <Card
@@ -50,25 +58,23 @@ export function StoreStoryPreviewCard({
           </View>
 
           {mediaType === 'image' && mediaUrl ? (
-            <View className="overflow-hidden rounded-lg">
+            <View className="overflow-hidden rounded-lg self-center" style={portraitFrameStyle}>
               <Image
                 source={{ uri: mediaUrl }}
                 style={{
                   width: '100%',
-                  height: 260,
-                  borderRadius: 16,
+                  height: '100%',
                   backgroundColor: theme.colors.surfaceVariant,
                 }}
-                contentFit="cover"
+                contentFit="contain"
               />
             </View>
           ) : (
             <View
-              className="items-center justify-center rounded-lg border border-dashed px-lg py-xl"
+              className="items-center justify-center rounded-lg border border-dashed self-center px-lg py-xl"
               style={{
-                minHeight: 220,
+                ...portraitFrameStyle,
                 borderColor: theme.colors.outline,
-                backgroundColor: theme.colors.surfaceVariant,
               }}>
               <Text
                 variant="titleMedium"

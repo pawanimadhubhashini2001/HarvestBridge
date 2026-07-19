@@ -8,9 +8,9 @@ use App\Models\Donation;
 use App\Models\Farm;
 use App\Models\HarvestListing;
 use App\Models\StoreStory;
+use App\Support\MediaStorage;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class AdminModerationService
 {
@@ -192,7 +192,7 @@ class AdminModerationService
     public function deleteStory(StoreStory $story): void
     {
         DB::transaction(function () use ($story) {
-            Storage::disk('public')->delete($story->media_path);
+            MediaStorage::delete($story->media_path);
             $story->delete();
         });
     }

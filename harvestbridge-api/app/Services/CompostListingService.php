@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\CompostListing;
 use App\Models\Farm;
 use App\Models\HarvestListing;
+use App\Support\MediaStorage;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -13,7 +14,6 @@ use Illuminate\Validation\ValidationException;
 
 class CompostListingService
 {
-    private const IMAGE_STORAGE_DISK = 'public';
     private const IMAGE_DIRECTORY = 'compost-listings';
     private const MAX_IMAGES_PER_LISTING = 5;
     private const EARTH_RADIUS_KM = 6371;
@@ -111,7 +111,7 @@ class CompostListingService
         $listing->loadMissing('images');
 
         foreach ($listing->images as $image) {
-            Storage::disk(self::IMAGE_STORAGE_DISK)->delete($image->image_path);
+            MediaStorage::delete($image->image_path);
         }
 
         $listing->delete();
@@ -185,9 +185,9 @@ class CompostListingService
         foreach ($images as $image) {
             $sortOrder++;
 
-            $path = $image->store(
-                self::IMAGE_DIRECTORY.'/'.$listing->id,
-                self::IMAGE_STORAGE_DISK
+            $path = MediaStorage::storeUploadedFile(
+                $image,
+                self::IMAGE_DIRECTORY.'/'.$listing->id
             );
 
             $listing->images()->create([
@@ -213,7 +213,7 @@ class CompostListingService
         $listing->loadMissing('images');
 
         foreach ($listing->images as $image) {
-            Storage::disk(self::IMAGE_STORAGE_DISK)->delete($image->image_path);
+            MediaStorage::delete($image->image_path);
         }
 
         $listing->images()->delete();

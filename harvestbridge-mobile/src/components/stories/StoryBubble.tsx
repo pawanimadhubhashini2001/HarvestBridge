@@ -21,7 +21,10 @@ function formatDistance(distance?: number | null) {
 export function StoryBubble({ story, onPress }: StoryBubbleProps) {
   const theme = useAppTheme();
   const distanceLabel = formatDistance(story.distance_km ?? story.distance ?? null);
-  const imageUrl = story.store?.store_logo_url ?? story.media_url;
+  const previewImageUrl =
+    story.media_type === 'image'
+      ? story.media_url
+      : story.store?.store_logo_url ?? null;
 
   return (
     <Pressable
@@ -39,12 +42,16 @@ export function StoryBubble({ story, onPress }: StoryBubbleProps) {
               height: 68,
               backgroundColor: theme.colors.surfaceVariant,
             }}>
-            {imageUrl ? (
+            {previewImageUrl ? (
               <Image
-                source={{ uri: imageUrl }}
+                source={{ uri: previewImageUrl }}
                 style={{ width: '100%', height: '100%' }}
                 contentFit="cover"
               />
+            ) : story.media_type === 'video' ? (
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                Video
+              </Text>
             ) : (
               <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
                 Story

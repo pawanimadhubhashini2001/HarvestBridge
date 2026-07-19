@@ -20,6 +20,7 @@ import { ErrorState } from '@/components/common/error-state';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
 import { MarketplaceRecommendationSection } from '@/components/marketplace/MarketplaceRecommendationSection';
 import { StoriesRow } from '@/components/stories/StoriesRow';
+import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -45,6 +46,7 @@ interface Coordinates {
 export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [searchDraft, setSearchDraft] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [selectedRadius, setSelectedRadius] = useState<RadiusOptionValue>(50);
@@ -54,6 +56,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
   >('checking');
   const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const isFarmer = user?.role === 'farmer';
 
   const isAllSriLanka = selectedRadius === 'all';
   const shouldUseLocation = Boolean(coordinates) && !isAllSriLanka;
@@ -370,6 +373,19 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                 shouldUseLocation
                   ? 'Browse active farmer updates from stores around your selected search radius.'
                   : 'See the newest active stories from farmer stores.'
+              }
+              actionLabel={isFarmer ? 'Add Story' : undefined}
+              onActionPress={
+                isFarmer
+                  ? () => {
+                      navigation.navigate('CreateStory');
+                    }
+                  : undefined
+              }
+              emptyStateMessage={
+                isFarmer
+                  ? 'No active stories are visible right now. Share an image or video update from your store.'
+                  : undefined
               }
               onStoryPress={(story) => {
                 navigation.navigate('StoryFeed', {

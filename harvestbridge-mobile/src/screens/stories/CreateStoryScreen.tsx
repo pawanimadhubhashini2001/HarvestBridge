@@ -1,7 +1,7 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Button, HelperText, Snackbar, Text, TextInput } from 'react-native-paper';
 
 import {
@@ -26,6 +26,36 @@ function getMediaFileName(uri: string, fallbackPrefix: string) {
   const lastSegment = parts[parts.length - 1];
 
   return lastSegment || `${fallbackPrefix}-${Date.now()}`;
+}
+
+async function resolveWebMediaFile(params: {
+  asset: ImagePicker.ImagePickerAsset;
+  mimeType: string;
+  fileName: string;
+}) {
+  const directFile =
+    'file' in params.asset
+      ? ((params.asset as ImagePicker.ImagePickerAsset & { file?: Blob | null }).file ?? null)
+      : null;
+
+  if (directFile) {
+    return directFile;
+  }
+
+  if (Platform.OS !== 'web') {
+    return null;
+  }
+
+  const response = await fetch(params.asset.uri);
+  const blob = await response.blob();
+
+  if (typeof File !== 'undefined') {
+    return new File([blob], params.fileName, {
+      type: params.mimeType,
+    });
+  }
+
+  return blob;
 }
 
 function formatDateTime(value?: string | null) {
@@ -150,12 +180,20 @@ export function CreateStoryScreen({ navigation, route }: AppStackScreenProps<'Cr
         asset.type === 'video' || asset.mimeType?.startsWith('video/')
           ? 'video'
           : 'image';
+      const fileName = asset.fileName ?? getMediaFileName(asset.uri, `story-${mediaType}`);
+      const mimeType = asset.mimeType ?? (mediaType === 'video' ? 'video/mp4' : 'image/jpeg');
+      const browserFile = await resolveWebMediaFile({
+        asset,
+        mimeType,
+        fileName,
+      });
 
       setSelectedMedia({
         uri: asset.uri,
-        name: asset.fileName ?? getMediaFileName(asset.uri, `story-${mediaType}`),
-        type: asset.mimeType ?? (mediaType === 'video' ? 'video/mp4' : 'image/jpeg'),
+        name: fileName,
+        type: mimeType,
         mediaType,
+        file: browserFile,
       });
     } catch (error) {
       setFeedbackMessage(getErrorMessage(error));
@@ -268,6 +306,10 @@ export function CreateStoryScreen({ navigation, route }: AppStackScreenProps<'Cr
 
         <HelperText type="info" visible>
           Supported story media: images up to 5 MB and videos up to 25 MB.
+        </HelperText>
+        <HelperText type="info" visible>
+          Stories are previewed in a portrait 9:16 layout. Vertical photos or videos will look
+          best.
         </HelperText>
 
         <TextInput

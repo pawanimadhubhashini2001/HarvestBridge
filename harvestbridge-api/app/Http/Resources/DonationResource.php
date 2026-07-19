@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class DonationResource extends JsonResource
 {
@@ -65,7 +65,7 @@ class DonationResource extends JsonResource
                 'phone_number' => $this->harvestListing?->farm?->phone_number,
                 'business_status' => $this->harvestListing?->farm?->business_status,
                 'store_logo_url' => $this->harvestListing?->farm?->store_logo_path
-                    ? Storage::disk('public')->url($this->harvestListing->farm->store_logo_path)
+                    ? MediaStorage::url($this->harvestListing->farm->store_logo_path, $request)
                     : null,
             ]),
             'location' => $this->whenLoaded('harvestListing', fn () => [

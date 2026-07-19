@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class FavoriteStoreResource extends JsonResource
 {
@@ -15,10 +15,10 @@ class FavoriteStoreResource extends JsonResource
             'store_name' => $this->farm_name,
             'store_description' => $this->description,
             'store_logo_url' => $this->store_logo_path
-                ? Storage::disk('public')->url($this->store_logo_path)
+                ? MediaStorage::url($this->store_logo_path, $request)
                 : null,
             'store_cover_image_url' => $this->store_cover_image_path
-                ? Storage::disk('public')->url($this->store_cover_image_path)
+                ? MediaStorage::url($this->store_cover_image_path, $request)
                 : null,
             'phone_number' => $this->phone_number,
             'district' => $this->district,

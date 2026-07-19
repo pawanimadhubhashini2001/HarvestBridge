@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class CompostListingImageResource extends JsonResource
 {
@@ -12,7 +12,7 @@ class CompostListingImageResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'url' => Storage::disk('public')->url($this->image_path),
+            'url' => MediaStorage::url($this->image_path, $request),
             'sort_order' => $this->sort_order,
             'is_primary' => $this->isPrimary(),
         ];

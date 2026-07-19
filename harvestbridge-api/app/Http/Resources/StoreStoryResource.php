@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class StoreStoryResource extends JsonResource
 {
@@ -22,7 +22,7 @@ class StoreStoryResource extends JsonResource
                 'longitude' => $this->store?->longitude,
                 'phone_number' => $this->store?->phone_number,
                 'store_logo_url' => $this->store?->store_logo_path
-                    ? Storage::disk('public')->url($this->store->store_logo_path)
+                    ? MediaStorage::url($this->store->store_logo_path, $request)
                     : null,
                 'actions' => [
                     'phone' => $this->store?->contactPhone(),
@@ -32,7 +32,7 @@ class StoreStoryResource extends JsonResource
                 ],
             ]),
             'media_type' => $this->media_type,
-            'media_url' => Storage::disk('public')->url($this->media_path),
+            'media_url' => MediaStorage::url($this->media_path, $request),
             'caption' => $this->caption,
             'is_hidden' => (bool) ($this->is_hidden ?? false),
             'distance' => $this->when(

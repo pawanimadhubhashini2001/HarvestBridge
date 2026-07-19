@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class FarmResource extends JsonResource
 {
@@ -16,7 +16,7 @@ class FarmResource extends JsonResource
             'farm_name' => $this->farm_name,
             'store_description' => $this->description,
             'store_image_url' => $this->store_logo_path
-                ? Storage::disk('public')->url($this->store_logo_path)
+                ? MediaStorage::url($this->store_logo_path, $request)
                 : null,
             'district' => $this->district,
             'address' => $this->address,
@@ -25,10 +25,10 @@ class FarmResource extends JsonResource
             'google_maps_location' => $this->googleMapsUrl(),
             'google_maps_url' => $this->googleMapsUrl(),
             'store_logo_url' => $this->store_logo_path
-                ? Storage::disk('public')->url($this->store_logo_path)
+                ? MediaStorage::url($this->store_logo_path, $request)
                 : null,
             'store_cover_image_url' => $this->store_cover_image_path
-                ? Storage::disk('public')->url($this->store_cover_image_path)
+                ? MediaStorage::url($this->store_cover_image_path, $request)
                 : null,
             'phone_number' => $this->phone_number,
             'whatsapp_number' => $this->whatsapp_number,

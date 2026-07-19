@@ -11,6 +11,9 @@ interface StoriesRowProps {
   subtitle: string;
   onStoryPress: (story: StoryFeedStoryDto) => void;
   onViewAllPress: () => void;
+  actionLabel?: string;
+  onActionPress?: () => void;
+  emptyStateMessage?: string;
 }
 
 export function StoriesRow({
@@ -19,10 +22,13 @@ export function StoriesRow({
   subtitle,
   onStoryPress,
   onViewAllPress,
+  actionLabel,
+  onActionPress,
+  emptyStateMessage,
 }: StoriesRowProps) {
   const theme = useAppTheme();
 
-  if (stories.length === 0) {
+  if (stories.length === 0 && !actionLabel && !emptyStateMessage) {
     return null;
   }
 
@@ -37,24 +43,47 @@ export function StoriesRow({
             {subtitle}
           </Text>
         </View>
-        <Button mode="text" onPress={onViewAllPress}>
-          View All
-        </Button>
+        <View className="items-end gap-xs">
+          {actionLabel && onActionPress ? (
+            <Button mode="contained-tonal" onPress={onActionPress}>
+              {actionLabel}
+            </Button>
+          ) : null}
+          {stories.length > 0 ? (
+            <Button mode="text" onPress={onViewAllPress}>
+              View All
+            </Button>
+          ) : null}
+        </View>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View className="flex-row gap-md pr-sm">
-          {stories.map((story) => (
-            <StoryBubble
-              key={`story-bubble-${story.id}`}
-              story={story}
-              onPress={() => {
-                onStoryPress(story);
-              }}
-            />
-          ))}
+      {stories.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row gap-md pr-sm">
+            {stories.map((story) => (
+              <StoryBubble
+                key={`story-bubble-${story.id}`}
+                story={story}
+                onPress={() => {
+                  onStoryPress(story);
+                }}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      ) : emptyStateMessage ? (
+        <View
+          className="rounded-lg border px-md py-md"
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.outline,
+          }}
+        >
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            {emptyStateMessage}
+          </Text>
         </View>
-      </ScrollView>
+      ) : null}
     </View>
   );
 }

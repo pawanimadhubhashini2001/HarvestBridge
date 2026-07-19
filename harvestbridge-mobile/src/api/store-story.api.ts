@@ -23,6 +23,7 @@ export interface StoreStoryMediaAsset {
   name: string;
   type: string;
   mediaType: StoreStoryMediaType;
+  file?: Blob | null;
 }
 
 export interface CreateStoreStoryPayload {
@@ -43,11 +44,15 @@ function buildStoryFormData(payload: CreateStoreStoryPayload | UpdateStoreStoryP
   }
 
   if (payload.media) {
-    formData.append('media', {
-      uri: payload.media.uri,
-      name: payload.media.name,
-      type: payload.media.type,
-    } as unknown as Blob);
+    if (payload.media.file) {
+      formData.append('media', payload.media.file, payload.media.name);
+    } else {
+      formData.append('media', {
+        uri: payload.media.uri,
+        name: payload.media.name,
+        type: payload.media.type,
+      } as unknown as Blob);
+    }
   }
 
   return formData;
@@ -70,11 +75,6 @@ export async function createStoreStory(
   const response = await apiClient.post<ApiSuccessResponse<StoreStoryDto>>(
     `/stores/${storeId}/stories`,
     buildStoryFormData(payload),
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    },
   );
 
   return response.data.data;
@@ -91,11 +91,6 @@ export async function updateStoreStory(
   const response = await apiClient.post<ApiSuccessResponse<StoreStoryDto>>(
     `/stores/${storeId}/stories/${storyId}`,
     formData,
-    {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    },
   );
 
   return response.data.data;
