@@ -26,19 +26,12 @@ class AIPredictionController extends Controller
      */
     public function predict(CropPredictionRequest $request)
     {
-        $prediction = $this->service->predict(
-            $request->validated()
-        );
-
-        $this->service->savePrediction(
-            $request->user(),
-            $request->validated(),
-            $prediction,
-            $request
-        );
-
         return ApiResponse::success(
-            $prediction,
+            $this->service->recommendCrops(
+                $request->user(),
+                $request->validated(),
+                $request
+            ),
             'Crop recommendation generated successfully.'
         );
     }

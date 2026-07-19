@@ -24,25 +24,17 @@ class CropPredictionRequest extends FormRequest
     {
         return [
 
-            'District' => 'required|string',
+            'District' => 'required|string|max:100',
 
-            'Season' => 'required|string',
+            'Season' => 'required|string|max:100',
 
-            'Soil_Type' => 'required|string',
+            'Soil_Type' => 'required|string|max:100',
 
-            'Temperature_C' => 'required|numeric',
+            'Temperature_C' => 'nullable|numeric',
 
-            'Rainfall_mm' => 'required|numeric',
+            'Rainfall_mm' => 'nullable|numeric|min:0',
 
-            'Humidity_pct' => 'required|numeric',
-
-            'pH' => 'required|numeric',
-
-            'Previous_Crop' => 'nullable|string',
-
-            'Previous_Yield_t_ha' => 'nullable|numeric',
-
-            'Market_Demand' => 'required|string',
+            'Humidity_pct' => 'nullable|numeric|min:0|max:100',
 
         ];
     }
