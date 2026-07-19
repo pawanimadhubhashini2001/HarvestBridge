@@ -73,7 +73,16 @@ export function BottomTabs() {
             component={FarmsScreen}
             options={{ tabBarLabel: 'Store' }}
           />
-          <Tab.Screen name="Recommendations" component={RecommendationsScreen} />
+          <Tab.Screen
+            name="Recommendations"
+            component={RecommendationsScreen}
+            listeners={({ navigation }) => ({
+              tabPress: (event) => {
+                event.preventDefault();
+                navigation.getParent()?.navigate('AIRecommendationForm');
+              },
+            })}
+          />
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
         </>

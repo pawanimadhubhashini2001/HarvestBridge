@@ -1,33 +1,25 @@
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { Text } from 'react-native-paper';
+
+import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
-import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 
 export function RecommendationsScreen({ navigation }: AppTabScreenProps<'Recommendations'>) {
+  const theme = useAppTheme();
+
+  useEffect(() => {
+    navigation.navigate('AIRecommendationForm');
+  }, [navigation]);
+
   return (
-    <PlaceholderScreen
-      title="AI Tools"
-      badgeLabel="AI Module"
-      description="Launch smart crop recommendations or scan a plant image for disease detection using the connected AI services."
-      actions={[
-        {
-          label: 'New Recommendation',
-          onPress: () => {
-            navigation.navigate('AIRecommendationForm');
-          },
-        },
-        {
-          label: 'Plant Disease Detection',
-          onPress: () => {
-            navigation.navigate('PlantDiseaseDetection');
-          },
-        },
-        {
-          label: 'Latest Disease Prediction',
-          mode: 'outline',
-          onPress: () => {
-            navigation.navigate('PlantDiseasePrediction');
-          },
-        },
-      ]}
-    />
+    <View
+      className="flex-1 items-center justify-center gap-md px-lg"
+      style={{ backgroundColor: theme.colors.background }}>
+      <ActivityIndicator size="large" color={theme.colors.primary} />
+      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        Opening smart recommendation...
+      </Text>
+    </View>
   );
 }

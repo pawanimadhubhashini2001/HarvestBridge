@@ -13,6 +13,7 @@ import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
+import { MarketplaceRecommendationSection } from '@/components/marketplace/MarketplaceRecommendationSection';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
@@ -148,6 +149,21 @@ export function MarketplaceProductDetailsScreen({
     }
   }
 
+  async function handleCallFarmer(targetListingId: number) {
+    try {
+      const details = await queryClient.fetchQuery({
+        queryKey: getMarketplaceProductQueryKey(targetListingId, detailQueryParams),
+        queryFn: () => getMarketplaceProduct(targetListingId, detailQueryParams),
+      });
+
+      const phoneNumber = details.contact.phone ?? details.store?.phone_number ?? null;
+
+      await openExternalUrl(phoneNumber ? `tel:${phoneNumber}` : null);
+    } catch (error) {
+      setActionError(getErrorMessage(error));
+    }
+  }
+
   if (!listingId) {
     return (
       <ErrorState
@@ -189,6 +205,7 @@ export function MarketplaceProductDetailsScreen({
     farmer,
     store,
     store_location: storeLocation,
+    recommended_products: recommendedProducts,
     related_products: relatedProducts,
   } = detailsQuery.data;
   const isFavorite = Boolean(product.is_favorite);
@@ -392,6 +409,31 @@ export function MarketplaceProductDetailsScreen({
         </View>
       </Card>
 
+      {recommendedProducts.length > 0 ? (
+        <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
+          <View className="gap-md p-lg">
+            <MarketplaceRecommendationSection
+              items={recommendedProducts}
+              subtitle="Recommended nearby products based on this product's category and current harvest availability."
+              onItemPress={(item) => {
+                navigation.push('MarketplaceProductDetails', {
+                  listingId: String(item.id),
+                  latitude: route.params?.latitude,
+                  longitude: route.params?.longitude,
+                  distanceKm: item.distance_km ?? item.distance ?? null,
+                });
+              }}
+              onCallPress={(item) => {
+                void handleCallFarmer(item.id);
+              }}
+              onDirectionsPress={(item) => {
+                void openExternalUrl(item.open_maps_action?.url ?? item.google_maps_url ?? null);
+              }}
+            />
+          </View>
+        </Card>
+      ) : null}
+
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
         <View className="gap-md p-lg">
           <View className="gap-xs">
@@ -423,7 +465,7 @@ export function MarketplaceProductDetailsScreen({
                     });
                   }}
                   onCallPress={() => {
-                    void openExternalUrl(contact.phone ? `tel:${contact.phone}` : null);
+                    void handleCallFarmer(relatedProduct.id);
                   }}
                   onDirectionsPress={() => {
                     void openExternalUrl(
