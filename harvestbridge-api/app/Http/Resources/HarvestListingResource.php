@@ -45,6 +45,11 @@ class HarvestListingResource extends JsonResource
                 fn () => $this->matched_field
             ),
 
+            'recommendation_reason' => $this->when(
+                isset($this->recommendation_reason),
+                fn () => $this->recommendation_reason
+            ),
+
             'distance' => $this->when(
                 isset($this->distance_km),
                 fn () => round((float) $this->distance_km, 2)

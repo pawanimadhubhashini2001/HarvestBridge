@@ -7,6 +7,7 @@ use App\Models\HarvestListing;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class MarketplaceService
 {
@@ -59,12 +60,14 @@ class MarketplaceService
         $listings = $this->getAvailableHarvests(
             $searchContext['effective_filters']
         );
+        $recommendedForYou = $this->getNearbySuggestions(
+            $searchContext['effective_filters']
+        );
 
         return [
             'listings' => $listings,
-            'nearby_suggestions' => $this->getNearbySuggestions(
-                $searchContext['effective_filters']
-            ),
+            'nearby_suggestions' => $recommendedForYou,
+            'recommended_for_you' => $recommendedForYou,
             'used_radius' => $searchContext['used_radius'],
             'results_found' => $listings->total(),
             'expanded' => $searchContext['expanded'],
@@ -134,6 +137,11 @@ class MarketplaceService
                     ->exists()
             );
         }
+
+        $listing->setRelation(
+            'recommendedProducts',
+            $this->getRecommendedProducts($listing, $filters)
+        );
 
         $listing->setRelation(
             'relatedProducts',
@@ -667,7 +675,14 @@ class MarketplaceService
             ->get()
             ->unique('crop_id')
             ->take(5)
-            ->values();
+            ->values()
+            ->pipe(fn (Collection $listings) => $this->decorateRecommendedListings(
+                $listings,
+                [
+                    'search' => $search,
+                    'category' => $relatedContext['categories']->first(),
+                ]
+            ));
     }
 
     private function shouldSuggestNearbyProducts(array $filters): bool
@@ -782,6 +797,64 @@ class MarketplaceService
         return $query;
     }
 
+    private function getRecommendedProducts(
+        HarvestListing $listing,
+        array $filters = []
+    ): Collection {
+        $query = $this->marketplaceIndexQuery($filters)
+            ->whereKeyNot($listing->getKey())
+            ->where('farm_id', '!=', $listing->farm_id);
+
+        $this->applyStatusScope($query, []);
+
+        if ($this->hasLocationSearch($filters)) {
+            $this->applyLocationSearch($query, $filters);
+        }
+
+        if ($listing->crop?->category) {
+            $query->whereHas('crop', function ($cropQuery) use ($listing) {
+                $cropQuery->where('category', $listing->crop->category);
+
+                if ($listing->crop_id !== null) {
+                    $cropQuery->whereKeyNot($listing->crop_id);
+                }
+            });
+        } elseif ($listing->crop_id !== null) {
+            $query->where('crop_id', '!=', $listing->crop_id);
+        }
+
+        if ($this->hasLocationSearch($filters)) {
+            $query->orderBy('distance_km')
+                ->orderByDesc('available_quantity')
+                ->orderByDesc('harvest_date')
+                ->orderByRaw($this->qualityGradeSortExpression())
+                ->orderByRaw('quality_grade ASC NULLS LAST')
+                ->orderBy('price_per_unit')
+                ->orderByDesc('id');
+        } else {
+            $query->orderByDesc('harvest_date')
+                ->orderByDesc('available_quantity')
+                ->orderByRaw($this->qualityGradeSortExpression())
+                ->orderByRaw('quality_grade ASC NULLS LAST')
+                ->orderBy('price_per_unit')
+                ->orderByDesc('id');
+        }
+
+        return $query
+            ->limit(18)
+            ->get()
+            ->unique('crop_id')
+            ->take(6)
+            ->values()
+            ->pipe(fn (Collection $listings) => $this->decorateRecommendedListings(
+                $listings,
+                [
+                    'source_crop' => $listing->crop?->name,
+                    'category' => $listing->crop?->category,
+                ]
+            ));
+    }
+
     private function getRelatedProducts(
         HarvestListing $listing,
         array $filters = []
@@ -827,5 +900,102 @@ class MarketplaceService
         return $query
             ->limit(6)
             ->get();
+    }
+
+    private function decorateRecommendedListings(
+        Collection $listings,
+        array $context = []
+    ): Collection {
+        return $listings->map(function (HarvestListing $listing) use ($context) {
+            $reason = $this->buildRecommendationReason($listing, $context);
+
+            if ($reason !== null) {
+                $listing->setAttribute('recommendation_reason', $reason);
+            }
+
+            return $listing;
+        })->values();
+    }
+
+    private function buildRecommendationReason(
+        HarvestListing $listing,
+        array $context = []
+    ): ?string {
+        $reasons = [];
+        $category = $context['category'] ?? $listing->crop?->category;
+        $search = trim((string) ($context['search'] ?? ''));
+        $sourceCrop = trim((string) ($context['source_crop'] ?? ''));
+
+        if ($search !== '') {
+            $reasons[] = $category
+                ? sprintf(
+                    'Matches the %s category from your search for "%s".',
+                    $category,
+                    $search
+                )
+                : sprintf(
+                    'Recommended based on your search for "%s".',
+                    $search
+                );
+        } elseif ($sourceCrop !== '') {
+            $reasons[] = $category
+                ? sprintf(
+                    'Pairs well with %s in the %s category.',
+                    $sourceCrop,
+                    $category
+                )
+                : sprintf(
+                    'Recommended based on the %s product you viewed.',
+                    $sourceCrop
+                );
+        }
+
+        if (isset($listing->distance_km)) {
+            $reasons[] = sprintf(
+                'Available %.1f km away.',
+                round((float) $listing->distance_km, 1)
+            );
+        } elseif ($listing->farm?->district) {
+            $reasons[] = sprintf(
+                'Available from %s.',
+                $listing->farm->district
+            );
+        }
+
+        if ($this->isSeasonallyRelevant($listing)) {
+            $reasons[] = 'Fresh for the current harvest window.';
+        }
+
+        if ($reasons === []) {
+            return null;
+        }
+
+        return implode(' ', array_slice($reasons, 0, 3));
+    }
+
+    private function isSeasonallyRelevant(HarvestListing $listing): bool
+    {
+        $today = now()->startOfDay();
+
+        if ($listing->harvest_date !== null) {
+            try {
+                if (Carbon::parse($listing->harvest_date)->greaterThanOrEqualTo($today->copy()->subDays(45))) {
+                    return true;
+                }
+            } catch (\Throwable) {
+                // Ignore invalid harvest dates and continue checking available_until.
+            }
+        }
+
+        if ($listing->available_until !== null) {
+            try {
+                return Carbon::parse($listing->available_until)->greaterThanOrEqualTo($today)
+                    && Carbon::parse($listing->available_until)->lessThanOrEqualTo($today->copy()->addDays(30));
+            } catch (\Throwable) {
+                return false;
+            }
+        }
+
+        return false;
     }
 }

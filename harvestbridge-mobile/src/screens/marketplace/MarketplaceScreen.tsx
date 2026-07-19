@@ -18,6 +18,7 @@ import {
 import { getStoryFeed, getStoryFeedQueryKey } from '@/api/story-feed.api';
 import { ErrorState } from '@/components/common/error-state';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
+import { MarketplaceRecommendationSection } from '@/components/marketplace/MarketplaceRecommendationSection';
 import { StoriesRow } from '@/components/stories/StoriesRow';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppTabScreenProps } from '@/navigation/types';
@@ -179,7 +180,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
 
   const listings = marketplaceQuery.data?.pages.flatMap((page) => page.listings) ?? [];
   const summary = marketplaceQuery.data?.pages[0] ?? null;
-  const nearbySuggestions = summary?.nearby_suggestions ?? [];
+  const recommendedForYou = summary?.recommended_for_you ?? summary?.nearby_suggestions ?? [];
   const storyFeed = storyFeedQuery.data?.stories ?? [];
   const isInitialLoading = marketplaceQuery.isLoading && listings.length === 0;
   const isRefreshing = marketplaceQuery.isRefetching && !marketplaceQuery.isFetchingNextPage;
@@ -464,40 +465,24 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
         }
         ListFooterComponent={
           <View className="gap-md px-md">
-            {nearbySuggestions.length > 0 ? (
-              <View className="gap-md pt-sm">
-                <View className="gap-xs">
-                  <Text variant="titleLarge" style={{ fontWeight: '700' }}>
-                    Nearby Suggestions
-                  </Text>
-                  <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                    Related products available around your current search area.
-                  </Text>
-                </View>
-
-                {nearbySuggestions.map((suggestion) => (
-                  <MarketplaceProductCard
-                    key={`suggestion-${suggestion.id}`}
-                    item={suggestion}
-                    compact
-                    onPress={() => {
-                      navigation.navigate('MarketplaceProductDetails', {
-                        listingId: String(suggestion.id),
-                        latitude: coordinates?.latitude,
-                        longitude: coordinates?.longitude,
-                        distanceKm: suggestion.distance_km ?? suggestion.distance ?? null,
-                      });
-                    }}
-                    onCallPress={() => {
-                      void handleCallFarmer(suggestion.id);
-                    }}
-                    onDirectionsPress={() => {
-                      handleDirections(suggestion);
-                    }}
-                  />
-                ))}
-              </View>
-            ) : null}
+            <MarketplaceRecommendationSection
+              items={recommendedForYou}
+              subtitle="Nearby products selected from your current search, store distance, and seasonal availability."
+              onItemPress={(item) => {
+                navigation.navigate('MarketplaceProductDetails', {
+                  listingId: String(item.id),
+                  latitude: coordinates?.latitude,
+                  longitude: coordinates?.longitude,
+                  distanceKm: item.distance_km ?? item.distance ?? null,
+                });
+              }}
+              onCallPress={(item) => {
+                void handleCallFarmer(item.id);
+              }}
+              onDirectionsPress={(item) => {
+                handleDirections(item);
+              }}
+            />
 
             {marketplaceQuery.isFetchingNextPage ? (
               <View className="flex-row items-center justify-center gap-sm py-md">

@@ -58,6 +58,9 @@ class MarketplaceController extends Controller
                 'nearby_suggestions' => NearbyProductSuggestionResource::collection(
                     $marketplace['nearby_suggestions']
                 )->resolve(),
+                'recommended_for_you' => NearbyProductSuggestionResource::collection(
+                    $marketplace['recommended_for_you']
+                )->resolve(),
                 'used_radius' => $marketplace['used_radius'],
                 'results_found' => $marketplace['results_found'],
                 'expanded' => $marketplace['expanded'],

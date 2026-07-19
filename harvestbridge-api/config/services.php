@@ -36,6 +36,8 @@ return [
     ],
     'ai' => [
         'url' => env('AI_API_URL'),
+        'disease_url' => env('AI_DISEASE_API_URL'),
+        'disease_field' => env('AI_DISEASE_API_FIELD', 'image'),
     ],
     'weather' => [
         'url' => env('WEATHER_API_URL'),

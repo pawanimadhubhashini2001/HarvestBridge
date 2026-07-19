@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
 use App\Http\Requests\CropPredictionRequest;
+use App\Http\Requests\DetectPlantDiseaseRequest;
 use App\Http\Requests\SmartPredictionRequest;
 use App\Http\Resources\MarketPriceResource;
 use App\Http\Resources\PredictionHistoryResource;
@@ -33,6 +34,18 @@ class AIPredictionController extends Controller
                 $request
             ),
             'Crop recommendation generated successfully.'
+        );
+    }
+
+    public function detectDisease(DetectPlantDiseaseRequest $request)
+    {
+        return ApiResponse::success(
+            $this->service->detectPlantDisease(
+                $request->user(),
+                $request->file('image'),
+                $request
+            ),
+            'Plant disease prediction generated successfully.'
         );
     }
 

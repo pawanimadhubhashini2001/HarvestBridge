@@ -7,6 +7,7 @@ use App\Models\PredictionHistory;
 use Illuminate\Support\Facades\Http;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class AIService
@@ -250,6 +251,59 @@ class AIService
         return $history;
     }
 
+    public function detectPlantDisease(
+        User $user,
+        UploadedFile $image,
+        ?Request $request = null
+    ): array {
+        $endpoint = (string) config('services.ai.disease_url');
+
+        if ($endpoint === '') {
+            throw new \Exception(
+                'Plant disease detection service is not configured. Set AI_DISEASE_API_URL first.'
+            );
+        }
+
+        $fieldName = (string) config('services.ai.disease_field', 'image');
+        $response = Http::timeout(60)
+            ->attach(
+                $fieldName,
+                file_get_contents($image->getRealPath()),
+                $image->getClientOriginalName()
+            )
+            ->post($endpoint);
+
+        if ($response->failed()) {
+            throw new \Exception(
+                'Unable to connect to plant disease detection service.'
+            );
+        }
+
+        $payload = $response->json();
+
+        if (! is_array($payload)) {
+            throw new \Exception(
+                'Disease detection service returned an invalid response.'
+            );
+        }
+
+        $normalized = $this->normalizeDiseasePrediction($payload);
+
+        $this->auditLogService->log(
+            'ai.disease.prediction.requested',
+            $user->id,
+            null,
+            [
+                'disease_name' => $normalized['disease_name'],
+                'confidence' => $normalized['confidence'],
+                'image_name' => $image->getClientOriginalName(),
+            ],
+            $request
+        );
+
+        return $normalized;
+    }
+
     private function buildPredictionPayload(array $data): array
     {
         $weather = $this->weatherService->getWeather($data['District']);
@@ -381,5 +435,134 @@ class AIService
             ->filter(fn (?string $tip) => $tip !== null && trim($tip) !== '')
             ->values()
             ->all();
+    }
+
+    private function normalizeDiseasePrediction(array $payload): array
+    {
+        $diseaseName = $this->firstFilledValue($payload, [
+            'disease_name',
+            'disease',
+            'predicted_disease',
+            'predicted_class',
+            'class_name',
+            'label',
+            'prediction',
+        ]);
+
+        if ($diseaseName === null) {
+            throw new \Exception(
+                'Disease detection service response does not include a disease name.'
+            );
+        }
+
+        $confidenceRaw = $this->firstFilledValue($payload, [
+            'confidence',
+            'confidence_score',
+            'probability',
+            'score',
+        ]);
+        $confidence = is_numeric($confidenceRaw)
+            ? round((float) $confidenceRaw, 4)
+            : 0.0;
+        $confidencePercentage = $confidence <= 1
+            ? round($confidence * 100, 2)
+            : round($confidence, 2);
+
+        $description = $this->firstFilledValue($payload, [
+            'description',
+            'disease_description',
+            'summary',
+            'details',
+        ]) ?? sprintf(
+            'The AI service detected %s from the uploaded plant image.',
+            $diseaseName
+        );
+
+        $treatmentSuggestions = $this->normalizeTreatmentSuggestions($payload);
+
+        if ($treatmentSuggestions === []) {
+            $treatmentSuggestions = [
+                'Inspect nearby leaves and isolate affected plants if symptoms are spreading.',
+                'Remove heavily damaged plant parts and keep tools clean between plants.',
+                'Consult a local agricultural officer or agronomist before applying treatment.',
+            ];
+        }
+
+        return [
+            'disease_name' => $diseaseName,
+            'confidence' => $confidence,
+            'confidence_percentage' => $confidencePercentage,
+            'description' => $description,
+            'treatment_suggestions' => $treatmentSuggestions,
+            'raw_response' => $payload,
+        ];
+    }
+
+    private function normalizeTreatmentSuggestions(array $payload): array
+    {
+        $value = null;
+
+        foreach ([
+            'treatment_suggestions',
+            'treatments',
+            'suggestions',
+            'recommendations',
+            'remedies',
+        ] as $key) {
+            if (array_key_exists($key, $payload) && $payload[$key] !== null) {
+                $value = $payload[$key];
+                break;
+            }
+        }
+
+        if (is_string($value)) {
+            return collect(preg_split('/\r\n|\r|\n|;/', $value) ?: [])
+                ->map(fn (string $item) => trim($item))
+                ->filter()
+                ->values()
+                ->all();
+        }
+
+        if (is_array($value)) {
+            return collect($value)
+                ->map(function ($item) {
+                    if (is_string($item)) {
+                        return trim($item);
+                    }
+
+                    if (is_array($item)) {
+                        return $this->firstFilledValue($item, [
+                            'message',
+                            'text',
+                            'suggestion',
+                            'title',
+                        ]);
+                    }
+
+                    return null;
+                })
+                ->filter(fn (?string $item) => $item !== null && $item !== '')
+                ->values()
+                ->all();
+        }
+
+        return [];
+    }
+
+    private function firstFilledValue(array $payload, array $keys): ?string
+    {
+        foreach ($keys as $key) {
+            $value = data_get($payload, $key);
+
+            if (is_string($value) && trim($value) !== '') {
+                return trim($value);
+            }
+
+            if (is_numeric($value)) {
+                return (string) $value;
+            }
+        }
+
+        return null;
     }
 }

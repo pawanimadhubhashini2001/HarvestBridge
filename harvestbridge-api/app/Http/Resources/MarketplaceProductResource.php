@@ -80,6 +80,9 @@ class MarketplaceProductResource extends JsonResource
                 'google_maps_url' => $this->farm->googleMapsUrl(),
                 'open_maps_action' => $this->farm->openMapsAction(),
             ]),
+            'recommended_products' => HarvestListingResource::collection(
+                $this->whenLoaded('recommendedProducts')
+            ),
             'related_products' => HarvestListingResource::collection(
                 $this->whenLoaded('relatedProducts')
             ),

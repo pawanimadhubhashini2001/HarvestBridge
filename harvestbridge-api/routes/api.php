@@ -360,6 +360,10 @@ Route::middleware('auth:sanctum')->group(function () {
         '/ai/predict',
         [AIPredictionController::class, 'predict']
     );
+    Route::post(
+        '/ai/disease-detect',
+        [AIPredictionController::class, 'detectDisease']
+    );
     Route::get(
         '/ai/history',
         [AIPredictionController::class, 'history']

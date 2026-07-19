@@ -10,6 +10,8 @@ import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/Marketpla
 import { FavoritesScreen } from '@/screens/marketplace/FavoritesScreen';
 import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
 import { StoreReviewsScreen } from '@/screens/marketplace/StoreReviewsScreen';
+import { PlantDiseaseDetectionScreen } from '@/screens/recommendation/PlantDiseaseDetectionScreen';
+import { PlantDiseasePredictionScreen } from '@/screens/recommendation/PlantDiseasePredictionScreen';
 import { WriteReviewScreen } from '@/screens/marketplace/WriteReviewScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
@@ -100,6 +102,16 @@ export function AppNavigator() {
         name="AIRecommendationForm"
         component={SmartRecommendationScreen}
         options={{ title: 'Smart Recommendation' }}
+      />
+      <Stack.Screen
+        name="PlantDiseaseDetection"
+        component={PlantDiseaseDetectionScreen}
+        options={{ title: 'Plant Disease Detection' }}
+      />
+      <Stack.Screen
+        name="PlantDiseasePrediction"
+        component={PlantDiseasePredictionScreen}
+        options={{ title: 'Disease Prediction' }}
       />
       <Stack.Screen
         name="RecommendationResult"

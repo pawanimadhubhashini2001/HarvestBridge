@@ -20,6 +20,10 @@ class NearbyProductSuggestionResource extends JsonResource
             'price_per_unit' => $this->price_per_unit,
             'quality_grade' => $this->quality_grade,
             'status' => $this->status,
+            'recommendation_reason' => $this->when(
+                isset($this->recommendation_reason),
+                fn () => $this->recommendation_reason
+            ),
             'distance' => $this->when(
                 isset($this->distance_km),
                 fn () => round((float) $this->distance_km, 2)

@@ -35,6 +35,7 @@ export interface MarketplaceListingDto {
   farmer?: string | null;
   district?: string | null;
   matched_field?: string | null;
+  recommendation_reason?: string | null;
   distance?: number | null;
   distance_km?: number | null;
   quantity: number | string;
@@ -67,6 +68,7 @@ export interface NearbyProductSuggestionDto {
   crop?: string | null;
   crop_category?: string | null;
   description?: string | null;
+  recommendation_reason?: string | null;
   available_quantity: number | string;
   unit: string;
   price_per_unit: number | string;
@@ -103,6 +105,7 @@ export interface MarketplaceIndexDto {
     meta?: MarketplacePaginationMetaDto | null;
   };
   nearby_suggestions: NearbyProductSuggestionDto[];
+  recommended_for_you: NearbyProductSuggestionDto[];
   used_radius: number | string | null;
   results_found: number;
   expanded: boolean;
@@ -167,6 +170,7 @@ export interface MarketplaceProductDetailDto {
     google_maps_url?: string | null;
     open_maps_action?: MarketplaceOpenMapsActionDto | null;
   } | null;
+  recommended_products: MarketplaceListingDto[];
   related_products: MarketplaceListingDto[];
 }
 

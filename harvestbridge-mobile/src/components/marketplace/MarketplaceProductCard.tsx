@@ -74,6 +74,7 @@ export function MarketplaceProductCard({
   const title = 'crop' in item ? item.crop : null;
   const storeName = item.store?.store_name ?? 'Store unavailable';
   const description = item.description?.trim();
+  const recommendationReason = item.recommendation_reason?.trim();
   const distance = item.distance_km ?? item.distance ?? null;
 
   return (
@@ -132,6 +133,18 @@ export function MarketplaceProductCard({
           <Text variant={compact ? 'titleMedium' : 'headlineSmall'} style={{ color: theme.colors.primary }}>
             {formatCurrency(item.price_per_unit, item.unit)}
           </Text>
+
+          {recommendationReason ? (
+            <View
+              className="rounded-md px-sm py-sm"
+              style={{ backgroundColor: theme.colors.primaryContainer }}>
+              <Text
+                variant="bodySmall"
+                style={{ color: theme.colors.onPrimaryContainer }}>
+                {recommendationReason}
+              </Text>
+            </View>
+          ) : null}
 
           {!compact && description ? (
             <Text

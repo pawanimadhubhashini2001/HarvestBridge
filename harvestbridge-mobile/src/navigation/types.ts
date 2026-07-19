@@ -54,6 +54,8 @@ export type AppStackParamList = {
     recommendationId?: string;
   };
   AIRecommendationForm: undefined;
+  PlantDiseaseDetection: undefined;
+  PlantDiseasePrediction: undefined;
   RecommendationResult: {
     predictionId?: string;
   };
@@ -142,6 +144,8 @@ export const linking: LinkingOptions<RootStackParamList> = {
           StoryFeed: 'marketplace/stories',
           RecommendationDetails: 'recommendations/:recommendationId',
           AIRecommendationForm: 'recommendations/new',
+          PlantDiseaseDetection: 'recommendations/disease-detect',
+          PlantDiseasePrediction: 'recommendations/disease-result',
           RecommendationResult: 'recommendations/result/:predictionId',
           WeatherDetails: 'weather/:district',
           Settings: 'settings',
