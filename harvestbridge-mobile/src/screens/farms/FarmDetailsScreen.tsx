@@ -50,6 +50,8 @@ import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 import { formatStoreStatus } from '@/utils/store-status';
 
+type StoreListingSection = 'products' | 'donations' | 'compost';
+
 function SummaryTile({
   label,
   value,
@@ -272,6 +274,7 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<StoreListingSection>('products');
   const [selectedListing, setSelectedListing] = useState<HarvestListingDto | null>(null);
   const [selectedDonation, setSelectedDonation] = useState<DonationDto | null>(null);
   const [selectedCompostListing, setSelectedCompostListing] = useState<CompostListingDto | null>(null);
@@ -610,6 +613,70 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Card.Content>
+          <View className="gap-sm">
+            <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+              Store Listings
+            </Text>
+            <View className="flex-row flex-wrap gap-sm">
+              {[
+                {
+                  key: 'products' as const,
+                  label: 'My Products',
+                  count: harvestListings.length,
+                  icon: 'basket-outline',
+                },
+                {
+                  key: 'donations' as const,
+                  label: 'My Donations',
+                  count: donations.length,
+                  icon: 'hand-heart-outline',
+                },
+                {
+                  key: 'compost' as const,
+                  label: 'My Compost',
+                  count: compostListings.length,
+                  icon: 'recycle',
+                },
+              ].map((section) => {
+                const isSelected = activeSection === section.key;
+
+                return (
+                  <Chip
+                    key={section.key}
+                    selected={isSelected}
+                    icon={section.icon}
+                    showSelectedCheck={false}
+                    onPress={() => {
+                      setActiveSection(section.key);
+                      setGalleryListingId(null);
+                    }}
+                    style={{
+                      backgroundColor: isSelected
+                        ? theme.colors.primary
+                        : theme.colors.primaryContainer,
+                    }}
+                    textStyle={{
+                      color: isSelected
+                        ? theme.colors.onPrimary
+                        : theme.colors.primary,
+                      fontWeight: '700',
+                    }}
+                  >
+                    {section.label} ({section.count})
+                  </Chip>
+                );
+              })}
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {activeSection === 'products' ? (
+      <Card
+        mode="outlined"
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
+      >
+        <Card.Content>
           <View className="gap-md">
             <View className="gap-sm">
               <View className="flex-row items-center justify-between gap-md">
@@ -684,7 +751,9 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           </View>
         </Card.Content>
       </Card>
+      ) : null}
 
+      {activeSection === 'donations' ? (
       <Card
         mode="outlined"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
@@ -764,7 +833,9 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           </View>
         </Card.Content>
       </Card>
+      ) : null}
 
+      {activeSection === 'compost' ? (
       <Card
         mode="outlined"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
@@ -844,6 +915,7 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           </View>
         </Card.Content>
       </Card>
+      ) : null}
 
       <Snackbar
         visible={Boolean(feedbackMessage)}
