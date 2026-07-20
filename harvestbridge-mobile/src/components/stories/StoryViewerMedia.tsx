@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Pressable, View } from 'react-native';
-import { IconButton, Text } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
@@ -122,13 +121,13 @@ export function StoryViewerMedia({
       style={{ width: '100%', height: '100%' }}
       player={player}
       nativeControls={false}
-      contentFit="cover"
+      contentFit="contain"
     />
   ) : (
     <Image
       source={{ uri: story.media_url }}
       style={{ width: '100%', height: '100%' }}
-      contentFit="cover"
+      contentFit="contain"
       transition={180}
     />
   );
@@ -146,30 +145,6 @@ export function StoryViewerMedia({
             backgroundColor: 'rgba(0, 0, 0, 0.18)',
           }}
         />
-
-        <View
-          style={{
-            position: 'absolute',
-            right: 16,
-            bottom: 160,
-            alignItems: 'center',
-            gap: 8,
-          }}>
-          <IconButton
-            icon={isPaused ? 'play' : 'pause'}
-            mode="contained"
-            size={20}
-            containerColor="rgba(0, 0, 0, 0.4)"
-            iconColor={theme.colors.onPrimary}
-            onPress={onTogglePause}
-          />
-
-          {story.media_type === 'video' ? (
-            <Text variant="labelSmall" style={{ color: theme.colors.onPrimary }}>
-              Video story
-            </Text>
-          ) : null}
-        </View>
       </View>
     </Pressable>
   );

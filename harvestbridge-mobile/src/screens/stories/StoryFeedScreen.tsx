@@ -112,6 +112,7 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
     [storyFeedQuery.data],
   );
   const currentStory = stories[currentIndex] ?? null;
+  const currentStoryId = currentStory?.id ?? null;
   const isInitialLoading = storyFeedQuery.isLoading && stories.length === 0;
   const isRefreshing = storyFeedQuery.isRefetching && !storyFeedQuery.isFetchingNextPage;
 
@@ -148,6 +149,10 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
     }
 
     goToIndex(0, false);
+  }
+
+  function handleTogglePause() {
+    setIsPaused((current) => !current);
   }
 
   async function openExternalUrl(url?: string | null, unavailableMessage?: string) {
@@ -219,7 +224,9 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
   useEffect(() => {
     setProgress(0);
     setIsPaused(false);
+  }, [currentStoryId]);
 
+  useEffect(() => {
     if (!currentStory) {
       return;
     }
@@ -328,7 +335,7 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
                 }}
                 onTogglePause={() => {
                   if (index === currentIndex) {
-                    setIsPaused((current) => !current);
+                    handleTogglePause();
                   }
                 }}
               />
@@ -460,9 +467,11 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
                   size={20}
                   containerColor="rgba(0, 0, 0, 0.45)"
                   iconColor={theme.colors.onPrimary}
-                  onPress={() => {
-                    setIsPaused((current) => !current);
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    handleTogglePause();
                   }}
+                  accessibilityLabel={isPaused ? 'Resume story' : 'Pause story'}
                 />
               </View>
 
