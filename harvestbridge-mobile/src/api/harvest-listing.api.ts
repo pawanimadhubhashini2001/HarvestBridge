@@ -20,8 +20,9 @@ export interface HarvestListingDto {
   id: number;
   user_id: number;
   farm_id: number;
-  crop_id: number;
+  crop_id: number | null;
   crop?: string | null;
+  crop_name?: string | null;
   crop_category?: string | null;
   quantity: number | string;
   total_quantity: number | string;
@@ -47,6 +48,21 @@ export interface HarvestListingImageAsset {
   uri: string;
   name: string;
   type: string;
+  file?: Blob | null;
+}
+
+export interface CreateHarvestListingPayload {
+  farm_id: number | string;
+  crop_id?: number;
+  crop_name: string;
+  crop_category?: string;
+  quantity: number;
+  unit: string;
+  price_per_unit: number;
+  quality_grade?: string;
+  harvest_date: string;
+  available_until?: string;
+  description?: string;
 }
 
 export interface UpdateHarvestListingAvailabilityPayload {
@@ -60,6 +76,15 @@ export function getHarvestListingsQueryKey() {
 
 export async function getHarvestListings() {
   const response = await apiClient.get<ApiSuccessResponse<HarvestListingDto[]>>('/harvest-listings');
+
+  return response.data.data;
+}
+
+export async function createHarvestListing(payload: CreateHarvestListingPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<HarvestListingDto>>(
+    '/harvest-listings',
+    payload,
+  );
 
   return response.data.data;
 }
@@ -96,11 +121,15 @@ export async function uploadHarvestListingImages(
   const formData = new FormData();
 
   images.forEach((image) => {
-    formData.append('images[]', {
-      uri: image.uri,
-      name: image.name,
-      type: image.type,
-    } as unknown as Blob);
+    const imageFile =
+      image.file
+      ?? ({
+        uri: image.uri,
+        name: image.name,
+        type: image.type,
+      } as unknown as Blob);
+
+    formData.append('images[]', imageFile, image.name);
   });
 
   const response = await apiClient.post<ApiSuccessResponse<HarvestListingDto>>(

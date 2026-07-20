@@ -56,7 +56,7 @@ class ContentReportResource extends JsonResource
         if ($reportable instanceof HarvestListing) {
             return [
                 'id' => $reportable->id,
-                'title' => $reportable->crop?->name ?? 'Harvest Listing',
+                'title' => $reportable->crop?->name ?? $reportable->crop_name ?? 'Harvest Listing',
                 'status' => $reportable->status,
                 'store_id' => $reportable->farm_id,
             ];

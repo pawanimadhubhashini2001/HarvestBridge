@@ -1,19 +1,30 @@
+import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import * as Location from 'expo-location';
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
+import { View } from 'react-native';
 import {
   Button,
   Card,
   Chip,
   Dialog,
   HelperText,
+  IconButton,
   Portal,
   Snackbar,
   Text,
   TextInput,
 } from 'react-native-paper';
 
+import {
+  getCompostListings,
+  getCompostListingsQueryKey,
+  type CompostListingDto,
+} from '@/api/compost-listing.api';
+import {
+  getDonations,
+  getDonationsQueryKey,
+  type DonationDto,
+} from '@/api/donation.api';
 import {
   deleteHarvestListing,
   getHarvestListings,
@@ -25,66 +36,41 @@ import {
   getMyStore,
   getMyStoreQueryKey,
   getStoreDetailsQueryKey,
-  getStoreLocation,
-  getStoreLocationQueryKey,
-  getStoreStatus,
-  getStoreStatusQueryKey,
-  updateStoreLocation,
-  updateStoreStatus,
 } from '@/api/store.api';
-import { DeleteStoreButton } from '@/components/store/DeleteStoreButton';
 import { FarmerProductCard } from '@/components/store/FarmerProductCard';
 import { HarvestListingGalleryManager } from '@/components/store/HarvestListingGalleryManager';
-import { StoreImageManager } from '@/components/store/StoreImageManager';
+import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
-import { ConfirmationDialog } from '@/components/common/confirmation-dialog';
 import { Screen } from '@/components/layout/screen';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
-import {
-  buildAddressFromReverseGeocode,
-  extractDistrictFromReverseGeocode,
-  formatStoreCoordinates,
-} from '@/utils/store-location';
-import {
-  formatStoreStatus,
-  getStoreStatusLabel,
-  STORE_STATUS_OPTIONS,
-} from '@/utils/store-status';
+import { formatStoreStatus } from '@/utils/store-status';
 
-function formatDateTime(value?: string | null) {
-  if (!value) {
-    return 'Not available';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(date);
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
+function SummaryTile({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   const theme = useAppTheme();
 
   return (
-    <View className="flex-row items-start justify-between gap-md">
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}>
+    <View
+      className="flex-1 gap-xs rounded-2xl px-md py-md"
+      style={{
+        minWidth: 140,
+        backgroundColor: theme.colors.surfaceVariant,
+      }}
+    >
+      <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
         {label}
       </Text>
       <Text
-        variant="bodyMedium"
-        style={{ color: theme.colors.onSurface, flex: 1.2, textAlign: 'right', fontWeight: '600' }}
+        variant="titleMedium"
+        style={{ color: theme.colors.onSurface, fontWeight: '700', lineHeight: 24 }}
       >
         {value}
       </Text>
@@ -92,10 +78,98 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ListingEmptyState({
+  title,
+  message,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  message: string;
+  actionLabel: string;
+  onAction: () => void;
+}) {
+  const theme = useAppTheme();
+
+  return (
+    <View
+      className="gap-sm rounded-2xl border px-lg py-lg"
+      style={{ borderColor: theme.colors.outlineVariant ?? theme.colors.outline }}
+    >
+      <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+        {title}
+      </Text>
+      <Text
+        variant="bodyMedium"
+        style={{ color: theme.colors.onSurfaceVariant, lineHeight: 22 }}
+      >
+        {message}
+      </Text>
+      <Button
+        mode="contained"
+        icon="plus"
+        onPress={onAction}
+        style={{ alignSelf: 'flex-start' }}
+      >
+        {actionLabel}
+      </Button>
+    </View>
+  );
+}
+
+function SecondaryListingCard({
+  title,
+  subtitle,
+  status,
+  meta,
+  description,
+}: {
+  title: string;
+  subtitle?: string | null;
+  status: string;
+  meta: string[];
+  description?: string | null;
+}) {
+  const theme = useAppTheme();
+
+  return (
+    <View
+      className="gap-sm rounded-2xl border px-lg py-lg"
+      style={{ borderColor: theme.colors.outlineVariant ?? theme.colors.outline }}
+    >
+      <View className="flex-row items-start justify-between gap-sm">
+        <View className="flex-1 gap-xs">
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+            {title}
+          </Text>
+          {subtitle ? (
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+        <Chip compact>{status}</Chip>
+      </View>
+      <View className="flex-row flex-wrap gap-sm">
+        {meta.map((item) => (
+          <Chip key={item} compact>
+            {item}
+          </Chip>
+        ))}
+      </View>
+      {description ? (
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, lineHeight: 22 }}>
+          {description}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetails'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const [locationFeedback, setLocationFeedback] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [selectedListing, setSelectedListing] = useState<HarvestListingDto | null>(null);
   const [galleryListingId, setGalleryListingId] = useState<number | null>(null);
   const [quantityDialogVisible, setQuantityDialogVisible] = useState(false);
@@ -103,99 +177,33 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [availableQuantityInput, setAvailableQuantityInput] = useState('');
   const [availableQuantityError, setAvailableQuantityError] = useState<string | null>(null);
+
   const storeQuery = useQuery({
     queryKey: getMyStoreQueryKey(),
     queryFn: getMyStore,
   });
+
   const store = storeQuery.data;
   const storeId = store?.id;
-  const storeLocationQuery = useQuery({
-    queryKey: getStoreLocationQueryKey(storeId),
-    queryFn: () => getStoreLocation(storeId ?? ''),
-    enabled: Boolean(storeId),
-  });
-  const storeStatusQuery = useQuery({
-    queryKey: getStoreStatusQueryKey(storeId),
-    queryFn: () => getStoreStatus(storeId ?? ''),
-    enabled: Boolean(storeId),
-  });
+
   const harvestListingsQuery = useQuery({
     queryKey: getHarvestListingsQueryKey(),
     queryFn: getHarvestListings,
     enabled: Boolean(storeId),
   });
-  const updateLocationMutation = useMutation({
-    mutationFn: async () => {
-      if (!storeId || !store) {
-        throw new Error('Store profile is required before updating the location.');
-      }
 
-      const permission = await Location.requestForegroundPermissionsAsync();
-
-      if (permission.status !== 'granted') {
-        throw new Error('Location permission is required to update your store location.');
-      }
-
-      const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      const reverseResults = await Location.reverseGeocodeAsync({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-      const bestMatch = reverseResults[0];
-
-      return updateStoreLocation(storeId, {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        address: buildAddressFromReverseGeocode(bestMatch) || store.address,
-        district: extractDistrictFromReverseGeocode(bestMatch) || store.district,
-      });
-    },
-    onSuccess: async (updatedLocation) => {
-      if (!storeId) {
-        return;
-      }
-
-      queryClient.setQueryData(getStoreLocationQueryKey(storeId), updatedLocation);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
-        queryClient.invalidateQueries({ queryKey: getStoreDetailsQueryKey(storeId) }),
-        queryClient.invalidateQueries({ queryKey: getStoreLocationQueryKey(storeId) }),
-      ]);
-      setLocationFeedback('Store location updated from your current device position.');
-    },
-    onError: (error) => {
-      setLocationFeedback(getErrorMessage(error));
-    },
+  const donationsQuery = useQuery({
+    queryKey: getDonationsQueryKey(),
+    queryFn: getDonations,
+    enabled: Boolean(storeId),
   });
-  const updateStatusMutation = useMutation({
-    mutationFn: async (businessStatus: 'open' | 'closed' | 'temporarily_closed') => {
-      if (!storeId) {
-        throw new Error('Store profile is required before updating the status.');
-      }
 
-      return updateStoreStatus(storeId, {
-        business_status: businessStatus,
-      });
-    },
-    onSuccess: async (updatedStatus) => {
-      if (!storeId) {
-        return;
-      }
-
-      queryClient.setQueryData(getStoreStatusQueryKey(storeId), updatedStatus);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
-        queryClient.invalidateQueries({ queryKey: getStoreDetailsQueryKey(storeId) }),
-        queryClient.invalidateQueries({ queryKey: getStoreStatusQueryKey(storeId) }),
-      ]);
-      setLocationFeedback(`Store status updated to ${getStoreStatusLabel(updatedStatus.business_status)}.`);
-    },
-    onError: (error) => {
-      setLocationFeedback(getErrorMessage(error));
-    },
+  const compostListingsQuery = useQuery({
+    queryKey: getCompostListingsQueryKey(),
+    queryFn: getCompostListings,
+    enabled: Boolean(storeId),
   });
+
   const updateAvailabilityMutation = useMutation({
     mutationFn: async ({
       listingId,
@@ -215,6 +223,7 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
             listing.id === updatedListing.id ? updatedListing : listing,
           ) ?? [updatedListing],
       );
+
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getHarvestListingsQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
@@ -222,15 +231,17 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           ? queryClient.invalidateQueries({ queryKey: getStoreDetailsQueryKey(storeId) })
           : Promise.resolve(),
       ]);
+
       setQuantityDialogVisible(false);
       setStatusDialogVisible(false);
       setSelectedListing(updatedListing);
-      setLocationFeedback('Product availability updated successfully.');
+      setFeedbackMessage('Product availability updated successfully.');
     },
     onError: (error) => {
-      setLocationFeedback(getErrorMessage(error));
+      setFeedbackMessage(getErrorMessage(error));
     },
   });
+
   const deleteHarvestListingMutation = useMutation({
     mutationFn: async (listingId: number) => deleteHarvestListing(listingId),
     onSuccess: async () => {
@@ -241,12 +252,13 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           ? queryClient.invalidateQueries({ queryKey: getStoreDetailsQueryKey(storeId) })
           : Promise.resolve(),
       ]);
+
       setDeleteDialogVisible(false);
       setSelectedListing(null);
-      setLocationFeedback('Product deleted successfully.');
+      setFeedbackMessage('Product deleted successfully.');
     },
     onError: (error) => {
-      setLocationFeedback(getErrorMessage(error));
+      setFeedbackMessage(getErrorMessage(error));
     },
   });
 
@@ -280,11 +292,15 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
     );
   }
 
-  const locationData = storeLocationQuery.data;
-  const currentStoreStatus = storeStatusQuery.data?.business_status ?? store.business_status ?? 'open';
+  const currentStoreStatus = store.business_status ?? 'open';
   const harvestListings = harvestListingsQuery.data ?? [];
+  const donations = donationsQuery.data ?? [];
+  const compostListings = compostListingsQuery.data ?? [];
   const galleryListing =
     harvestListings.find((listing) => listing.id === galleryListingId) ?? null;
+  const storeDescription =
+    store.store_description?.trim()
+    || 'Add a short description so customers understand what your store offers.';
 
   function openEditDialog(listing: HarvestListingDto) {
     setSelectedListing(listing);
@@ -301,25 +317,6 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
   function openDeleteDialog(listing: HarvestListingDto) {
     setSelectedListing(listing);
     setDeleteDialogVisible(true);
-  }
-
-  async function handleOpenMaps() {
-    const targetUrl =
-      locationData?.open_maps_action?.url ??
-      locationData?.google_maps_url ??
-      store.open_maps_action?.url ??
-      store.google_maps_url;
-
-    if (!targetUrl) {
-      setLocationFeedback('Google Maps preview is not available until coordinates are saved.');
-      return;
-    }
-
-    try {
-      await Linking.openURL(targetUrl);
-    } catch {
-      setLocationFeedback('Unable to open Google Maps on this device.');
-    }
   }
 
   async function handleQuantitySave() {
@@ -365,72 +362,130 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
     });
   }
 
+  function handleAddListing(listingType: 'product' | 'donation' | 'compost') {
+    navigation.navigate('AddHarvestListing', { listingType });
+  }
+
   return (
     <Screen scrollable contentClassName="gap-lg">
-      <View
-        className="gap-sm rounded-lg border px-lg py-lg"
-        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
-      >
-        <Chip
-          compact
-          style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
-          textStyle={{ color: theme.colors.primary }}
-        >
-          Store Profile
-        </Chip>
-        <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-          {store.store_name}
-        </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          This is your public selling location for harvest listings and marketplace visibility.
-        </Text>
-      </View>
-
       <Card
         mode="outlined"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Card.Content>
-          <View className="gap-md">
-            <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-              Store Information
-            </Text>
+          <View className="gap-lg">
+            <View className="flex-row items-start justify-between gap-md">
+              <View className="flex-1 gap-sm">
+                <View className="flex-row flex-wrap items-center gap-sm">
+                  <Chip
+                    compact
+                    style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
+                    textStyle={{ color: theme.colors.primary }}
+                  >
+                    Store Profile
+                  </Chip>
+                  <Chip compact icon="storefront-outline">
+                    {formatStoreStatus(currentStoreStatus)}
+                  </Chip>
+                </View>
+                <Text
+                  variant="headlineMedium"
+                  style={{ color: theme.colors.onSurface, fontWeight: '700', lineHeight: 38 }}
+                >
+                  {store.store_name}
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  style={{ color: theme.colors.onSurfaceVariant, lineHeight: 22 }}
+                >
+                  {storeDescription}
+                </Text>
+              </View>
 
-            <DetailRow label="Store Name" value={store.store_name} />
-            <DetailRow label="Phone Number" value={store.phone_number} />
-            <DetailRow
-              label="Description"
-              value={store.store_description?.trim() || 'Not provided'}
-            />
-            <DetailRow
-              label="Active Crops"
-              value={`${store.active_crop_count ?? 0}`}
-            />
-            <DetailRow
-              label="Business Status"
-              value={formatStoreStatus(currentStoreStatus)}
-            />
-            <DetailRow label="Created Date" value={formatDateTime(store.created_at)} />
-            <DetailRow label="Updated Date" value={formatDateTime(store.updated_at)} />
+              <IconButton
+                icon="pencil-outline"
+                mode="contained-tonal"
+                size={20}
+                onPress={() => {
+                  navigation.navigate('EditFarm', { farmId: String(store.id) });
+                }}
+                accessibilityLabel="Edit store profile"
+              />
+            </View>
+
+            <View className="flex-row items-center gap-md">
+              <View
+                className="items-center justify-center overflow-hidden rounded-3xl"
+                style={{
+                  width: 88,
+                  height: 88,
+                  backgroundColor: theme.colors.surfaceVariant,
+                }}
+              >
+                {store.store_logo_url ?? store.logo_url ?? store.store_image_url ? (
+                  <Image
+                    source={{
+                      uri: store.store_logo_url ?? store.logo_url ?? store.store_image_url ?? '',
+                    }}
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                    No Logo
+                  </Text>
+                )}
+              </View>
+
+              <View className="flex-1 gap-sm">
+                <SummaryTile label="Phone" value={store.phone_number || 'Not added'} />
+              </View>
+            </View>
+
+            <View className="flex-row flex-wrap gap-sm">
+              <Chip compact icon="map-marker-outline">
+                {store.district}
+              </Chip>
+              <Chip compact icon="sprout-outline">
+                {store.active_crop_count ?? 0} active crops
+              </Chip>
+            </View>
+
+            <View className="flex-row flex-wrap gap-sm">
+              <SummaryTile label="Address" value={store.address || 'Not added'} />
+              <SummaryTile label="Updated" value={store.updated_at ? new Date(store.updated_at).toLocaleDateString() : 'Not available'} />
+            </View>
           </View>
         </Card.Content>
       </Card>
 
-      <StoreImageManager storeId={store.id} store={store} />
-
       <Card
         mode="outlined"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Card.Content>
           <View className="gap-md">
-            <View className="gap-xs">
-              <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-                My Products
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                Manage the availability of your harvest listings. Customers only see products that are available.
-              </Text>
+            <View className="gap-sm">
+              <View className="flex-row items-center justify-between gap-md">
+                <View className="flex-1 gap-xs">
+                  <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                    My Products
+                  </Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    Manage listing visibility, stock, gallery images, and selling status from one place.
+                  </Text>
+                </View>
+                <Button
+                  mode="contained-tonal"
+                  compact
+                  icon="plus"
+                  onPress={() => {
+                    handleAddListing('product');
+                  }}
+                >
+                  Add Product
+                </Button>
+              </View>
             </View>
 
             {harvestListingsQuery.isLoading && harvestListings.length === 0 ? (
@@ -442,14 +497,14 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                 {getErrorMessage(harvestListingsQuery.error)}
               </Text>
             ) : harvestListings.length === 0 ? (
-              <View className="gap-sm rounded-lg border px-lg py-lg" style={{ borderColor: theme.colors.outline }}>
-                <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-                  No products yet
-                </Text>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Your store is ready, but no harvest listings have been added for availability management yet.
-                </Text>
-              </View>
+              <ListingEmptyState
+                title="No products yet"
+                message="Add marketplace products for customers who want to buy directly from your store."
+                actionLabel="Add Product"
+                onAction={() => {
+                  handleAddListing('product');
+                }}
+              />
             ) : (
               <View className="gap-md">
                 {harvestListings.map((listing) => (
@@ -479,9 +534,7 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
               </View>
             )}
 
-            {galleryListing ? (
-              <HarvestListingGalleryManager listing={galleryListing} />
-            ) : null}
+            {galleryListing ? <HarvestListingGalleryManager listing={galleryListing} /> : null}
           </View>
         </Card.Content>
       </Card>
@@ -492,112 +545,69 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
       >
         <Card.Content>
           <View className="gap-md">
-            <View className="gap-xs">
-              <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-                Store Status
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                Control whether your store is open, closed, or temporarily closed for customers.
-              </Text>
+            <View className="gap-sm">
+              <View className="flex-row items-center justify-between gap-md">
+                <View className="flex-1 gap-xs">
+                  <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                    My Donations
+                  </Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    Review donation items available for NGOs and community collection.
+                  </Text>
+                </View>
+                <Button
+                  mode="contained-tonal"
+                  compact
+                  icon="plus"
+                  onPress={() => {
+                    handleAddListing('donation');
+                  }}
+                >
+                  Add Donation
+                </Button>
+              </View>
             </View>
 
-            <Chip compact style={{ alignSelf: 'flex-start' }}>
-              {formatStoreStatus(currentStoreStatus)}
-            </Chip>
-
-            <View className="flex-row flex-wrap gap-sm">
-              {STORE_STATUS_OPTIONS.map((statusOption) => {
-                const isActive = currentStoreStatus === statusOption;
-
-                return (
-                  <Button
-                    key={statusOption}
-                    mode={isActive ? 'contained' : 'outlined'}
-                    disabled={updateStatusMutation.isPending}
-                    loading={updateStatusMutation.isPending && isActive}
-                    onPress={() => {
-                      void updateStatusMutation.mutateAsync(statusOption);
-                    }}
-                  >
-                    {getStoreStatusLabel(statusOption)}
-                  </Button>
-                );
-              })}
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
-
-      <Card
-        mode="outlined"
-        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
-      >
-        <Card.Content>
-          <View className="gap-md">
-            <View className="gap-xs">
-              <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-                Current Store Location
-              </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                Saved store coordinates are used for maps, nearby search, and future distance
-                calculations.
-              </Text>
-            </View>
-
-            {storeLocationQuery.isLoading && !locationData ? (
+            {donationsQuery.isLoading && donations.length === 0 ? (
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Loading store location...
+                Loading your donations...
               </Text>
-            ) : storeLocationQuery.isError && !locationData ? (
+            ) : donationsQuery.isError && donations.length === 0 ? (
               <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-                {getErrorMessage(storeLocationQuery.error)}
+                {getErrorMessage(donationsQuery.error)}
               </Text>
+            ) : donations.length === 0 ? (
+              <ListingEmptyState
+                title="No donations yet"
+                message="Share excess produce with NGOs without adding a selling price."
+                actionLabel="Add Donation"
+                onAction={() => {
+                  handleAddListing('donation');
+                }}
+              />
             ) : (
-              <View className="gap-sm">
-                <DetailRow label="District" value={locationData?.district || store.district} />
-                <DetailRow label="Address" value={locationData?.address || store.address || 'Not provided'} />
-                <DetailRow
-                  label="Coordinates"
-                  value={formatStoreCoordinates(
-                    locationData?.latitude ?? store.latitude,
-                    locationData?.longitude ?? store.longitude,
-                  )}
-                />
-                <DetailRow
-                  label="Google Maps URL"
-                  value={locationData?.google_maps_url ?? store.google_maps_url ?? 'Not available'}
-                />
+              <View className="gap-md">
+                {donations.map((donation: DonationDto) => (
+                  <SecondaryListingCard
+                    key={donation.id}
+                    title={donation.product?.crop_name ?? donation.crop_name ?? 'Donation'}
+                    subtitle={donation.product?.crop_category ?? donation.crop_category ?? 'Donation listing'}
+                    status={donation.collection_status ?? donation.status}
+                    meta={[
+                      `${donation.quantity} ${donation.unit}`,
+                      donation.price_per_unit
+                        ? `LKR ${donation.price_per_unit}/${donation.unit}`
+                        : 'No price added',
+                      donation.pickup_location ?? 'Pickup location not set',
+                      donation.available_until
+                        ? `Until ${new Date(donation.available_until).toLocaleDateString()}`
+                        : 'No closing date',
+                    ]}
+                    description={donation.description ?? donation.notes ?? null}
+                  />
+                ))}
               </View>
             )}
-
-            <View className="gap-sm">
-              <Button
-                mode="contained"
-                loading={updateLocationMutation.isPending}
-                disabled={updateLocationMutation.isPending}
-                onPress={() => {
-                  void updateLocationMutation.mutateAsync();
-                }}
-              >
-                Use Current Location
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={() => {
-                  navigation.navigate('EditFarm', { farmId: String(store.id) });
-                }}
-              >
-                Change Location
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={() => {
-                  void handleOpenMaps();
-                }}
-              >
-                Open Google Maps Preview
-              </Button>
-            </View>
           </View>
         </Card.Content>
       </Card>
@@ -607,58 +617,87 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Card.Content>
-          <View className="gap-sm">
-            <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-              Actions
-            </Text>
-            <Button
-              mode="contained"
-              onPress={() => {
-                navigation.navigate('EditFarm', { farmId: String(store.id) });
-              }}
-            >
-              Edit Store
-            </Button>
-            <Button
-              mode="contained-tonal"
-              onPress={() => {
-                navigation.navigate('MyStories');
-              }}
-            >
-              My Stories
-            </Button>
-            <DeleteStoreButton
-              storeId={store.id}
-              label="Delete Store"
-              onDeleted={() => {
-                navigation.replace('MainTabs', { screen: 'Farms' });
-              }}
-            />
-            <Button
-              mode="outlined"
-              onPress={() => {
-                navigation.navigate('AIRecommendationForm');
-              }}
-            >
-              Create AI Recommendation
-            </Button>
+          <View className="gap-md">
+            <View className="gap-sm">
+              <View className="flex-row items-center justify-between gap-md">
+                <View className="flex-1 gap-xs">
+                  <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                    My Compost
+                  </Text>
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    Review compost items available for pickup and recycling collection.
+                  </Text>
+                </View>
+                <Button
+                  mode="contained-tonal"
+                  compact
+                  icon="plus"
+                  onPress={() => {
+                    handleAddListing('compost');
+                  }}
+                >
+                  Add Compost
+                </Button>
+              </View>
+            </View>
+
+            {compostListingsQuery.isLoading && compostListings.length === 0 ? (
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                Loading your compost listings...
+              </Text>
+            ) : compostListingsQuery.isError && compostListings.length === 0 ? (
+              <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
+                {getErrorMessage(compostListingsQuery.error)}
+              </Text>
+            ) : compostListings.length === 0 ? (
+              <ListingEmptyState
+                title="No compost listings yet"
+                message="Share crop waste or compost materials without setting a selling price."
+                actionLabel="Add Compost"
+                onAction={() => {
+                  handleAddListing('compost');
+                }}
+              />
+            ) : (
+              <View className="gap-md">
+                {compostListings.map((listing: CompostListingDto) => (
+                  <SecondaryListingCard
+                    key={listing.id}
+                    title={listing.waste_type}
+                    subtitle={listing.crop_category ?? 'Compost material'}
+                    status={listing.collection_status ?? listing.status}
+                    meta={[
+                      `${listing.quantity} ${listing.unit}`,
+                      listing.price_per_unit
+                        ? `LKR ${listing.price_per_unit}/${listing.unit}`
+                        : 'No price added',
+                      listing.pickup_location ?? 'Pickup location not set',
+                      listing.available_until
+                        ? `Until ${new Date(listing.available_until).toLocaleDateString()}`
+                        : 'No closing date',
+                    ]}
+                    description={listing.description ?? listing.notes ?? null}
+                  />
+                ))}
+              </View>
+            )}
           </View>
         </Card.Content>
       </Card>
 
       <Snackbar
-        visible={Boolean(locationFeedback)}
+        visible={Boolean(feedbackMessage)}
         onDismiss={() => {
-          setLocationFeedback(null);
+          setFeedbackMessage(null);
         }}
         action={{
           label: 'Close',
           onPress: () => {
-            setLocationFeedback(null);
+            setFeedbackMessage(null);
           },
         }}
       >
-        {locationFeedback ?? ''}
+        {feedbackMessage ?? ''}
       </Snackbar>
 
       <Portal>

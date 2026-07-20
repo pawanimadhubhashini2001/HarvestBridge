@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Platform } from 'react-native';
 import { Button, Snackbar } from 'react-native-paper';
 
 import {
@@ -43,35 +44,52 @@ export function DeleteStoreButton({
     },
   });
 
+  const handleDeletePress = () => {
+    if (Platform.OS === 'web') {
+      const shouldDelete = globalThis.confirm(
+        'Delete this store profile? This will permanently remove your store profile if no harvest listings are linked to it.',
+      );
+
+      if (!shouldDelete) {
+        return;
+      }
+
+      void deleteStoreMutation.mutateAsync();
+      return;
+    }
+
+    setDialogVisible(true);
+  };
+
   return (
     <>
       <Button
         mode={mode}
         buttonColor={mode === 'contained' ? undefined : undefined}
         textColor={mode === 'contained' ? undefined : '#B42318'}
-        onPress={() => {
-          setDialogVisible(true);
-        }}
+        onPress={handleDeletePress}
         loading={deleteStoreMutation.isPending}
         disabled={deleteStoreMutation.isPending}
       >
         {label}
       </Button>
 
-      <ConfirmationDialog
-        visible={dialogVisible}
-        title="Delete Store Profile?"
-        message="This will permanently remove your store profile if no harvest listings are linked to it."
-        confirmLabel="Delete Store"
-        cancelLabel="Cancel"
-        loading={deleteStoreMutation.isPending}
-        onCancel={() => {
-          setDialogVisible(false);
-        }}
-        onConfirm={() => {
-          void deleteStoreMutation.mutateAsync();
-        }}
-      />
+      {Platform.OS === 'web' ? null : (
+        <ConfirmationDialog
+          visible={dialogVisible}
+          title="Delete Store Profile?"
+          message="This will permanently remove your store profile if no harvest listings are linked to it."
+          confirmLabel="Delete Store"
+          cancelLabel="Cancel"
+          loading={deleteStoreMutation.isPending}
+          onCancel={() => {
+            setDialogVisible(false);
+          }}
+          onConfirm={() => {
+            void deleteStoreMutation.mutateAsync();
+          }}
+        />
+      )}
 
       <Snackbar
         visible={Boolean(feedbackMessage)}

@@ -38,7 +38,6 @@ const storeFormFieldNames = [
   'longitude',
   'store_description',
   'store_logo',
-  'store_cover_image',
 ] as const satisfies readonly (keyof FarmFormValues)[];
 
 export function AddFarmScreen({ navigation }: AppStackScreenProps<'AddFarm'>) {

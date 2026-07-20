@@ -33,7 +33,7 @@ class FarmerMarketplaceDashboardResource extends JsonResource
             ->map(function (HarvestListing $listing) {
                 return [
                     'id' => $listing->id,
-                    'crop' => $listing->crop?->name,
+                    'crop' => $listing->crop?->name ?? $listing->crop_name,
                     'farm' => $listing->farm?->farm_name,
                     'district' => $listing->farm?->district,
                     'quantity' => $listing->quantity,
@@ -64,7 +64,7 @@ class FarmerMarketplaceDashboardResource extends JsonResource
                     ],
                     'listing' => [
                         'id' => $item->harvest_listing_id,
-                        'crop' => $item->harvestListing?->crop?->name,
+                        'crop' => $item->harvestListing?->crop?->name ?? $item->harvestListing?->crop_name,
                         'farm' => $item->harvestListing?->farm?->farm_name,
                         'district' => $item->harvestListing?->farm?->district,
                     ],

@@ -37,8 +37,8 @@ const storeFormFieldNames = [
   'latitude',
   'longitude',
   'store_description',
+  'business_status',
   'store_logo',
-  'store_cover_image',
 ] as const satisfies readonly (keyof FarmFormValues)[];
 
 export function EditFarmScreen({ navigation }: AppStackScreenProps<'EditFarm'>) {
@@ -203,6 +203,7 @@ export function EditFarmScreen({ navigation }: AppStackScreenProps<'EditFarm'>) 
           errors={errors}
           setValue={setValue}
           disabled={updateStoreMutation.isPending}
+          showBusinessStatus
           latitudeLabel="Latitude (optional)"
           longitudeLabel="Longitude (optional)"
           descriptionLabel="Store Description (optional)"

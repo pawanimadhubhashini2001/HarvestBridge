@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Models\DonationRequest;
+use App\Models\Farm;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 class Donation extends Model
@@ -18,9 +20,12 @@ class Donation extends Model
     protected $fillable = [
         'farmer_id',
         'harvest_listing_id',
+        'crop_name',
+        'crop_category',
         'ngo_id',
         'quantity',
         'unit',
+        'price_per_unit',
         'description',
         'pickup_location',
         'pickup_date',
@@ -35,6 +40,7 @@ class Donation extends Model
     {
         return [
             'quantity' => 'decimal:2',
+            'price_per_unit' => 'decimal:2',
             'pickup_date' => 'date',
             'available_until' => 'date',
             'collected_at' => 'datetime',
@@ -65,6 +71,12 @@ class Donation extends Model
     public function requests()
     {
         return $this->hasMany(DonationRequest::class);
+    }
+
+    public function farmerStore(): HasOne
+    {
+        return $this->hasOne(Farm::class, 'user_id', 'farmer_id')
+            ->latestOfMany();
     }
 
     public function isMarketplaceVisible(): bool

@@ -35,6 +35,10 @@ export type AppStackParamList = {
   FarmDetails: {
     farmId?: string;
   };
+  AddHarvestListing: {
+    listingType?: 'product' | 'donation' | 'compost';
+    compostListingId?: number;
+  } | undefined;
   AddFarm: undefined;
   EditFarm: {
     farmId?: string;
@@ -137,6 +141,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
           WriteStoreReview: 'marketplace/store/:storeId/reviews/write',
           Favorites: 'favorites',
           FarmDetails: 'store/:farmId',
+          AddHarvestListing: 'store/products/new',
           AddFarm: 'store/new',
           EditFarm: 'store/:farmId/edit',
           MyStories: 'store/stories',

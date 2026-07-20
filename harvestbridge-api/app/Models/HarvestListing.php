@@ -27,6 +27,10 @@ class HarvestListing extends Model
 
         'crop_id',
 
+        'crop_name',
+
+        'crop_category',
+
         'description',
 
         'harvest_date',

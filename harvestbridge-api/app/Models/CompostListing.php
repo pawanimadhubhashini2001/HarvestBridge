@@ -19,8 +19,10 @@ class CompostListing extends Model
         'farmer_id',
         'harvest_listing_id',
         'waste_type',
+        'crop_category',
         'quantity',
         'unit',
+        'price_per_unit',
         'pickup_location',
         'available_from',
         'available_until',
@@ -33,6 +35,7 @@ class CompostListing extends Model
     {
         return [
             'quantity' => 'decimal:2',
+            'price_per_unit' => 'decimal:2',
             'available_from' => 'date',
             'available_until' => 'date',
             'collected_at' => 'datetime',

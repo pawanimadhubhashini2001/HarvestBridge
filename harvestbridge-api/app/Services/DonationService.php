@@ -37,7 +37,11 @@ class DonationService
         $query = Donation::query()
             ->with($this->resourceRelations())
             ->where('status', Donation::STATUS_AVAILABLE)
-            ->whereHas('harvestListing.farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
+            ->where(function (Builder $builder) {
+                $builder
+                    ->whereHas('harvestListing.farm', fn ($farmQuery) => $farmQuery->where('is_suspended', false))
+                    ->orWhereHas('farmerStore', fn ($storeQuery) => $storeQuery->where('is_suspended', false));
+            })
             ->where(function (Builder $builder) {
                 $builder->whereNull('available_until')
                     ->orWhereDate('available_until', '>=', now()->toDateString());
@@ -55,19 +59,26 @@ class DonationService
 
     public function create(User $farmer, array $data): Donation
     {
-        $listing = HarvestListing::query()
-            ->with(['crop', 'farm', 'farmer'])
-            ->findOrFail($data['harvest_listing_id']);
+        $listing = null;
 
-        $this->assertListingOwnership($listing, $farmer);
-        $this->assertListingAvailableForDonation($listing);
-        $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
+        if (! empty($data['harvest_listing_id'])) {
+            $listing = HarvestListing::query()
+                ->with(['crop', 'farm', 'farmer'])
+                ->findOrFail($data['harvest_listing_id']);
+
+            $this->assertListingOwnership($listing, $farmer);
+            $this->assertListingAvailableForDonation($listing);
+            $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
+        }
 
         $payload = [
             'farmer_id' => $farmer->id,
-            'harvest_listing_id' => $listing->id,
+            'harvest_listing_id' => $listing?->id,
+            'crop_name' => $listing?->crop?->name ?? $listing?->crop_name ?? $data['crop_name'] ?? null,
+            'crop_category' => $listing?->crop?->category ?? $listing?->crop_category ?? $data['crop_category'] ?? null,
             'quantity' => $data['quantity'],
             'unit' => $data['unit'],
+            'price_per_unit' => $data['price_per_unit'] ?? null,
             'description' => $data['description'],
             'pickup_location' => $data['pickup_location'],
             'pickup_date' => $data['pickup_date'] ?? null,
@@ -85,19 +96,28 @@ class DonationService
     {
         $listing = $donation->harvestListing;
 
-        if (
-            array_key_exists('harvest_listing_id', $data)
-            && (int) $data['harvest_listing_id'] !== (int) $donation->harvest_listing_id
-        ) {
-            throw ValidationException::withMessages([
-                'harvest_listing_id' => [
-                    'Changing the harvest listing of an existing donation is not supported.',
-                ],
-            ]);
+        if (array_key_exists('harvest_listing_id', $data)) {
+            $nextHarvestListingId = $data['harvest_listing_id'];
+
+            if ($nextHarvestListingId === null) {
+                $listing = null;
+            } elseif ((int) $nextHarvestListingId !== (int) $donation->harvest_listing_id) {
+                $listing = HarvestListing::query()
+                    ->with(['crop', 'farm', 'farmer'])
+                    ->findOrFail($nextHarvestListingId);
+
+                $this->assertListingOwnership($listing, $donation->farmer);
+                $this->assertListingAvailableForDonation($listing);
+            }
         }
 
         if (array_key_exists('quantity', $data) && $listing !== null) {
             $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
+        }
+
+        if ($listing !== null) {
+            $data['crop_name'] = $listing->crop?->name ?? $listing->crop_name;
+            $data['crop_category'] = $listing->crop?->category ?? $listing->crop_category;
         }
 
         $donation->update($data);
@@ -164,7 +184,8 @@ class DonationService
         return [
             'farmer:id,name,email,phone',
             'ngo:id,name,email,phone',
-            'harvestListing:id,user_id,farm_id,crop_id,description,quantity,available_quantity,unit,available_until,status',
+            'farmerStore:id,user_id,farm_name,store_logo_path,phone_number,district,address,latitude,longitude,business_status',
+            'harvestListing:id,user_id,farm_id,crop_id,crop_name,crop_category,description,quantity,available_quantity,unit,available_until,status',
             'harvestListing.crop:id,name,category',
             'harvestListing.farm:id,farm_name,store_logo_path,phone_number,district,address,latitude,longitude,business_status',
         ];
@@ -216,10 +237,18 @@ class DonationService
             return;
         }
 
-        $query->join('harvest_listings as donation_listings', 'donation_listings.id', '=', 'donations.harvest_listing_id')
-            ->join('farms as donation_farms', 'donation_farms.id', '=', 'donation_listings.farm_id')
+        $query->leftJoin('harvest_listings as donation_listings', 'donation_listings.id', '=', 'donations.harvest_listing_id')
+            ->leftJoin('farms as donation_farms', 'donation_farms.id', '=', 'donation_listings.farm_id')
             ->join('users as donation_farmers', 'donation_farmers.id', '=', 'donations.farmer_id')
             ->leftJoin('crops as donation_crops', 'donation_crops.id', '=', 'donation_listings.crop_id')
+            ->leftJoinSub(
+                DB::table('farms')
+                    ->selectRaw('MAX(id) as id, user_id')
+                    ->groupBy('user_id'),
+                'latest_donation_stores',
+                fn ($join) => $join->on('latest_donation_stores.user_id', '=', 'donations.farmer_id')
+            )
+            ->leftJoin('farms as donation_store_profiles', 'donation_store_profiles.id', '=', 'latest_donation_stores.id')
             ->select('donations.*');
     }
 
@@ -237,9 +266,12 @@ class DonationService
             $builder->where('donations.description', 'like', $pattern)
                 ->orWhere('donations.notes', 'like', $pattern)
                 ->orWhere('donations.pickup_location', 'like', $pattern)
+                ->orWhere('donations.crop_name', 'like', $pattern)
                 ->orWhere('donation_crops.name', 'like', $pattern)
                 ->orWhere('donation_farms.farm_name', 'like', $pattern)
+                ->orWhere('donation_store_profiles.farm_name', 'like', $pattern)
                 ->orWhere('donation_farms.district', 'like', $pattern)
+                ->orWhere('donation_store_profiles.district', 'like', $pattern)
                 ->orWhere('donation_farmers.name', 'like', $pattern);
         });
     }
@@ -260,8 +292,8 @@ class DonationService
             $latitude,
         ];
 
-        $query->whereNotNull('donation_farms.latitude')
-            ->whereNotNull('donation_farms.longitude')
+        $query->whereNotNull('donation_store_profiles.latitude')
+            ->whereNotNull('donation_store_profiles.longitude')
             ->selectRaw("ROUND(($distanceFormula)::numeric, 2) as distance_km", $bindings)
             ->whereRaw("($distanceFormula) <= ?", [
                 ...$bindings,
@@ -333,7 +365,7 @@ class DonationService
         return min($resolvedPerPage, self::MAX_PAGE_SIZE);
     }
 
-    private function distanceFormula(string $tableAlias = 'donation_farms'): string
+    private function distanceFormula(string $tableAlias = 'donation_store_profiles'): string
     {
         return '('.self::EARTH_RADIUS_KM.' * acos(
             LEAST(

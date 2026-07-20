@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
+import { Linking, Platform, View } from 'react-native';
 import {
   Controller,
   type Control,
@@ -13,9 +13,10 @@ import {
 import { Button, Text } from 'react-native-paper';
 import { z } from 'zod';
 
-import { type StoreDto, type StoreImageAsset, type StorePayload } from '@/api/store.api';
+import { type StoreBusinessStatus, type StoreDto, type StoreImageAsset, type StorePayload } from '@/api/store.api';
 import { AppTextInput } from '@/components/form/app-text-input';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { getStoreStatusLabel, STORE_STATUS_OPTIONS } from '@/utils/store-status';
 import {
   buildAddressFromReverseGeocode,
   buildGoogleMapsSearchUrl,
@@ -37,6 +38,7 @@ const storeImageSchema = z
     name: z.string().min(1),
     type: z.string().min(1),
   })
+  .passthrough()
   .nullable()
   .optional();
 
@@ -66,10 +68,9 @@ export const farmFormSchema = z
       .max(1000, 'Description is too long.')
       .optional()
       .or(z.literal('')),
+    business_status: z.enum(['open', 'temporarily_closed', 'closed']).default('open'),
     store_logo: storeImageSchema,
     existing_store_logo_url: z.string().optional().or(z.literal('')),
-    store_cover_image: storeImageSchema,
-    existing_store_cover_image_url: z.string().optional().or(z.literal('')),
   })
   .superRefine((values, context) => {
     const hasLatitude = values.latitude.trim().length > 0;
@@ -134,6 +135,36 @@ function getImageFileName(uri: string, fallbackPrefix: string) {
   return `${fallbackPrefix}-${Date.now()}.jpg`;
 }
 
+async function resolveWebImageFile(params: {
+  asset: ImagePicker.ImagePickerAsset;
+  mimeType: string;
+  fileName: string;
+}) {
+  const directFile =
+    'file' in params.asset
+      ? ((params.asset as ImagePicker.ImagePickerAsset & { file?: Blob | null }).file ?? null)
+      : null;
+
+  if (directFile) {
+    return directFile;
+  }
+
+  if (Platform.OS !== 'web') {
+    return null;
+  }
+
+  const response = await fetch(params.asset.uri);
+  const blob = await response.blob();
+
+  if (typeof File !== 'undefined') {
+    return new File([blob], params.fileName, {
+      type: params.mimeType,
+    });
+  }
+
+  return blob;
+}
+
 export function getDefaultFarmFormValues(): FarmFormValues {
   return {
     store_name: '',
@@ -143,10 +174,9 @@ export function getDefaultFarmFormValues(): FarmFormValues {
     latitude: '',
     longitude: '',
     store_description: '',
+    business_status: 'open',
     store_logo: null,
     existing_store_logo_url: '',
-    store_cover_image: null,
-    existing_store_cover_image_url: '',
   };
 }
 
@@ -165,10 +195,9 @@ export function toFarmFormValues(store?: Partial<StoreDto>): FarmFormValues {
     latitude: stringifyOptionalValue(store.latitude),
     longitude: stringifyOptionalValue(store.longitude),
     store_description: store.store_description ?? defaults.store_description,
+    business_status: (store.business_status as StoreBusinessStatus | null | undefined) ?? defaults.business_status,
     store_logo: null,
     existing_store_logo_url: store.store_logo_url ?? store.logo_url ?? store.store_image_url ?? '',
-    store_cover_image: null,
-    existing_store_cover_image_url: store.store_cover_image_url ?? store.cover_url ?? '',
   };
 }
 
@@ -183,8 +212,8 @@ export function toFarmPayload(values: FarmFormValues): StorePayload {
     ...(values.store_description?.trim()
       ? { store_description: values.store_description.trim() }
       : {}),
+    business_status: values.business_status,
     ...(values.store_logo ? { store_logo: values.store_logo } : {}),
-    ...(values.store_cover_image ? { store_cover_image: values.store_cover_image } : {}),
   };
 }
 
@@ -229,10 +258,18 @@ function StoreLogoField({
           }
 
           const asset = result.assets[0];
+          const fileName = asset.fileName ?? getImageFileName(asset.uri, 'store-logo');
+          const mimeType = asset.mimeType ?? 'image/jpeg';
+          const browserFile = await resolveWebImageFile({
+            asset,
+            mimeType,
+            fileName,
+          });
           const pickedImage: StoreImageAsset = {
             uri: asset.uri,
-            name: asset.fileName ?? getImageFileName(asset.uri, 'store-logo'),
-            type: asset.mimeType ?? 'image/jpeg',
+            name: fileName,
+            type: mimeType,
+            file: browserFile,
           };
 
           onChange(pickedImage);
@@ -269,107 +306,6 @@ function StoreLogoField({
             <View className="flex-row gap-sm">
               <Button mode="contained-tonal" disabled={disabled} onPress={() => void handlePickImage()}>
                 {previewUri ? 'Change Logo' : 'Upload Logo'}
-              </Button>
-              {previewUri ? (
-                <Button
-                  mode="text"
-                  disabled={disabled}
-                  onPress={() => {
-                    onChange(null);
-                  }}
-                >
-                  Remove
-                </Button>
-              ) : null}
-            </View>
-          </View>
-        );
-      }}
-    />
-  );
-}
-
-function StoreCoverField({
-  control,
-  disabled,
-}: {
-  control: Control<FarmFormValues>;
-  disabled: boolean;
-}) {
-  const theme = useAppTheme();
-  const selectedImage = useWatch({
-    control,
-    name: 'store_cover_image',
-  });
-  const existingImageUrl = useWatch({
-    control,
-    name: 'existing_store_cover_image_url',
-  });
-  const previewUri = selectedImage?.uri ?? existingImageUrl ?? null;
-
-  return (
-    <Controller
-      control={control}
-      name="store_cover_image"
-      render={({ field: { onChange } }) => {
-        const handlePickImage = async () => {
-          const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-          if (permission.status !== 'granted') {
-            return;
-          }
-
-          const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            quality: 0.8,
-            allowsMultipleSelection: false,
-          });
-
-          if (result.canceled || result.assets.length === 0) {
-            return;
-          }
-
-          const asset = result.assets[0];
-          const pickedImage: StoreImageAsset = {
-            uri: asset.uri,
-            name: asset.fileName ?? getImageFileName(asset.uri, 'store-cover'),
-            type: asset.mimeType ?? 'image/jpeg',
-          };
-
-          onChange(pickedImage);
-        };
-
-        return (
-          <View className="gap-sm">
-            <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
-              Store Cover Image (optional)
-            </Text>
-
-            {previewUri ? (
-              <View
-                className="overflow-hidden rounded-lg border"
-                style={{ borderColor: theme.colors.outline }}
-              >
-                <Image
-                  source={{ uri: previewUri }}
-                  style={{ width: '100%', height: 180 }}
-                  contentFit="cover"
-                />
-              </View>
-            ) : (
-              <View
-                className="items-center justify-center rounded-lg border border-dashed px-md py-xl"
-                style={{ borderColor: theme.colors.outline, minHeight: 180 }}
-              >
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Upload a cover image to make your store profile feel more complete.
-                </Text>
-              </View>
-            )}
-
-            <View className="flex-row gap-sm">
-              <Button mode="contained-tonal" disabled={disabled} onPress={() => void handlePickImage()}>
-                {previewUri ? 'Change Cover' : 'Upload Cover'}
               </Button>
               {previewUri ? (
                 <Button
@@ -543,11 +479,61 @@ function StoreLocationFieldGroup({
   );
 }
 
+function StoreStatusField({
+  control,
+  disabled,
+}: {
+  control: Control<FarmFormValues>;
+  disabled: boolean;
+}) {
+  const theme = useAppTheme();
+  const selectedStatus = useWatch({
+    control,
+    name: 'business_status',
+  });
+
+  return (
+    <Controller
+      control={control}
+      name="business_status"
+      render={({ field: { value, onChange } }) => (
+        <View className="gap-sm">
+          <Text variant="titleSmall" style={{ color: theme.colors.onSurface }}>
+            Store Status
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Choose how your store should appear to customers right now.
+          </Text>
+          <View className="flex-row flex-wrap gap-sm">
+            {STORE_STATUS_OPTIONS.map((statusOption) => {
+              const isActive = (value ?? selectedStatus) === statusOption;
+
+              return (
+                <Button
+                  key={statusOption}
+                  mode={isActive ? 'contained' : 'outlined'}
+                  disabled={disabled}
+                  onPress={() => {
+                    onChange(statusOption);
+                  }}
+                >
+                  {getStoreStatusLabel(statusOption)}
+                </Button>
+              );
+            })}
+          </View>
+        </View>
+      )}
+    />
+  );
+}
+
 export function FarmFormFields({
   control,
   errors,
   setValue,
   disabled = false,
+  showBusinessStatus = false,
   latitudeLabel = 'Latitude',
   longitudeLabel = 'Longitude',
   descriptionLabel = 'Description',
@@ -556,6 +542,7 @@ export function FarmFormFields({
   errors: FieldErrors<FarmFormValues>;
   setValue: UseFormSetValue<FarmFormValues>;
   disabled?: boolean;
+  showBusinessStatus?: boolean;
   latitudeLabel?: string;
   longitudeLabel?: string;
   descriptionLabel?: string;
@@ -599,7 +586,6 @@ export function FarmFormFields({
       />
 
       <StoreLogoField control={control} disabled={disabled} />
-      <StoreCoverField control={control} disabled={disabled} />
 
       <Controller
         control={control}
@@ -689,6 +675,8 @@ export function FarmFormFields({
           />
         )}
       />
+
+      {showBusinessStatus ? <StoreStatusField control={control} disabled={disabled} /> : null}
 
       <View
         className="gap-xs rounded-lg px-md py-md"

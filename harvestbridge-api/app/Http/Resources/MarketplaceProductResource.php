@@ -10,12 +10,15 @@ class MarketplaceProductResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $cropName = $this->crop?->name ?? $this->crop_name;
+        $cropCategory = $this->crop?->category ?? $this->crop_category;
+
         return [
             'product' => [
                 'id' => $this->id,
                 'crop_id' => $this->crop_id,
-                'crop_name' => $this->crop?->name,
-                'crop_category' => $this->crop?->category,
+                'crop_name' => $cropName,
+                'crop_category' => $cropCategory,
                 'description' => $this->description,
                 'quantity' => $this->quantity,
                 'available_quantity' => $this->available_quantity,

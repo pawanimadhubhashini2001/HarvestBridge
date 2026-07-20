@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Crop;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCompostListingRequest extends FormRequest
@@ -16,6 +17,7 @@ class UpdateCompostListingRequest extends FormRequest
         return [
             'harvest_listing_id' => 'sometimes|nullable|exists:harvest_listings,id',
             'waste_type' => 'sometimes|string|max:255',
+            'crop_category' => 'sometimes|string|max:100',
             'quantity' => 'sometimes|numeric|min:1',
             'unit' => 'sometimes|string|max:20',
             'pickup_location' => 'sometimes|string|max:255',
@@ -49,5 +51,14 @@ class UpdateCompostListingRequest extends FormRequest
                 }
             },
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('crop_category')) {
+            $this->merge([
+                'crop_category' => Crop::normalizeCategory($this->input('crop_category')),
+            ]);
+        }
     }
 }

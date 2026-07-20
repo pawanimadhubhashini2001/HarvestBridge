@@ -10,6 +10,8 @@ class HarvestListingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $cropName = $this->crop?->name ?? $this->crop_name;
+        $cropCategory = $this->crop?->category ?? $this->crop_category;
         $isDetailedResponse =
             $this->relationLoaded('donation')
             || $this->relationLoaded('compostListing')
@@ -25,13 +27,15 @@ class HarvestListingResource extends JsonResource
 
             'crop_id' => $this->crop_id,
 
-            'crop' => $this->crop?->name,
+            'crop' => $cropName,
 
-            'crop_category' => $this->crop?->category,
+            'crop_name' => $cropName,
+
+            'crop_category' => $cropCategory,
 
             'category' => $this->whenLoaded('crop', fn () => [
-                'name' => $this->crop?->category,
-                'slug' => Crop::categorySlug($this->crop?->category),
+                'name' => $cropCategory,
+                'slug' => Crop::categorySlug($cropCategory),
             ]),
 
             'farm' => $this->farm?->farm_name,
@@ -142,7 +146,8 @@ class HarvestListingResource extends JsonResource
                         'user_id' => $this->user_id,
                         'farm_id' => $this->farm_id,
                         'crop_id' => $this->crop_id,
-                        'crop_category' => $this->crop?->category,
+                        'crop_name' => $cropName,
+                        'crop_category' => $cropCategory,
                         'quantity' => $this->quantity,
                         'total_quantity' => $this->quantity,
                         'available_quantity' => $this->available_quantity,

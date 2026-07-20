@@ -9,11 +9,15 @@ class NearbyProductSuggestionResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $cropName = $this->crop?->name ?? $this->crop_name;
+        $cropCategory = $this->crop?->category ?? $this->crop_category;
+
         return [
             'id' => $this->id,
             'crop_id' => $this->crop_id,
-            'crop' => $this->crop?->name,
-            'crop_category' => $this->crop?->category,
+            'crop' => $cropName,
+            'crop_name' => $cropName,
+            'crop_category' => $cropCategory,
             'description' => $this->description,
             'available_quantity' => $this->available_quantity,
             'unit' => $this->unit,

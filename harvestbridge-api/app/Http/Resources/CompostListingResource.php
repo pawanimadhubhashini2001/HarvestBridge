@@ -16,8 +16,10 @@ class CompostListingResource extends JsonResource
         return [
             'id' => $this->id,
             'waste_type' => $this->waste_type,
+            'crop_category' => $this->crop_category,
             'quantity' => $this->quantity,
             'unit' => $this->unit,
+            'price_per_unit' => $this->price_per_unit,
             'description' => $this->notes,
             'notes' => $this->notes,
             'pickup_location' => $this->pickup_location,

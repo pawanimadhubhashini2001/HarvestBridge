@@ -56,6 +56,7 @@ export interface StoreImageAsset {
   uri: string;
   name: string;
   type: string;
+  file?: Blob | null;
 }
 
 export interface StorePayload {
@@ -66,6 +67,7 @@ export interface StorePayload {
   latitude?: number;
   longitude?: number;
   store_description?: string;
+  business_status?: StoreBusinessStatus;
   store_logo?: StoreImageAsset | null;
   store_cover_image?: StoreImageAsset | null;
 }
@@ -187,21 +189,12 @@ function buildStoreFormData(payload: StorePayload | UpdateStorePayload) {
   appendValue('latitude', payload.latitude);
   appendValue('longitude', payload.longitude);
   appendValue('store_description', payload.store_description?.trim());
+  appendValue('business_status', payload.business_status);
 
-  if (payload.store_logo) {
-    formData.append('store_logo', {
-      uri: payload.store_logo.uri,
-      name: payload.store_logo.name,
-      type: payload.store_logo.type,
-    } as unknown as Blob);
-  }
+  appendStoreImageField(formData, 'store_logo', payload.store_logo);
 
   if (payload.store_cover_image) {
-    formData.append('store_cover_image', {
-      uri: payload.store_cover_image.uri,
-      name: payload.store_cover_image.name,
-      type: payload.store_cover_image.type,
-    } as unknown as Blob);
+    appendStoreImageField(formData, 'store_cover_image', payload.store_cover_image);
   }
 
   return formData;
@@ -365,13 +358,30 @@ export async function deleteStore(storeId: number | string) {
 function buildStoreImageFormData(fieldName: 'store_logo' | 'store_cover_image', image: StoreImageAsset) {
   const formData = new FormData();
 
+  appendStoreImageField(formData, fieldName, image);
+
+  return formData;
+}
+
+function appendStoreImageField(
+  formData: FormData,
+  fieldName: 'store_logo' | 'store_cover_image',
+  image?: StoreImageAsset | null,
+) {
+  if (!image) {
+    return;
+  }
+
+  if (image.file) {
+    formData.append(fieldName, image.file, image.name);
+    return;
+  }
+
   formData.append(fieldName, {
     uri: image.uri,
     name: image.name,
     type: image.type,
   } as unknown as Blob);
-
-  return formData;
 }
 
 export async function uploadStoreLogo(storeId: number | string, image: StoreImageAsset) {

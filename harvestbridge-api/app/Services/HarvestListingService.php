@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Crop;
 use App\Models\Farm;
 use App\Models\HarvestListingImage;
 use App\Models\HarvestListing;
@@ -53,6 +54,7 @@ class HarvestListingService
     {
         $data['user_id'] = $user->id;
         $this->assertOwnedStore($user->id, $data['farm_id']);
+        $data = $this->syncCropAttributes($data);
 
         $data = $this->initializeStockState($data);
 
@@ -72,6 +74,8 @@ class HarvestListingService
         if (array_key_exists('farm_id', $data)) {
             $this->assertOwnedStore($listing->user_id, $data['farm_id']);
         }
+
+        $data = $this->syncCropAttributes($data);
 
         $listing = DB::transaction(function () use ($listing, $data) {
             /** @var HarvestListing $lockedListing */
@@ -517,6 +521,36 @@ class HarvestListingService
             availableUntil: $data['available_until'] ?? null,
             currentStatus: $data['status'] ?? HarvestListing::STATUS_AVAILABLE,
         );
+
+        return $data;
+    }
+
+    private function syncCropAttributes(array $data): array
+    {
+        $cropId = $data['crop_id'] ?? null;
+
+        if ($cropId) {
+            $crop = Crop::query()->find($cropId);
+
+            if ($crop) {
+                $data['crop_name'] = trim((string) ($data['crop_name'] ?? $crop->name));
+                $data['crop_category'] = $data['crop_category'] ?? $crop->category;
+
+                return $data;
+            }
+        }
+
+        if (array_key_exists('crop_name', $data)) {
+            $data['crop_name'] = trim((string) $data['crop_name']);
+        }
+
+        if (array_key_exists('crop_category', $data) && $data['crop_category'] !== null) {
+            $data['crop_category'] = Crop::normalizeCategory((string) $data['crop_category']);
+        }
+
+        if (! empty($data['crop_name']) && empty($cropId)) {
+            $data['crop_id'] = null;
+        }
 
         return $data;
     }

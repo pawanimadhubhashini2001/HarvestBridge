@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import { BottomTabs } from '@/navigation/BottomTabs';
 import type { AppStackParamList } from '@/navigation/types';
+import { AddHarvestListingScreen } from '@/screens/farms/AddHarvestListingScreen';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
@@ -59,6 +60,20 @@ export function AppNavigator() {
         name="FarmDetails"
         component={FarmDetailsScreen}
         options={{ title: 'Store Profile' }}
+      />
+      <Stack.Screen
+        name="AddHarvestListing"
+        component={AddHarvestListingScreen}
+        options={({ route }) => ({
+          title:
+            route.params?.listingType === 'compost' && route.params?.compostListingId
+              ? 'Edit Compost'
+              : route.params?.listingType === 'donation'
+              ? 'Add Donation'
+              : route.params?.listingType === 'compost'
+                ? 'Add Compost'
+                : 'Add Product',
+        })}
       />
       <Stack.Screen
         name="AddFarm"
