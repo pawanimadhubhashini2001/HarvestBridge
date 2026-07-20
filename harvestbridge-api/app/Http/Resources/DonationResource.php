@@ -37,6 +37,15 @@ class DonationResource extends JsonResource
             'pickup_date' => $this->pickup_date,
             'pickup_time' => $this->pickup_time,
             'available_until' => $this->available_until,
+            'images' => DonationImageResource::collection(
+                $this->whenLoaded('images')
+            ),
+            'primary_image' => $this->whenLoaded(
+                'images',
+                fn () => $this->images->isNotEmpty()
+                    ? DonationImageResource::make($this->images->first())->resolve()
+                    : null
+            ),
             'distance' => $this->when(
                 isset($this->distance_km),
                 fn () => round((float) $this->distance_km, 2)

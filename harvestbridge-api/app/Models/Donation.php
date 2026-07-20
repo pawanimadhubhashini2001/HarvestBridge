@@ -6,6 +6,7 @@ use App\Models\DonationRequest;
 use App\Models\Farm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 class Donation extends Model
@@ -77,6 +78,13 @@ class Donation extends Model
     {
         return $this->hasOne(Farm::class, 'user_id', 'farmer_id')
             ->latestOfMany();
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(DonationImage::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function isMarketplaceVisible(): bool

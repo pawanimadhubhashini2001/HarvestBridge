@@ -14,6 +14,16 @@ export interface DonationDto {
   pickup_date?: string | null;
   pickup_time?: string | null;
   available_until?: string | null;
+  images?: Array<{
+    id: number;
+    url: string;
+    sort_order?: number | null;
+  }>;
+  primary_image?: {
+    id: number;
+    url: string;
+    sort_order?: number | null;
+  } | null;
   crop_name?: string | null;
   crop_category?: string | null;
   product?: {
@@ -43,6 +53,12 @@ export interface CreateDonationPayload {
   pickup_time?: string;
   available_until: string;
   notes?: string;
+  images?: Array<{
+    uri: string;
+    name: string;
+    type: string;
+    file?: Blob | null;
+  }>;
 }
 
 export function getDonationsQueryKey() {
@@ -56,7 +72,69 @@ export async function getDonations() {
 }
 
 export async function createDonation(payload: CreateDonationPayload) {
-  const response = await apiClient.post<ApiSuccessResponse<DonationDto>>('/donations', payload);
+  const formData = new FormData();
+
+  if (payload.harvest_listing_id !== undefined) {
+    formData.append('harvest_listing_id', String(payload.harvest_listing_id));
+  }
+
+  if (payload.crop_name !== undefined) {
+    formData.append('crop_name', payload.crop_name);
+  }
+
+  if (payload.crop_category !== undefined) {
+    formData.append('crop_category', payload.crop_category);
+  }
+
+  formData.append('quantity', String(payload.quantity));
+  formData.append('unit', payload.unit);
+
+  if (payload.price_per_unit !== undefined) {
+    formData.append('price_per_unit', String(payload.price_per_unit));
+  }
+
+  formData.append('description', payload.description);
+  formData.append('pickup_location', payload.pickup_location);
+
+  if (payload.pickup_date) {
+    formData.append('pickup_date', payload.pickup_date);
+  }
+
+  if (payload.pickup_time) {
+    formData.append('pickup_time', payload.pickup_time);
+  }
+
+  formData.append('available_until', payload.available_until);
+
+  if (payload.notes) {
+    formData.append('notes', payload.notes);
+  }
+
+  (payload.images ?? []).forEach((image) => {
+    const imageFile =
+      image.file
+      ?? ({
+        uri: image.uri,
+        name: image.name,
+        type: image.type,
+      } as unknown as Blob);
+
+    formData.append('images[]', imageFile, image.name);
+  });
+
+  const response = await apiClient.post<ApiSuccessResponse<DonationDto>>(
+    '/donations',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
 
   return response.data.data;
+}
+
+export async function deleteDonation(donationId: number) {
+  await apiClient.delete(`/donations/${donationId}`);
 }

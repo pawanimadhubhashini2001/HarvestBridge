@@ -16,11 +16,13 @@ import {
 } from 'react-native-paper';
 
 import {
+  deleteCompostListing,
   getCompostListings,
   getCompostListingsQueryKey,
   type CompostListingDto,
 } from '@/api/compost-listing.api';
 import {
+  deleteDonation,
   getDonations,
   getDonationsQueryKey,
   type DonationDto,
@@ -117,52 +119,152 @@ function ListingEmptyState({
   );
 }
 
-function SecondaryListingCard({
+function formatMoney(value?: number | string | null, unit?: string | null) {
+  if (value === null || value === undefined || value === '') {
+    return 'No price added';
+  }
+
+  const amount = Number(value);
+  const formattedAmount = Number.isFinite(amount)
+    ? new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: 'LKR',
+        maximumFractionDigits: 2,
+      }).format(amount)
+    : `LKR ${value}`;
+
+  return unit ? `${formattedAmount} / ${unit}` : formattedAmount;
+}
+
+function formatShortDate(value?: string | null) {
+  if (!value) {
+    return 'Not set';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date);
+}
+
+function StoreListingManagementCard({
   title,
   subtitle,
   status,
-  meta,
+  quantity,
+  unit,
+  price,
+  dateLabel,
+  dateValue,
+  imageUrl,
   description,
+  onEdit,
+  onDelete,
+  onManageGallery,
+  busy = false,
 }: {
   title: string;
   subtitle?: string | null;
   status: string;
-  meta: string[];
+  quantity: number | string;
+  unit: string;
+  price?: number | string | null;
+  dateLabel: string;
+  dateValue?: string | null;
+  imageUrl?: string | null;
   description?: string | null;
+  onEdit: () => void;
+  onDelete: () => void;
+  onManageGallery?: () => void;
+  busy?: boolean;
 }) {
   const theme = useAppTheme();
 
   return (
-    <View
-      className="gap-sm rounded-2xl border px-lg py-lg"
-      style={{ borderColor: theme.colors.outlineVariant ?? theme.colors.outline }}
-    >
-      <View className="flex-row items-start justify-between gap-sm">
-        <View className="flex-1 gap-xs">
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-            {title}
-          </Text>
-          {subtitle ? (
+    <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+      <Card.Content>
+        <View className="gap-md">
+          <View className="flex-row gap-md">
+            <View
+              className="items-center justify-center overflow-hidden rounded-lg"
+              style={{
+                width: 88,
+                height: 88,
+                backgroundColor: theme.colors.surfaceVariant,
+              }}
+            >
+              {imageUrl ? (
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={{ width: '100%', height: '100%' }}
+                  contentFit="cover"
+                />
+              ) : (
+                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  No Image
+                </Text>
+              )}
+            </View>
+
+            <View className="flex-1 gap-sm">
+              <View className="gap-xs">
+                <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                  {title}
+                </Text>
+                {subtitle ? (
+                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                    {subtitle}
+                  </Text>
+                ) : null}
+              </View>
+
+              <View className="flex-row flex-wrap gap-sm">
+                <Chip compact>{status}</Chip>
+                <Chip compact>
+                  {quantity} {unit} available
+                </Chip>
+              </View>
+
+              <Text variant="titleMedium" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+                {formatMoney(price, unit)}
+              </Text>
+            </View>
+          </View>
+
+          <View className="gap-xs">
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {subtitle}
+              {dateLabel}: {formatShortDate(dateValue)}
             </Text>
-          ) : null}
+            {description ? (
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                {description}
+              </Text>
+            ) : null}
+          </View>
+
+          <View className="flex-row flex-wrap gap-sm">
+            <Button mode="outlined" onPress={onEdit} disabled={busy}>
+              Edit
+            </Button>
+            {onManageGallery ? (
+              <Button mode="outlined" onPress={onManageGallery} disabled={busy}>
+                Manage Gallery
+              </Button>
+            ) : null}
+            <Button mode="outlined" textColor="#B42318" onPress={onDelete} disabled={busy}>
+              Delete
+            </Button>
+          </View>
         </View>
-        <Chip compact>{status}</Chip>
-      </View>
-      <View className="flex-row flex-wrap gap-sm">
-        {meta.map((item) => (
-          <Chip key={item} compact>
-            {item}
-          </Chip>
-        ))}
-      </View>
-      {description ? (
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, lineHeight: 22 }}>
-          {description}
-        </Text>
-      ) : null}
-    </View>
+      </Card.Content>
+    </Card>
   );
 }
 
@@ -171,10 +273,14 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
   const queryClient = useQueryClient();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [selectedListing, setSelectedListing] = useState<HarvestListingDto | null>(null);
+  const [selectedDonation, setSelectedDonation] = useState<DonationDto | null>(null);
+  const [selectedCompostListing, setSelectedCompostListing] = useState<CompostListingDto | null>(null);
   const [galleryListingId, setGalleryListingId] = useState<number | null>(null);
   const [quantityDialogVisible, setQuantityDialogVisible] = useState(false);
   const [statusDialogVisible, setStatusDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [deleteDonationDialogVisible, setDeleteDonationDialogVisible] = useState(false);
+  const [deleteCompostDialogVisible, setDeleteCompostDialogVisible] = useState(false);
   const [availableQuantityInput, setAvailableQuantityInput] = useState('');
   const [availableQuantityError, setAvailableQuantityError] = useState<string | null>(null);
 
@@ -256,6 +362,46 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
       setDeleteDialogVisible(false);
       setSelectedListing(null);
       setFeedbackMessage('Product deleted successfully.');
+    },
+    onError: (error) => {
+      setFeedbackMessage(getErrorMessage(error));
+    },
+  });
+
+  const deleteDonationMutation = useMutation({
+    mutationFn: async (donationId: number) => deleteDonation(donationId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getDonationsQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
+        storeId
+          ? queryClient.invalidateQueries({ queryKey: getStoreDetailsQueryKey(storeId) })
+          : Promise.resolve(),
+      ]);
+
+      setDeleteDonationDialogVisible(false);
+      setSelectedDonation(null);
+      setFeedbackMessage('Donation deleted successfully.');
+    },
+    onError: (error) => {
+      setFeedbackMessage(getErrorMessage(error));
+    },
+  });
+
+  const deleteCompostListingMutation = useMutation({
+    mutationFn: async (listingId: number) => deleteCompostListing(listingId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getCompostListingsQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
+        storeId
+          ? queryClient.invalidateQueries({ queryKey: getStoreDetailsQueryKey(storeId) })
+          : Promise.resolve(),
+      ]);
+
+      setDeleteCompostDialogVisible(false);
+      setSelectedCompostListing(null);
+      setFeedbackMessage('Compost listing deleted successfully.');
     },
     onError: (error) => {
       setFeedbackMessage(getErrorMessage(error));
@@ -588,22 +734,29 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
             ) : (
               <View className="gap-md">
                 {donations.map((donation: DonationDto) => (
-                  <SecondaryListingCard
+                  <StoreListingManagementCard
                     key={donation.id}
                     title={donation.product?.crop_name ?? donation.crop_name ?? 'Donation'}
                     subtitle={donation.product?.crop_category ?? donation.crop_category ?? 'Donation listing'}
                     status={donation.collection_status ?? donation.status}
-                    meta={[
-                      `${donation.quantity} ${donation.unit}`,
-                      donation.price_per_unit
-                        ? `LKR ${donation.price_per_unit}/${donation.unit}`
-                        : 'No price added',
-                      donation.pickup_location ?? 'Pickup location not set',
-                      donation.available_until
-                        ? `Until ${new Date(donation.available_until).toLocaleDateString()}`
-                        : 'No closing date',
-                    ]}
+                    quantity={donation.quantity}
+                    unit={donation.unit}
+                    price={donation.price_per_unit}
+                    dateLabel="Available Until"
+                    dateValue={donation.available_until}
+                    imageUrl={donation.primary_image?.url ?? donation.images?.[0]?.url ?? null}
                     description={donation.description ?? donation.notes ?? null}
+                    busy={deleteDonationMutation.isPending}
+                    onEdit={() => {
+                      setFeedbackMessage('Donation editing is prepared for the next form update.');
+                    }}
+                    onManageGallery={() => {
+                      setFeedbackMessage('Donation gallery management is prepared for the next form update.');
+                    }}
+                    onDelete={() => {
+                      setSelectedDonation(donation);
+                      setDeleteDonationDialogVisible(true);
+                    }}
                   />
                 ))}
               </View>
@@ -661,22 +814,29 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
             ) : (
               <View className="gap-md">
                 {compostListings.map((listing: CompostListingDto) => (
-                  <SecondaryListingCard
+                  <StoreListingManagementCard
                     key={listing.id}
                     title={listing.waste_type}
                     subtitle={listing.crop_category ?? 'Compost material'}
                     status={listing.collection_status ?? listing.status}
-                    meta={[
-                      `${listing.quantity} ${listing.unit}`,
-                      listing.price_per_unit
-                        ? `LKR ${listing.price_per_unit}/${listing.unit}`
-                        : 'No price added',
-                      listing.pickup_location ?? 'Pickup location not set',
-                      listing.available_until
-                        ? `Until ${new Date(listing.available_until).toLocaleDateString()}`
-                        : 'No closing date',
-                    ]}
+                    quantity={listing.quantity}
+                    unit={listing.unit}
+                    price={listing.price_per_unit}
+                    dateLabel="Available Until"
+                    dateValue={listing.available_until}
+                    imageUrl={listing.primary_image?.url ?? listing.images?.[0]?.url ?? null}
                     description={listing.description ?? listing.notes ?? null}
+                    busy={deleteCompostListingMutation.isPending}
+                    onEdit={() => {
+                      setFeedbackMessage('Compost editing is prepared for the next form update.');
+                    }}
+                    onManageGallery={() => {
+                      setFeedbackMessage('Compost gallery management is prepared for the next form update.');
+                    }}
+                    onDelete={() => {
+                      setSelectedCompostListing(listing);
+                      setDeleteCompostDialogVisible(true);
+                    }}
                   />
                 ))}
               </View>
@@ -826,6 +986,44 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           }
 
           void deleteHarvestListingMutation.mutateAsync(selectedListing.id);
+        }}
+      />
+
+      <ConfirmationDialog
+        visible={deleteDonationDialogVisible}
+        title="Delete Donation?"
+        message="This will permanently remove the selected donation from your store."
+        confirmLabel="Delete Donation"
+        cancelLabel="Cancel"
+        loading={deleteDonationMutation.isPending}
+        onCancel={() => {
+          setDeleteDonationDialogVisible(false);
+        }}
+        onConfirm={() => {
+          if (!selectedDonation) {
+            return;
+          }
+
+          void deleteDonationMutation.mutateAsync(selectedDonation.id);
+        }}
+      />
+
+      <ConfirmationDialog
+        visible={deleteCompostDialogVisible}
+        title="Delete Compost Listing?"
+        message="This will permanently remove the selected compost listing from your store."
+        confirmLabel="Delete Compost"
+        cancelLabel="Cancel"
+        loading={deleteCompostListingMutation.isPending}
+        onCancel={() => {
+          setDeleteCompostDialogVisible(false);
+        }}
+        onConfirm={() => {
+          if (!selectedCompostListing) {
+            return;
+          }
+
+          void deleteCompostListingMutation.mutateAsync(selectedCompostListing.id);
         }}
       />
     </Screen>

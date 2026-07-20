@@ -334,7 +334,7 @@ export function AddHarvestListingScreen({
   const showQualityGrade = listingType === 'product';
   const showHarvestDate = listingType !== 'donation';
   const showPickupLocation = listingType !== 'product';
-  const showImages = listingType !== 'donation';
+  const showImages = true;
   const dateFieldLabel =
     listingType === 'compost' ? 'Available From' : 'Harvest Date';
 
@@ -372,6 +372,7 @@ export function AddHarvestListingScreen({
             description: values.description.trim(),
             pickup_location: values.pickup_location.trim(),
             available_until: values.available_until.trim(),
+            images: selectedImages,
           }),
         };
       }

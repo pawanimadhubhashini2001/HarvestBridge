@@ -5,13 +5,17 @@ namespace App\Services;
 use App\Models\Donation;
 use App\Models\HarvestListing;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class DonationService
 {
+    private const IMAGE_DIRECTORY = 'donations';
+    private const MAX_IMAGES_PER_DONATION = 5;
     private const EARTH_RADIUS_KM = 6371;
     private const DEFAULT_RADIUS_KM = 50;
     private const MAX_RADIUS_KM = 200;
@@ -59,37 +63,52 @@ class DonationService
 
     public function create(User $farmer, array $data): Donation
     {
-        $listing = null;
+        return DB::transaction(function () use ($farmer, $data) {
+            $listing = null;
+            $images = $data['images'] ?? [];
 
-        if (! empty($data['harvest_listing_id'])) {
-            $listing = HarvestListing::query()
-                ->with(['crop', 'farm', 'farmer'])
-                ->findOrFail($data['harvest_listing_id']);
+            if (! empty($data['harvest_listing_id'])) {
+                $listing = HarvestListing::query()
+                    ->with(['crop', 'farm', 'farmer'])
+                    ->findOrFail($data['harvest_listing_id']);
 
-            $this->assertListingOwnership($listing, $farmer);
-            $this->assertListingAvailableForDonation($listing);
-            $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
-        }
+                $this->assertListingOwnership($listing, $farmer);
+                $this->assertListingAvailableForDonation($listing);
+                $this->assertDonationQuantityWithinAvailableStock($listing, (float) $data['quantity']);
+            }
 
-        $payload = [
-            'farmer_id' => $farmer->id,
-            'harvest_listing_id' => $listing?->id,
-            'crop_name' => $listing?->crop?->name ?? $listing?->crop_name ?? $data['crop_name'] ?? null,
-            'crop_category' => $listing?->crop?->category ?? $listing?->crop_category ?? $data['crop_category'] ?? null,
-            'quantity' => $data['quantity'],
-            'unit' => $data['unit'],
-            'price_per_unit' => $data['price_per_unit'] ?? null,
-            'description' => $data['description'],
-            'pickup_location' => $data['pickup_location'],
-            'pickup_date' => $data['pickup_date'] ?? null,
-            'pickup_time' => $data['pickup_time'] ?? null,
-            'available_until' => $data['available_until'],
-            'collected_at' => null,
-            'status' => Donation::STATUS_AVAILABLE,
-            'notes' => $data['notes'] ?? null,
-        ];
+            if (count($images) > self::MAX_IMAGES_PER_DONATION) {
+                throw ValidationException::withMessages([
+                    'images' => [
+                        'A donation may have up to '.self::MAX_IMAGES_PER_DONATION.' images.',
+                    ],
+                ]);
+            }
 
-        return Donation::query()->create($payload)->load($this->resourceRelations());
+            $payload = [
+                'farmer_id' => $farmer->id,
+                'harvest_listing_id' => $listing?->id,
+                'crop_name' => $listing?->crop?->name ?? $listing?->crop_name ?? $data['crop_name'] ?? null,
+                'crop_category' => $listing?->crop?->category ?? $listing?->crop_category ?? $data['crop_category'] ?? null,
+                'quantity' => $data['quantity'],
+                'unit' => $data['unit'],
+                'price_per_unit' => $data['price_per_unit'] ?? null,
+                'description' => $data['description'],
+                'pickup_location' => $data['pickup_location'],
+                'pickup_date' => $data['pickup_date'] ?? null,
+                'pickup_time' => $data['pickup_time'] ?? null,
+                'available_until' => $data['available_until'],
+                'collected_at' => null,
+                'status' => Donation::STATUS_AVAILABLE,
+                'notes' => $data['notes'] ?? null,
+            ];
+
+            $donation = Donation::query()->create($payload);
+
+            $this->storeImages($donation, $images);
+
+            return $donation->fresh()->load($this->resourceRelations());
+        });
     }
 
     public function update(Donation $donation, array $data): Donation
@@ -127,6 +146,12 @@ class DonationService
 
     public function delete(Donation $donation): void
     {
+        $donation->loadMissing('images');
+
+        foreach ($donation->images as $image) {
+            MediaStorage::delete($image->image_path);
+        }
+
         $donation->delete();
     }
 
@@ -184,11 +209,34 @@ class DonationService
         return [
             'farmer:id,name,email,phone',
             'ngo:id,name,email,phone',
-            'farmerStore:id,user_id,farm_name,store_logo_path,phone_number,district,address,latitude,longitude,business_status',
+            'images',
+            'farmerStore',
             'harvestListing:id,user_id,farm_id,crop_id,crop_name,crop_category,description,quantity,available_quantity,unit,available_until,status',
             'harvestListing.crop:id,name,category',
             'harvestListing.farm:id,farm_name,store_logo_path,phone_number,district,address,latitude,longitude,business_status',
         ];
+    }
+
+    /**
+     * @param UploadedFile[] $images
+     */
+    private function storeImages(Donation $donation, array $images): void
+    {
+        $sortOrder = 0;
+
+        foreach ($images as $image) {
+            $sortOrder++;
+
+            $path = MediaStorage::storeUploadedFile(
+                $image,
+                self::IMAGE_DIRECTORY.'/'.$donation->id
+            );
+
+            $donation->images()->create([
+                'image_path' => $path,
+                'sort_order' => $sortOrder,
+            ]);
+        }
     }
 
     private function assertListingOwnership(HarvestListing $listing, User $farmer): void

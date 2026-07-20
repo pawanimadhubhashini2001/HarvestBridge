@@ -37,6 +37,10 @@ class StoreDonationRequest extends FormRequest
                 'nullable',
             'available_until' =>
                 'required|date|after_or_equal:today',
+            'images' =>
+                ['nullable', 'array', 'min:1', 'max:5'],
+            'images.*' =>
+                ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'notes' =>
                 'nullable|string|max:2000',
         ];
