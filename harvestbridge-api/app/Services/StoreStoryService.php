@@ -8,10 +8,10 @@ use App\Models\StoreStoryView;
 use App\Support\MediaStorage;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class StoreStoryService
@@ -41,24 +41,35 @@ class StoreStoryService
 
     public function getFeed(array $filters = []): LengthAwarePaginator
     {
+        $hasLocationSearch = $this->hasLocationSearch($filters);
+        $perPage = $this->resolvePerPage($filters['per_page'] ?? null);
         $sort = $this->normalizeSortOption(
             $filters['sort'] ?? null,
-            $this->hasLocationSearch($filters)
+            $hasLocationSearch
         );
 
-        $query = StoreStory::query()
-            ->active()
-            ->whereHas('store', fn ($storeQuery) => $storeQuery->where('is_suspended', false))
-            ->with([
-                'store:id,farm_name,store_logo_path,district,address,latitude,longitude,phone_number',
-            ]);
+        if ($hasLocationSearch) {
+            $nearbyQuery = $this->feedQuery();
 
-        $this->applyLocationSearch($query, $filters);
-        $this->applySorting($query, $sort);
+            $this->applyLocationSearch($nearbyQuery, $filters);
+            $this->applySorting($nearbyQuery, $sort);
+
+            $nearbyStories = $nearbyQuery
+                ->withCount('views')
+                ->paginate($perPage)
+                ->withQueryString();
+
+            if ($nearbyStories->total() > 0) {
+                return $nearbyStories;
+            }
+        }
+
+        $query = $this->feedQuery();
+        $this->applySorting($query, 'newest');
 
         return $query
             ->withCount('views')
-            ->paginate($this->resolvePerPage($filters['per_page'] ?? null))
+            ->paginate($perPage)
             ->withQueryString();
     }
 
@@ -228,6 +239,16 @@ class StoreStoryService
             ->whereRaw("($distanceFormula) <= ?", [
                 ...$bindings,
                 $radius,
+            ]);
+    }
+
+    private function feedQuery(): Builder
+    {
+        return StoreStory::query()
+            ->active()
+            ->whereHas('store', fn ($storeQuery) => $storeQuery->where('is_suspended', false))
+            ->with([
+                'store:id,farm_name,store_logo_path,district,address,latitude,longitude,phone_number',
             ]);
     }
 

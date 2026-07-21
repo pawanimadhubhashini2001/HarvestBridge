@@ -187,6 +187,12 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
   const storyFeed = storyFeedQuery.data?.stories ?? [];
   const isInitialLoading = marketplaceQuery.isLoading && listings.length === 0;
   const isRefreshing = marketplaceQuery.isRefetching && !marketplaceQuery.isFetchingNextPage;
+  const storyFeedRouteParams = {
+    latitude: shouldUseLocation ? coordinates?.latitude : undefined,
+    longitude: shouldUseLocation ? coordinates?.longitude : undefined,
+    radius: shouldUseLocation && typeof selectedRadius === 'number' ? selectedRadius : undefined,
+    sort: shouldUseLocation ? ('distance' as const) : ('newest' as const),
+  };
 
   async function handleRefresh() {
     if (locationState === 'granted') {
@@ -389,26 +395,12 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               }
               onStoryPress={(story) => {
                 navigation.navigate('StoryFeed', {
+                  ...storyFeedRouteParams,
                   initialStoryId: story.id,
-                  latitude: coordinates?.latitude,
-                  longitude: coordinates?.longitude,
-                  radius:
-                    shouldUseLocation && typeof selectedRadius === 'number'
-                      ? selectedRadius
-                      : undefined,
-                  sort: shouldUseLocation ? 'distance' : 'newest',
                 });
               }}
               onViewAllPress={() => {
-                navigation.navigate('StoryFeed', {
-                  latitude: coordinates?.latitude,
-                  longitude: coordinates?.longitude,
-                  radius:
-                    shouldUseLocation && typeof selectedRadius === 'number'
-                      ? selectedRadius
-                      : undefined,
-                  sort: shouldUseLocation ? 'distance' : 'newest',
-                });
+                navigation.navigate('StoryFeed', storyFeedRouteParams);
               }}
             />
 
