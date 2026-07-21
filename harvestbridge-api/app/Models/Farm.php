@@ -113,7 +113,7 @@ class Farm extends Model
     public function activeHarvestListings(): HasMany
     {
         return $this->hasMany(HarvestListing::class)
-            ->where('status', HarvestListing::STATUS_AVAILABLE)
+            ->whereIn('status', HarvestListing::marketplaceVisibleStatuses())
             ->where('available_quantity', '>', 0);
     }
 

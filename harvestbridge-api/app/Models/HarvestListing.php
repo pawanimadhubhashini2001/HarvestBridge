@@ -131,12 +131,13 @@ class HarvestListing extends Model
     {
         return [
             self::STATUS_AVAILABLE,
+            self::STATUS_RESERVED,
         ];
     }
 
     public function isAvailableForConsumers(): bool
     {
-        return $this->status === self::STATUS_AVAILABLE
+        return in_array($this->status, self::marketplaceVisibleStatuses(), true)
             && (float) $this->available_quantity > 0;
     }
 

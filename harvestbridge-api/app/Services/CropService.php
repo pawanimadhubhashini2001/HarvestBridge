@@ -18,9 +18,7 @@ class CropService
         $activeListingsByCategory = HarvestListing::query()
             ->select('crops.category')
             ->join('crops', 'crops.id', '=', 'harvest_listings.crop_id')
-            ->whereIn('harvest_listings.status', [
-                HarvestListing::STATUS_AVAILABLE,
-            ])
+            ->whereIn('harvest_listings.status', HarvestListing::marketplaceVisibleStatuses())
             ->where('harvest_listings.available_quantity', '>', 0)
             ->get()
             ->groupBy(fn ($listing) => Crop::normalizeCategory($listing->category));

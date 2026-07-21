@@ -21,6 +21,7 @@ class MarketplaceService
     private const AUTO_EXPANSION_RADII = [50, 75, 100];
     private const ACTIVE_STATUSES = [
         HarvestListing::STATUS_AVAILABLE,
+        HarvestListing::STATUS_RESERVED,
     ];
 
     public function __construct(
