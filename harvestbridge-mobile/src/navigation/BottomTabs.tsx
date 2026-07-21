@@ -6,6 +6,7 @@ import { HomeScreen } from '@/screens/dashboard/HomeScreen';
 import { useAuth } from '@/hooks/use-auth';
 import { NotificationsScreen } from '@/screens/notification/notifications-screen';
 import { MarketplaceScreen } from '@/screens/marketplace/MarketplaceScreen';
+import { MyOrdersScreen } from '@/screens/marketplace/MyOrdersScreen';
 import { RecommendationsScreen } from '@/screens/recommendation/recommendations-screen';
 import { ProfileScreen } from '@/screens/settings/profile-screen';
 import type { AppTabParamList } from '@/navigation/types';
@@ -21,6 +22,7 @@ export function BottomTabs() {
   const iconMap: Record<keyof AppTabParamList, keyof typeof MaterialCommunityIcons.glyphMap> = {
     Home: 'sprout',
     Marketplace: 'storefront-outline',
+    MyOrders: 'clipboard-list-outline',
     Farms: 'storefront',
     Recommendations: 'chart-timeline-variant',
     Notifications: 'bell-ring-outline',
@@ -62,6 +64,11 @@ export function BottomTabs() {
       {isConsumer ? (
         <>
           <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
+          <Tab.Screen
+            name="MyOrders"
+            component={MyOrdersScreen}
+            options={{ tabBarLabel: 'Orders' }}
+          />
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
         </>

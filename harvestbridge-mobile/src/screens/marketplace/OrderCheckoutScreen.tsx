@@ -120,7 +120,7 @@ export function OrderCheckoutScreen({
           queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing'),
         }),
       ]);
-      navigation.replace('MyOrders');
+      navigation.replace('MainTabs', { screen: 'MyOrders' });
     },
     onError: (error) => {
       setFeedbackMessage(getErrorMessage(error));

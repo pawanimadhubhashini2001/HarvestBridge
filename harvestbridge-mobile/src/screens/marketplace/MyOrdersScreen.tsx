@@ -9,10 +9,10 @@ import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { OrderCard } from '@/components/marketplace/OrderCard';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import type { AppStackScreenProps } from '@/navigation/types';
+import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-export function MyOrdersScreen({ navigation }: AppStackScreenProps<'MyOrders'>) {
+export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
   const theme = useAppTheme();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const ordersQuery = useQuery({

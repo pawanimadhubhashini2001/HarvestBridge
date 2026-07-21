@@ -91,7 +91,10 @@ export function OrderCard({
     ? `${item.quantity} ${product?.unit ?? ''}`.trim()
     : 'Quantity unavailable';
   const statusColors = getStatusColors(theme, order.order_status);
-  const canShowDirections = role === 'consumer' && order.order_status === 'accepted';
+  const canShowDirections =
+    role === 'consumer' &&
+    order.order_status === 'accepted' &&
+    Boolean(order.store?.open_maps_action?.url ?? order.store?.google_maps_url);
   const canManage = role === 'farmer' && order.order_status === 'pending';
   const canComplete = role === 'farmer' && order.order_status === 'accepted';
 

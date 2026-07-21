@@ -10,7 +10,6 @@ import { FarmerOrdersScreen } from '@/screens/farms/FarmerOrdersScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
 import { FavoritesScreen } from '@/screens/marketplace/FavoritesScreen';
-import { MyOrdersScreen } from '@/screens/marketplace/MyOrdersScreen';
 import { OrderCheckoutScreen } from '@/screens/marketplace/OrderCheckoutScreen';
 import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
 import { StoreReviewsScreen } from '@/screens/marketplace/StoreReviewsScreen';
@@ -145,11 +144,6 @@ export function AppNavigator() {
         name="OrderCheckout"
         component={OrderCheckoutScreen}
         options={{ title: 'Order Now' }}
-      />
-      <Stack.Screen
-        name="MyOrders"
-        component={MyOrdersScreen}
-        options={{ title: 'My Orders' }}
       />
       <Stack.Screen
         name="FarmerOrders"
