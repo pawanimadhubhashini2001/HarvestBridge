@@ -69,6 +69,11 @@ export type AppStackParamList = {
     longitude?: number;
     distanceKm?: number | null;
   };
+  OrderCheckout: {
+    listingId?: string;
+  };
+  MyOrders: undefined;
+  FarmerOrders: undefined;
   StoreDetails: {
     storeId?: string;
     latitude?: number;
@@ -136,6 +141,9 @@ export const linking: LinkingOptions<RootStackParamList> = {
             },
           },
           MarketplaceProductDetails: 'marketplace/:listingId',
+          OrderCheckout: 'marketplace/:listingId/order',
+          MyOrders: 'orders',
+          FarmerOrders: 'farmer/orders',
           StoreDetails: 'marketplace/store/:storeId',
           StoreReviews: 'marketplace/store/:storeId/reviews',
           WriteStoreReview: 'marketplace/store/:storeId/reviews/write',

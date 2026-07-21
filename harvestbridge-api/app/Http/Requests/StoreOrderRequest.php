@@ -25,7 +25,9 @@ class StoreOrderRequest extends FormRequest
 
             'quantity' => 'required|numeric|min:0.01',
 
-            'delivery_address' => 'required|string|max:1000',
+            'visit_date' => 'required|date|after_or_equal:today',
+
+            'delivery_address' => 'nullable|string|max:1000',
 
             'notes' => 'nullable|string'
 

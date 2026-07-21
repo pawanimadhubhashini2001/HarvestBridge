@@ -258,6 +258,15 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
           onDirectionsPress={() => {
             handleDirections(item);
           }}
+          onOrderPress={
+            user?.role === 'consumer'
+              ? () => {
+                  navigation.navigate('OrderCheckout', {
+                    listingId: String(item.id),
+                  });
+                }
+              : undefined
+          }
         />
       </View>
     );

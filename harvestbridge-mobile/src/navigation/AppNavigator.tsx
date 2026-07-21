@@ -6,9 +6,12 @@ import type { AppStackParamList } from '@/navigation/types';
 import { AddHarvestListingScreen } from '@/screens/farms/AddHarvestListingScreen';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
+import { FarmerOrdersScreen } from '@/screens/farms/FarmerOrdersScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
 import { FavoritesScreen } from '@/screens/marketplace/FavoritesScreen';
+import { MyOrdersScreen } from '@/screens/marketplace/MyOrdersScreen';
+import { OrderCheckoutScreen } from '@/screens/marketplace/OrderCheckoutScreen';
 import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
 import { StoreReviewsScreen } from '@/screens/marketplace/StoreReviewsScreen';
 import { PlantDiseaseDetectionScreen } from '@/screens/recommendation/PlantDiseaseDetectionScreen';
@@ -137,6 +140,21 @@ export function AppNavigator() {
         name="MarketplaceProductDetails"
         component={MarketplaceProductDetailsScreen}
         options={{ title: 'Product Details' }}
+      />
+      <Stack.Screen
+        name="OrderCheckout"
+        component={OrderCheckoutScreen}
+        options={{ title: 'Order Now' }}
+      />
+      <Stack.Screen
+        name="MyOrders"
+        component={MyOrdersScreen}
+        options={{ title: 'My Orders' }}
+      />
+      <Stack.Screen
+        name="FarmerOrders"
+        component={FarmerOrdersScreen}
+        options={{ title: 'Customer Orders' }}
       />
       <Stack.Screen
         name="StoreDetails"

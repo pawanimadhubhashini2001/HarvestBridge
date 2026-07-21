@@ -30,7 +30,7 @@ class OrderService
             |--------------------------------------------------------------------------
             */
 
-            $listing = HarvestListing::findOrFail(
+            $listing = HarvestListing::with('farm')->findOrFail(
                 $data['harvest_listing_id']
             );
 
@@ -81,7 +81,12 @@ class OrderService
 
                 'order_status' => 'pending',
 
-                'delivery_address' => $data['delivery_address'],
+                'delivery_address' => $data['delivery_address']
+                    ?? $listing->farm?->address
+                    ?? $listing->farm?->district
+                    ?? 'Store visit',
+
+                'delivery_date' => $data['visit_date'],
 
                 'notes' => $data['notes'] ?? null
 
@@ -111,14 +116,32 @@ class OrderService
 
             ]);
 
-            return $order->load('items');
+            return $this->loadOrderDetails($order);
         });
     }
+    public function getConsumerOrders(User $consumer)
+    {
+        return Order::query()
+            ->with([
+                'consumer',
+                'items.harvestListing.crop',
+                'items.harvestListing.farm',
+                'items.harvestListing.images',
+                'items.harvestListing.farmer',
+            ])
+            ->where('consumer_id', $consumer->id)
+            ->latest()
+            ->get();
+    }
+
     public function getFarmerOrders(User $farmer)
     {
         return Order::with([
             'consumer',
-            'items.harvestListing.crop'
+            'items.harvestListing.crop',
+            'items.harvestListing.farm',
+            'items.harvestListing.images',
+            'items.harvestListing.farmer',
         ])
             ->whereHas('items.harvestListing', function ($query) use ($farmer) {
 
@@ -136,6 +159,10 @@ class OrderService
             /** @var Order $lockedOrder */
             $lockedOrder = Order::with([
                 'items.harvestListing',
+                'items.harvestListing.crop',
+                'items.harvestListing.farm',
+                'items.harvestListing.images',
+                'items.harvestListing.farmer',
                 'consumer',
             ])
                 ->lockForUpdate()
@@ -205,10 +232,18 @@ class OrderService
                 'order_status' => $status
             ]);
 
-            return $lockedOrder->fresh()->load([
-                'consumer',
-                'items.harvestListing.crop'
-            ]);
+            return $this->loadOrderDetails($lockedOrder->fresh());
         });
+    }
+
+    private function loadOrderDetails(Order $order): Order
+    {
+        return $order->load([
+            'consumer',
+            'items.harvestListing.crop',
+            'items.harvestListing.farm',
+            'items.harvestListing.images',
+            'items.harvestListing.farmer',
+        ]);
     }
 }

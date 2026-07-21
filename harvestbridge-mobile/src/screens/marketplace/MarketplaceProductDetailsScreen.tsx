@@ -303,6 +303,19 @@ export function MarketplaceProductDetailsScreen({
           </Text>
 
           <View className="flex-row flex-wrap gap-sm">
+            {isConsumer ? (
+              <Button
+                mode="contained"
+                icon="basket-outline"
+                disabled={!product.is_available}
+                onPress={() => {
+                  navigation.navigate('OrderCheckout', {
+                    listingId: String(product.id),
+                  });
+                }}>
+                Order Now
+              </Button>
+            ) : null}
             <Button mode="contained" icon="phone-outline" onPress={() => void openExternalUrl(contact.phone ? `tel:${contact.phone}` : null)}>
               Call Farmer
             </Button>
@@ -472,6 +485,15 @@ export function MarketplaceProductDetailsScreen({
                       relatedProduct.open_maps_action?.url ?? relatedProduct.google_maps_url ?? null,
                     );
                   }}
+                  onOrderPress={
+                    isConsumer
+                      ? () => {
+                          navigation.navigate('OrderCheckout', {
+                            listingId: String(relatedProduct.id),
+                          });
+                        }
+                      : undefined
+                  }
                 />
               ))}
             </View>

@@ -13,6 +13,7 @@ interface MarketplaceProductCardProps {
   onPress: () => void;
   onCallPress: () => void;
   onDirectionsPress: () => void;
+  onOrderPress?: () => void;
   compact?: boolean;
 }
 
@@ -67,6 +68,7 @@ export function MarketplaceProductCard({
   onPress,
   onCallPress,
   onDirectionsPress,
+  onOrderPress,
   compact = false,
 }: MarketplaceProductCardProps) {
   const theme = useAppTheme();
@@ -156,6 +158,11 @@ export function MarketplaceProductCard({
           ) : null}
 
           <View className="flex-row flex-wrap gap-sm">
+            {onOrderPress ? (
+              <Button mode="contained" icon="basket-outline" onPress={onOrderPress}>
+                Order Now
+              </Button>
+            ) : null}
             <Button mode="outlined" icon="phone-outline" onPress={onCallPress}>
               Call Farmer
             </Button>

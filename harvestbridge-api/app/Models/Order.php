@@ -26,6 +26,14 @@ class Order extends Model
 
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'delivery_date' => 'date',
+            'total_amount' => 'decimal:2',
+        ];
+    }
+
     public function consumer()
     {
         return $this->belongsTo(User::class, 'consumer_id');
