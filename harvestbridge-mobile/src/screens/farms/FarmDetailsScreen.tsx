@@ -255,11 +255,6 @@ function StoreListingManagementCard({
             <Button mode="outlined" onPress={onEdit} disabled={busy}>
               Edit
             </Button>
-            {onManageGallery ? (
-              <Button mode="outlined" onPress={onManageGallery} disabled={busy}>
-                Manage Gallery
-              </Button>
-            ) : null}
             <Button mode="outlined" textColor="#B42318" onPress={onDelete} disabled={busy}>
               Delete
             </Button>
@@ -684,9 +679,6 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                   <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
                     My Products
                   </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    Manage listing visibility, stock, gallery images, and selling status from one place.
-                  </Text>
                 </View>
                 <Button
                   mode="contained-tonal"
@@ -766,9 +758,6 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                   <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
                     My Donations
                   </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    Review donation items available for NGOs and community collection.
-                  </Text>
                 </View>
                 <Button
                   mode="contained-tonal"
@@ -847,9 +836,6 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                 <View className="flex-1 gap-xs">
                   <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
                     My Compost
-                  </Text>
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    Review compost items available for pickup and recycling collection.
                   </Text>
                 </View>
                 <Button

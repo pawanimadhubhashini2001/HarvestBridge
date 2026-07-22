@@ -170,9 +170,6 @@ export function OrderCheckoutScreen({
         <Card.Content>
           <View className="gap-md">
             <View className="gap-xs">
-              <Chip compact style={{ alignSelf: 'flex-start' }}>
-                Store Visit Order
-              </Chip>
               <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
                 {product.crop_name ?? 'Marketplace Product'}
               </Text>

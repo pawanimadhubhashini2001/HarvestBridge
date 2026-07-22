@@ -39,19 +39,11 @@ export function StoriesRow({
           <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
             {title}
           </Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            {subtitle}
-          </Text>
         </View>
         <View className="items-end gap-xs">
           {actionLabel && onActionPress ? (
             <Button mode="contained-tonal" onPress={onActionPress}>
               {actionLabel}
-            </Button>
-          ) : null}
-          {stories.length > 0 ? (
-            <Button mode="text" onPress={onViewAllPress}>
-              View All
             </Button>
           ) : null}
         </View>

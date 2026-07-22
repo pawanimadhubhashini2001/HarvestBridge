@@ -112,9 +112,6 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
         <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
           {store.store_name}
         </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Your single selling location is ready for harvest listing and marketplace activity.
-        </Text>
       </View>
 
       <Card

@@ -595,13 +595,6 @@ export function AddHarvestListingScreen({
         className="gap-sm rounded-lg border px-lg py-lg"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
-        <Chip
-          compact
-          style={{ alignSelf: 'flex-start', backgroundColor: theme.colors.primaryContainer }}
-          textStyle={{ color: theme.colors.primary }}
-        >
-          Listing Manager
-        </Chip>
         <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
           Add {listingLabel}
         </Text>

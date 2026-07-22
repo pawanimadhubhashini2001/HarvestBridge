@@ -249,7 +249,7 @@ export function WeatherCard({ city }: WeatherCardProps) {
       style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
     >
       <Card.Content>
-        <View className="gap-md">
+        <View className="gap-sm">
           <View className={isWide ? 'flex-row items-start justify-between gap-md' : 'gap-md'}>
             <View className="flex-1 gap-xs">
               <Chip
@@ -289,9 +289,6 @@ export function WeatherCard({ city }: WeatherCardProps) {
               >
                 {lastUpdated}
               </Text>
-              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                Pull down to refresh
-              </Text>
             </View>
           </View>
 
@@ -303,10 +300,6 @@ export function WeatherCard({ city }: WeatherCardProps) {
               value={formatRainProbability(weather?.rain_probability, weather?.rainfall)}
             />
           </View>
-
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            Tap the card to open Weather Details
-          </Text>
         </View>
       </Card.Content>
     </Card>
