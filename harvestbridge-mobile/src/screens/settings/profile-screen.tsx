@@ -193,7 +193,6 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
         <AppButton
           label="Edit Profile"
           mode="outline"
-          disabled
           onPress={() => {
             navigation.navigate('Settings');
           }}
@@ -209,9 +208,6 @@ export function ProfileScreen({ navigation }: AppTabScreenProps<'Profile'>) {
         />
       </View>
 
-      <Text variant="bodySmall" style={{ textAlign: 'center', opacity: 0.7 }}>
-        Edit Profile is reserved for the next lesson and is intentionally not active yet.
-      </Text>
     </Screen>
   );
 }

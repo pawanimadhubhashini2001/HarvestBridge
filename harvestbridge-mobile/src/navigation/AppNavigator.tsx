@@ -17,6 +17,7 @@ import { PlantDiseasePredictionScreen } from '@/screens/recommendation/PlantDise
 import { WriteReviewScreen } from '@/screens/marketplace/WriteReviewScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
 import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
+import { SettingsScreen } from '@/screens/settings/settings-screen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 import { CreateStoryScreen } from '@/screens/stories/CreateStoryScreen';
 import { MyStoriesScreen } from '@/screens/stories/MyStoriesScreen';
@@ -177,15 +178,9 @@ export function AppNavigator() {
       </Stack.Screen>
       <Stack.Screen
         name="Settings"
-        options={{ title: 'Settings' }}>
-        {() => (
-          <StackPlaceholder
-            title="Settings"
-            description="Prepared for global app and account settings."
-            badgeLabel="Account"
-          />
-        )}
-      </Stack.Screen>
+        component={SettingsScreen}
+        options={{ title: 'Edit Profile' }}
+      />
     </Stack.Navigator>
   );
 }
