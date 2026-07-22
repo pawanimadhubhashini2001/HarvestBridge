@@ -678,15 +678,6 @@ export function FarmFormFields({
 
       {showBusinessStatus ? <StoreStatusField control={control} disabled={disabled} /> : null}
 
-      <View
-        className="gap-xs rounded-lg px-md py-md"
-        style={{ backgroundColor: theme.colors.surfaceVariant }}
-      >
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Latitude and longitude are optional, but provide both together if you want Google Maps
-          directions, store previews, and nearby marketplace matching to work accurately.
-        </Text>
-      </View>
     </>
   );
 }

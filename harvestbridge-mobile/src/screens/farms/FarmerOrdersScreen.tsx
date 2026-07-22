@@ -84,9 +84,6 @@ export function FarmerOrdersScreen() {
             <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
               Customer Orders
             </Text>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Review visit requests, reserve stock for accepted customers, and complete fulfilled orders.
-            </Text>
           </View>
         </Card.Content>
       </Card>

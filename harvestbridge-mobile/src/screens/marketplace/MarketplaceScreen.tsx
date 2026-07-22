@@ -316,11 +316,8 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                 backgroundColor: theme.colors.surface,
                 borderColor: theme.colors.outline,
               }}>
-              <Chip compact style={{ alignSelf: 'flex-start' }}>
-                Smart Marketplace
-              </Chip>
               <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
-                {shouldUseLocation ? 'Nearby Products' : 'Marketplace'}
+                {shouldUseLocation ? 'Smart Marketplace' : 'Marketplace'}
               </Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
                 Search vegetables, compare nearby produce, and jump straight to farmer contact and
@@ -350,8 +347,40 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               ) : null}
             </View>
 
+            <StoriesRow
+              stories={storyFeed}
+              title={shouldUseLocation ? 'Stories' : 'Latest Stories'}
+              subtitle={
+                shouldUseLocation
+                  ? 'Browse active farmer updates from stores around your selected search radius.'
+                  : 'See the newest active stories from farmer stores.'
+              }
+              actionLabel={isFarmer ? 'Add Story' : undefined}
+              onActionPress={
+                isFarmer
+                  ? () => {
+                      navigation.navigate('CreateStory');
+                    }
+                  : undefined
+              }
+              emptyStateMessage={
+                isFarmer
+                  ? 'No active stories are visible right now. Share an image or video update from your store.'
+                  : 'No active farmer stories are visible right now. Check back soon for fresh store updates.'
+              }
+              onStoryPress={(story) => {
+                navigation.navigate('StoryFeed', {
+                  ...storyFeedRouteParams,
+                  initialStoryId: story.id,
+                });
+              }}
+              onViewAllPress={() => {
+                navigation.navigate('StoryFeed', storyFeedRouteParams);
+              }}
+            />
+
             <Searchbar
-              placeholder="Search vegetables..."
+              placeholder="Search Products..."
               value={searchDraft}
               onChangeText={setSearchDraft}
               onIconPress={handleSearchSubmit}
@@ -388,38 +417,6 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                 })}
               </View>
             </ScrollView>
-
-            <StoriesRow
-              stories={storyFeed}
-              title={shouldUseLocation ? 'Nearby Stories' : 'Latest Stories'}
-              subtitle={
-                shouldUseLocation
-                  ? 'Browse active farmer updates from stores around your selected search radius.'
-                  : 'See the newest active stories from farmer stores.'
-              }
-              actionLabel={isFarmer ? 'Add Story' : undefined}
-              onActionPress={
-                isFarmer
-                  ? () => {
-                      navigation.navigate('CreateStory');
-                    }
-                  : undefined
-              }
-              emptyStateMessage={
-                isFarmer
-                  ? 'No active stories are visible right now. Share an image or video update from your store.'
-                  : 'No active farmer stories are visible right now. Check back soon for fresh store updates.'
-              }
-              onStoryPress={(story) => {
-                navigation.navigate('StoryFeed', {
-                  ...storyFeedRouteParams,
-                  initialStoryId: story.id,
-                });
-              }}
-              onViewAllPress={() => {
-                navigation.navigate('StoryFeed', storyFeedRouteParams);
-              }}
-            />
 
             {isResolvingLocation ? (
               <View className="flex-row items-center gap-sm px-sm">

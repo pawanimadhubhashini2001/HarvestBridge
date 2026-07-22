@@ -132,17 +132,11 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
         className="gap-sm rounded-lg border px-lg py-lg"
         style={[{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}
       >
-        <Chip style={{ alignSelf: 'flex-start' }} compact>
-          Farmer Dashboard
-        </Chip>
         <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
           {greeting}, {user?.name ?? 'Farmer'}
         </Text>
         <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
           {currentDateLabel}
-        </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Here is your farmer dashboard with live weather and store summary.
         </Text>
       </View>
 
