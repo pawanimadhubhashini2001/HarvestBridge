@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { Button, Card, Chip, Text } from 'react-native-paper';
 
 import type { OrderDto, OrderStatus } from '@/api/order.api';
@@ -85,6 +85,8 @@ export function OrderCard({
   isUpdating = false,
 }: OrderCardProps) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isNarrow = width < 390;
   const item = order.items[0];
   const product = item?.product;
   const quantityLabel = item
@@ -97,15 +99,20 @@ export function OrderCard({
     Boolean(order.store?.open_maps_action?.url ?? order.store?.google_maps_url);
   const canManage = role === 'farmer' && order.order_status === 'pending';
   const canComplete = role === 'farmer' && order.order_status === 'accepted';
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   return (
     <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
       <Card.Content>
         <View className="gap-md">
-          <View className="flex-row items-start gap-md">
+          <View className={`${isNarrow ? 'gap-md' : 'flex-row items-start gap-md'}`}>
             <View
               className="items-center justify-center overflow-hidden rounded-md"
-              style={{ width: 72, height: 72, backgroundColor: theme.colors.surfaceVariant }}>
+              style={{
+                width: isNarrow ? '100%' : 72,
+                height: isNarrow ? 144 : 72,
+                backgroundColor: theme.colors.surfaceVariant,
+              }}>
               {product?.image_url ? (
                 <Image
                   source={{ uri: product.image_url }}
@@ -163,7 +170,12 @@ export function OrderCard({
 
           <View className="flex-row flex-wrap gap-sm">
             {canShowDirections ? (
-              <Button mode="contained" icon="map-marker-path" onPress={onDirectionsPress}>
+              <Button
+                mode="contained"
+                icon="map-marker-path"
+                style={actionButtonStyle}
+                contentStyle={{ minHeight: 44 }}
+                onPress={onDirectionsPress}>
                 Directions
               </Button>
             ) : null}
@@ -172,16 +184,34 @@ export function OrderCard({
             ) : null}
             {canManage ? (
               <>
-                <Button mode="contained" loading={isUpdating} disabled={isUpdating} onPress={onAcceptPress}>
+                <Button
+                  mode="contained"
+                  loading={isUpdating}
+                  disabled={isUpdating}
+                  style={actionButtonStyle}
+                  contentStyle={{ minHeight: 44 }}
+                  onPress={onAcceptPress}>
                   Accept
                 </Button>
-                <Button mode="outlined" loading={isUpdating} disabled={isUpdating} onPress={onRejectPress}>
+                <Button
+                  mode="outlined"
+                  loading={isUpdating}
+                  disabled={isUpdating}
+                  style={actionButtonStyle}
+                  contentStyle={{ minHeight: 44 }}
+                  onPress={onRejectPress}>
                   Reject
                 </Button>
               </>
             ) : null}
             {canComplete ? (
-              <Button mode="contained-tonal" loading={isUpdating} disabled={isUpdating} onPress={onCompletePress}>
+              <Button
+                mode="contained-tonal"
+                loading={isUpdating}
+                disabled={isUpdating}
+                style={actionButtonStyle}
+                contentStyle={{ minHeight: 44 }}
+                onPress={onCompletePress}>
                 Mark Completed
               </Button>
             ) : null}

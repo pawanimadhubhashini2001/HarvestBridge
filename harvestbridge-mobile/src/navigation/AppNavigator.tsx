@@ -9,7 +9,6 @@ import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
 import { FarmerOrdersScreen } from '@/screens/farms/FarmerOrdersScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
-import { FavoritesScreen } from '@/screens/marketplace/FavoritesScreen';
 import { OrderCheckoutScreen } from '@/screens/marketplace/OrderCheckoutScreen';
 import { StoreDetailsScreen } from '@/screens/marketplace/StoreDetailsScreen';
 import { StoreReviewsScreen } from '@/screens/marketplace/StoreReviewsScreen';
@@ -164,11 +163,6 @@ export function AppNavigator() {
         name="WriteStoreReview"
         component={WriteReviewScreen}
         options={{ title: 'Write Review' }}
-      />
-      <Stack.Screen
-        name="Favorites"
-        component={FavoritesScreen}
-        options={{ title: 'Favorites' }}
       />
       <Stack.Screen
         name="WeatherDetails"

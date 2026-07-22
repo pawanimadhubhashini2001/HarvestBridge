@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { Button, HelperText, Snackbar, Text, TextInput } from 'react-native-paper';
 import { z } from 'zod';
 
@@ -66,12 +66,15 @@ export function WriteReviewScreen({
   route,
 }: AppStackScreenProps<'WriteStoreReview'>) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const storeId = route.params?.storeId;
   const storeName = route.params?.storeName ?? 'Store';
   const reviewId = route.params?.reviewId;
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const isNarrow = width < 390;
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   const {
     control,
@@ -179,11 +182,11 @@ export function WriteReviewScreen({
   }
 
   return (
-    <Screen scrollable contentClassName="gap-lg">
+    <Screen scrollable contentClassName="gap-md">
       <View
-        className="gap-sm rounded-lg border px-lg py-lg"
+        className="gap-sm rounded-lg border p-md"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
-        <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
+        <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
           {reviewsQuery.data?.current_user_review ? 'Edit Review' : 'Write Review'}
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -193,7 +196,7 @@ export function WriteReviewScreen({
       </View>
 
       <View
-        className="gap-md rounded-lg border px-lg py-lg"
+        className="gap-md rounded-lg border p-md"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
         <Text variant="titleLarge" style={{ fontWeight: '700' }}>
           Rating
@@ -269,6 +272,8 @@ export function WriteReviewScreen({
             mode="contained"
             loading={reviewMutation.isPending || isSubmitting}
             disabled={reviewMutation.isPending}
+            style={actionButtonStyle}
+            contentStyle={{ minHeight: 44 }}
             onPress={handleSubmit((values) => {
               void reviewMutation.mutateAsync(values);
             })}>
@@ -277,6 +282,8 @@ export function WriteReviewScreen({
           <Button
             mode="outlined"
             disabled={reviewMutation.isPending}
+            style={actionButtonStyle}
+            contentStyle={{ minHeight: 44 }}
             onPress={() => {
               if (navigation.canGoBack()) {
                 navigation.goBack();

@@ -6,6 +6,7 @@ import {
   Linking,
   type ListRenderItem,
   Share,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -63,11 +64,15 @@ export function StoreDetailsScreen({
   route,
 }: AppStackScreenProps<'StoreDetails'>) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const storeId = route.params?.storeId;
   const [actionError, setActionError] = useState<string | null>(null);
   const isConsumer = user?.role === 'consumer';
+  const isNarrow = width < 390;
+  const horizontalPadding = isNarrow ? 12 : 16;
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   const queryParams: PublicStoreQueryParams =
     typeof route.params?.latitude === 'number' && typeof route.params?.longitude === 'number'
@@ -177,7 +182,7 @@ export function StoreDetailsScreen({
   });
 
   const renderProduct: ListRenderItem<MarketplaceListingDto> = ({ item }) => (
-    <View className="px-md pb-md">
+    <View style={{ paddingHorizontal: horizontalPadding, paddingBottom: 12 }}>
       <MarketplaceProductCard
         item={item}
         onPress={() => {
@@ -272,12 +277,12 @@ export function StoreDetailsScreen({
           }
         }}
         contentContainerStyle={{
-          paddingTop: 16,
-          paddingBottom: 24,
+          paddingTop: 12,
+          paddingBottom: 28,
           flexGrow: 1,
         }}
         ListHeaderComponent={
-          <View className="gap-md px-md pb-md">
+          <View className="gap-md pb-md" style={{ paddingHorizontal: horizontalPadding }}>
             <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
               <View>
                 {store.store_cover_image_url ? (
@@ -285,7 +290,7 @@ export function StoreDetailsScreen({
                     source={{ uri: store.store_cover_image_url }}
                     style={{
                       width: '100%',
-                      height: 220,
+                      height: isNarrow ? 180 : 220,
                       borderTopLeftRadius: 12,
                       borderTopRightRadius: 12,
                       backgroundColor: theme.colors.surfaceVariant,
@@ -305,13 +310,13 @@ export function StoreDetailsScreen({
                   </View>
                 )}
 
-                <View className="gap-md p-lg">
-                  <View className="flex-row gap-md">
+                <View className="gap-md p-md">
+                  <View className={`${isNarrow ? 'gap-md' : 'flex-row gap-md'}`}>
                     <View
                       className="items-center justify-center overflow-hidden rounded-xl"
                       style={{
-                        width: 84,
-                        height: 84,
+                        width: isNarrow ? '100%' : 84,
+                        height: isNarrow ? 132 : 84,
                         backgroundColor: theme.colors.surfaceVariant,
                       }}>
                       {store.store_logo_url ? (
@@ -380,6 +385,8 @@ export function StoreDetailsScreen({
                     <Button
                       mode="contained"
                       icon="phone-outline"
+                      style={actionButtonStyle}
+                      contentStyle={{ minHeight: 44 }}
                       onPress={() => {
                         void openExternalUrl(
                           store.actions.phone ? `tel:${store.actions.phone}` : null,
@@ -390,6 +397,8 @@ export function StoreDetailsScreen({
                     <Button
                       mode="outlined"
                       icon="map-marker-path"
+                      style={actionButtonStyle}
+                      contentStyle={{ minHeight: 44 }}
                       onPress={() => {
                         void openExternalUrl(
                           store.location.open_maps_action?.url
@@ -397,14 +406,21 @@ export function StoreDetailsScreen({
                             ?? null,
                         );
                       }}>
-                      Open Google Maps
+                      Directions
                     </Button>
-                    <Button mode="contained-tonal" icon="share-variant-outline" onPress={() => void shareStore()}>
+                    <Button
+                      mode="contained-tonal"
+                      icon="share-variant-outline"
+                      style={actionButtonStyle}
+                      contentStyle={{ minHeight: 44 }}
+                      onPress={() => void shareStore()}>
                       Share Store
                     </Button>
                     <Button
                       mode="outlined"
                       icon="star-outline"
+                      style={actionButtonStyle}
+                      contentStyle={{ minHeight: 44 }}
                       onPress={() => {
                         navigation.navigate('StoreReviews', {
                           storeId: String(store.id),
@@ -417,6 +433,8 @@ export function StoreDetailsScreen({
                       <Button
                         mode="contained-tonal"
                         icon="pencil-outline"
+                        style={actionButtonStyle}
+                        contentStyle={{ minHeight: 44 }}
                         onPress={() => {
                           navigation.navigate('WriteStoreReview', {
                             storeId: String(store.id),
@@ -432,7 +450,7 @@ export function StoreDetailsScreen({
             </Card>
 
             <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-              <View className="gap-md p-lg">
+              <View className="gap-md p-md">
                 <Text variant="titleLarge" style={{ fontWeight: '700' }}>
                   Store Information
                 </Text>
@@ -497,7 +515,7 @@ export function StoreDetailsScreen({
           </View>
         }
         ListFooterComponent={
-          <View className="gap-md px-md">
+          <View className="gap-md" style={{ paddingHorizontal: horizontalPadding }}>
             {productsQuery.isError && products.length > 0 ? (
               <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
                 <View className="gap-sm p-md">

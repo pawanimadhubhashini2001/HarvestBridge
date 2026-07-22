@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Linking, ScrollView, View } from 'react-native';
+import { FlatList, Linking, ScrollView, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator, Button, Chip, Searchbar, Snackbar, Text } from 'react-native-paper';
 
@@ -45,6 +45,7 @@ interface Coordinates {
 
 export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace'>) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const [searchDraft, setSearchDraft] = useState('');
@@ -57,6 +58,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
   const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const isFarmer = user?.role === 'farmer';
+  const horizontalPadding = width < 390 ? 12 : 16;
 
   const isAllSriLanka = selectedRadius === 'all';
   const shouldUseLocation = Boolean(coordinates) && !isAllSriLanka;
@@ -241,7 +243,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
     item: MarketplaceListingDto;
   }) {
     return (
-      <View className="px-md pb-md">
+      <View style={{ paddingHorizontal: horizontalPadding, paddingBottom: 12 }}>
         <MarketplaceProductCard
           item={item}
           onPress={() => {
@@ -302,14 +304,14 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
           }
         }}
         contentContainerStyle={{
-          paddingTop: 16,
-          paddingBottom: 24,
+          paddingTop: 12,
+          paddingBottom: 28,
           flexGrow: 1,
         }}
         ListHeaderComponent={
-          <View className="gap-md px-md pb-md">
+          <View className="gap-md pb-md" style={{ paddingHorizontal: horizontalPadding }}>
             <View
-              className="gap-sm rounded-lg border px-lg py-lg"
+              className="gap-sm rounded-lg border p-md"
               style={{
                 backgroundColor: theme.colors.surface,
                 borderColor: theme.colors.outline,
@@ -317,7 +319,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               <Chip compact style={{ alignSelf: 'flex-start' }}>
                 Smart Marketplace
               </Chip>
-              <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
+              <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
                 {shouldUseLocation ? 'Nearby Products' : 'Marketplace'}
               </Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -338,7 +340,10 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                     Location is off, so you are seeing results from across Sri Lanka. Enable
                     location to sort by distance and unlock nearby suggestions.
                   </Text>
-                  <Button mode="contained-tonal" onPress={() => void requestLocationPermission(true)}>
+                  <Button
+                    mode="contained-tonal"
+                    contentStyle={{ minHeight: 44 }}
+                    onPress={() => void requestLocationPermission(true)}>
                     Enable Location
                   </Button>
                 </View>
@@ -355,7 +360,10 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               accessibilityLabel="Search marketplace listings"
             />
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingRight: horizontalPadding }}>
               <View className="flex-row gap-sm">
                 {RADIUS_OPTIONS.map((option) => {
                   const isSelected = selectedRadius === option.value;
@@ -470,6 +478,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               </Text>
               <Button
                 mode="outlined"
+                contentStyle={{ minHeight: 44 }}
                 onPress={() => {
                   setSearchDraft('');
                   setSubmittedSearch('');
@@ -481,7 +490,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
           )
         }
         ListFooterComponent={
-          <View className="gap-md px-md">
+          <View className="gap-md" style={{ paddingHorizontal: horizontalPadding }}>
             <MarketplaceRecommendationSection
               items={recommendedForYou}
               subtitle="Nearby products selected from your current search, store distance, and seasonal availability."

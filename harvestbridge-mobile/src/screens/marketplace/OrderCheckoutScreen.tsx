@@ -165,7 +165,7 @@ export function OrderCheckoutScreen({
   const hasFormError = Boolean(quantityError || visitDateError);
 
   return (
-    <Screen scrollable contentClassName="gap-lg">
+    <Screen scrollable contentClassName="gap-md">
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
         <Card.Content>
           <View className="gap-md">
@@ -243,6 +243,8 @@ export function OrderCheckoutScreen({
               mode="contained"
               loading={orderMutation.isPending}
               disabled={orderMutation.isPending || hasFormError}
+              style={{ alignSelf: 'stretch' }}
+              contentStyle={{ minHeight: 48 }}
               onPress={() => {
                 orderMutation.mutate();
               }}>

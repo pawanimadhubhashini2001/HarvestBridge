@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, useWindowDimensions, View } from 'react-native';
 import { Button, Card, Divider, Snackbar, Text } from 'react-native-paper';
 
 import {
@@ -66,10 +66,13 @@ function ReviewCard({
   showActions?: boolean;
 }) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isNarrow = width < 390;
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   return (
     <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-      <View className="gap-sm p-lg">
+      <View className="gap-sm p-md">
         {title ? (
           <Text variant="titleMedium" style={{ fontWeight: '700' }}>
             {title}
@@ -116,10 +119,19 @@ function ReviewCard({
 
         {showActions ? (
           <View className="flex-row flex-wrap gap-sm pt-sm">
-            <Button mode="contained-tonal" onPress={onEdit}>
+            <Button
+              mode="contained-tonal"
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={onEdit}>
               Edit Review
             </Button>
-            <Button mode="outlined" textColor={theme.colors.error} onPress={onDelete}>
+            <Button
+              mode="outlined"
+              textColor={theme.colors.error}
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={onDelete}>
               Delete Review
             </Button>
           </View>
@@ -227,9 +239,9 @@ export function StoreReviewsScreen({
       onRefresh={() => {
         void reviewsQuery.refetch();
       }}
-      contentClassName="gap-lg">
+      contentClassName="gap-md">
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-        <View className="gap-md p-lg">
+        <View className="gap-md p-md">
           <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
             {storeName} Reviews
           </Text>
@@ -271,6 +283,7 @@ export function StoreReviewsScreen({
             <View className="flex-row flex-wrap gap-sm">
               <Button
                 mode="contained"
+                contentStyle={{ minHeight: 44 }}
                 onPress={() => {
                   navigation.navigate('WriteStoreReview', {
                     storeId,
@@ -310,7 +323,7 @@ export function StoreReviewsScreen({
 
         {otherReviews.length === 0 ? (
           <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-            <View className="gap-sm p-lg">
+            <View className="gap-sm p-md">
               <Text variant="titleMedium" style={{ fontWeight: '700' }}>
                 No reviews yet
               </Text>

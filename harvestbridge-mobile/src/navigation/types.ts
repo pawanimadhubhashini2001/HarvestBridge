@@ -24,6 +24,7 @@ export type AuthStackParamList = {
 export type AppTabParamList = {
   Home: undefined;
   Marketplace: undefined;
+  Favorites: undefined;
   MyOrders: undefined;
   Farms: undefined;
   Recommendations: undefined;
@@ -89,7 +90,6 @@ export type AppStackParamList = {
     storeName?: string;
     reviewId?: string;
   };
-  Favorites: undefined;
   WeatherDetails: {
     district?: string;
   };
@@ -134,6 +134,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
             screens: {
               Home: '',
               Marketplace: 'marketplace',
+              Favorites: 'favorites',
               MyOrders: 'orders',
               Farms: 'store',
               Recommendations: 'recommendations',
@@ -147,7 +148,6 @@ export const linking: LinkingOptions<RootStackParamList> = {
           StoreDetails: 'marketplace/store/:storeId',
           StoreReviews: 'marketplace/store/:storeId/reviews',
           WriteStoreReview: 'marketplace/store/:storeId/reviews/write',
-          Favorites: 'favorites',
           FarmDetails: 'store/:farmId',
           AddHarvestListing: 'store/products/new',
           AddFarm: 'store/new',

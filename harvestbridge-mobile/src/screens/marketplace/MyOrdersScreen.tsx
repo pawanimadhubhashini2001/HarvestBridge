@@ -55,7 +55,7 @@ export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
   return (
     <Screen
       scrollable
-      contentClassName="gap-lg"
+      contentClassName="gap-md"
       refreshing={ordersQuery.isRefetching}
       onRefresh={() => {
         void ordersQuery.refetch();
@@ -85,6 +85,8 @@ export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
               </Text>
               <Button
                 mode="contained"
+                style={{ alignSelf: 'stretch' }}
+                contentStyle={{ minHeight: 48 }}
                 onPress={() => {
                   navigation.navigate('MainTabs', { screen: 'Marketplace' });
                 }}>

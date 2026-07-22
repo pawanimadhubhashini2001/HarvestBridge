@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Linking, View } from 'react-native';
+import { Linking, useWindowDimensions, View } from 'react-native';
 import { Button, Card, Divider, Snackbar, Text } from 'react-native-paper';
 
 import {
@@ -17,7 +17,7 @@ import { Screen } from '@/components/layout/screen';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import type { AppStackScreenProps } from '@/navigation/types';
+import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 import { formatStoreStatus } from '@/utils/store-status';
 import { useState } from 'react';
@@ -32,16 +32,19 @@ function FavoriteStoreCard({
   onRemove: () => void;
 }) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isNarrow = width < 390;
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   return (
     <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-      <View className="gap-md p-lg">
-        <View className="flex-row gap-md">
+      <View className="gap-md p-md">
+        <View className={`${isNarrow ? 'gap-md' : 'flex-row gap-md'}`}>
           <View
             className="items-center justify-center overflow-hidden rounded-xl"
             style={{
-              width: 80,
-              height: 80,
+              width: isNarrow ? '100%' : 80,
+              height: isNarrow ? 140 : 80,
               backgroundColor: theme.colors.surfaceVariant,
             }}>
             {store.store_logo_url ? (
@@ -79,10 +82,19 @@ function FavoriteStoreCard({
         </View>
 
         <View className="flex-row flex-wrap gap-sm">
-          <Button mode="contained" onPress={onView}>
+          <Button
+            mode="contained"
+            style={actionButtonStyle}
+            contentStyle={{ minHeight: 44 }}
+            onPress={onView}>
             View Store
           </Button>
-          <Button mode="outlined" textColor={theme.colors.error} onPress={onRemove}>
+          <Button
+            mode="outlined"
+            textColor={theme.colors.error}
+            style={actionButtonStyle}
+            contentStyle={{ minHeight: 44 }}
+            onPress={onRemove}>
             Remove Favorite
           </Button>
         </View>
@@ -91,7 +103,7 @@ function FavoriteStoreCard({
   );
 }
 
-export function FavoritesScreen({ navigation }: AppStackScreenProps<'Favorites'>) {
+export function FavoritesScreen({ navigation }: AppTabScreenProps<'Favorites'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -190,11 +202,11 @@ export function FavoritesScreen({ navigation }: AppStackScreenProps<'Favorites'>
       onRefresh={() => {
         void favoritesQuery.refetch();
       }}
-      contentClassName="gap-lg">
+      contentClassName="gap-md">
       <View
-        className="gap-sm rounded-lg border px-lg py-lg"
+        className="gap-sm rounded-lg border p-md"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
-        <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
+        <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
           Favorites
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -204,7 +216,7 @@ export function FavoritesScreen({ navigation }: AppStackScreenProps<'Favorites'>
 
       {!hasFavorites ? (
         <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-          <View className="gap-sm p-lg">
+          <View className="gap-sm p-md">
             <Text variant="titleLarge" style={{ fontWeight: '700' }}>
               No favorites yet
             </Text>
@@ -284,6 +296,7 @@ export function FavoritesScreen({ navigation }: AppStackScreenProps<'Favorites'>
               <Button
                 mode="outlined"
                 textColor={theme.colors.error}
+                contentStyle={{ minHeight: 44 }}
                 onPress={() => {
                   void removeProductMutation.mutateAsync(product.id);
                 }}>

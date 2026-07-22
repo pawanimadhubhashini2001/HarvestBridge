@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { Button, Card, Chip, Text } from 'react-native-paper';
 
 import type { MarketplaceListingDto, NearbyProductSuggestionDto } from '@/api/marketplace.api';
@@ -72,24 +72,28 @@ export function MarketplaceProductCard({
   compact = false,
 }: MarketplaceProductCardProps) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isNarrow = width < 390;
   const imageUrl = getPrimaryImageUrl(item);
   const title = 'crop' in item ? item.crop : null;
   const storeName = item.store?.store_name ?? 'Store unavailable';
   const description = item.description?.trim();
   const recommendationReason = item.recommendation_reason?.trim();
   const distance = item.distance_km ?? item.distance ?? null;
+  const imageSize = compact ? 84 : 104;
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   return (
     <Card
       mode="contained"
       onPress={onPress}
       style={{ backgroundColor: theme.colors.surface }}>
-      <View className={`flex-row ${compact ? 'gap-sm' : 'gap-md'} p-md`}>
+      <View className={`${isNarrow ? 'gap-md' : `flex-row ${compact ? 'gap-sm' : 'gap-md'}`} p-md`}>
         <View
           className="items-center justify-center overflow-hidden rounded-md"
           style={{
-            width: compact ? 88 : 108,
-            height: compact ? 88 : 108,
+            width: isNarrow ? '100%' : imageSize,
+            height: isNarrow ? (compact ? 132 : 164) : imageSize,
             backgroundColor: theme.colors.surfaceVariant,
           }}>
           {imageUrl ? (
@@ -159,14 +163,29 @@ export function MarketplaceProductCard({
 
           <View className="flex-row flex-wrap gap-sm">
             {onOrderPress ? (
-              <Button mode="contained" icon="basket-outline" onPress={onOrderPress}>
+              <Button
+                mode="contained"
+                icon="basket-outline"
+                style={actionButtonStyle}
+                contentStyle={{ minHeight: 44 }}
+                onPress={onOrderPress}>
                 Order Now
               </Button>
             ) : null}
-            <Button mode="outlined" icon="phone-outline" onPress={onCallPress}>
+            <Button
+              mode="outlined"
+              icon="phone-outline"
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={onCallPress}>
               Call Farmer
             </Button>
-            <Button mode="text" icon="directions" onPress={onDirectionsPress}>
+            <Button
+              mode="text"
+              icon="directions"
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={onDirectionsPress}>
               Directions
             </Button>
           </View>

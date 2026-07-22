@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Linking, ScrollView, Share, View } from 'react-native';
+import { Linking, ScrollView, Share, useWindowDimensions, View } from 'react-native';
 import { Button, Card, Chip, Divider, IconButton, Snackbar, Text } from 'react-native-paper';
 
 import { favoriteProduct, getFavoritesQueryKey, unfavoriteProduct } from '@/api/favorites.api';
@@ -73,11 +73,15 @@ export function MarketplaceProductDetailsScreen({
   route,
 }: AppStackScreenProps<'MarketplaceProductDetails'>) {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const listingId = route.params?.listingId;
   const [actionError, setActionError] = useState<string | null>(null);
   const isConsumer = user?.role === 'consumer';
+  const isNarrow = width < 390;
+  const detailImageWidth = Math.min(width - 64, 320);
+  const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
   const detailQueryParams: Pick<MarketplaceQueryParams, 'latitude' | 'longitude'> =
     typeof route.params?.latitude === 'number' && typeof route.params?.longitude === 'number'
       ? {
@@ -230,14 +234,14 @@ export function MarketplaceProductDetailsScreen({
         void detailsQuery.refetch();
       }}>
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-        <View className="gap-md p-lg">
+        <View className="gap-md p-md">
           <View className="gap-sm">
             <View className="flex-row items-start justify-between gap-sm">
               <View className="flex-1 gap-sm">
                 <Chip compact style={{ alignSelf: 'flex-start' }}>
                   Product Details
                 </Chip>
-                <Text variant="headlineMedium" style={{ fontWeight: '700' }}>
+                <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
                   {product.crop_name ?? 'Marketplace Product'}
                 </Text>
                 <Text variant="titleLarge" style={{ color: theme.colors.primary }}>
@@ -268,9 +272,9 @@ export function MarketplaceProductDetailsScreen({
                     key={image.id}
                     source={{ uri: image.url }}
                     style={{
-                      width: 260,
+                      width: detailImageWidth,
                       height: 180,
-                      borderRadius: 16,
+                      borderRadius: 12,
                       backgroundColor: theme.colors.surfaceVariant,
                     }}
                     contentFit="cover"
@@ -308,6 +312,8 @@ export function MarketplaceProductDetailsScreen({
                 mode="contained"
                 icon="basket-outline"
                 disabled={!product.is_available}
+                style={actionButtonStyle}
+                contentStyle={{ minHeight: 44 }}
                 onPress={() => {
                   navigation.navigate('OrderCheckout', {
                     listingId: String(product.id),
@@ -316,19 +322,36 @@ export function MarketplaceProductDetailsScreen({
                 Order Now
               </Button>
             ) : null}
-            <Button mode="contained" icon="phone-outline" onPress={() => void openExternalUrl(contact.phone ? `tel:${contact.phone}` : null)}>
+            <Button
+              mode="contained"
+              icon="phone-outline"
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={() => void openExternalUrl(contact.phone ? `tel:${contact.phone}` : null)}>
               Call Farmer
             </Button>
-            <Button mode="outlined" icon="map-marker-path" onPress={() => void openExternalUrl(storeLocation?.open_maps_action?.url ?? storeLocation?.google_maps_url)}>
+            <Button
+              mode="outlined"
+              icon="map-marker-path"
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={() => void openExternalUrl(storeLocation?.open_maps_action?.url ?? storeLocation?.google_maps_url)}>
               Directions
             </Button>
-            <Button mode="outlined" icon="share-variant-outline" onPress={() => void shareProduct()}>
+            <Button
+              mode="outlined"
+              icon="share-variant-outline"
+              style={actionButtonStyle}
+              contentStyle={{ minHeight: 44 }}
+              onPress={() => void shareProduct()}>
               Share Product
             </Button>
             {store?.id ? (
               <Button
                 mode="contained-tonal"
                 icon="storefront-outline"
+                style={actionButtonStyle}
+                contentStyle={{ minHeight: 44 }}
                 onPress={() => {
                   navigation.navigate('StoreDetails', {
                     storeId: String(store.id),
@@ -345,7 +368,7 @@ export function MarketplaceProductDetailsScreen({
       </Card>
 
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-        <View className="gap-md p-lg">
+        <View className="gap-md p-md">
           <Text variant="titleLarge" style={{ fontWeight: '700' }}>
             Product Information
           </Text>
@@ -363,17 +386,17 @@ export function MarketplaceProductDetailsScreen({
       </Card>
 
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-        <View className="gap-md p-lg">
+        <View className="gap-md p-md">
           <Text variant="titleLarge" style={{ fontWeight: '700' }}>
             Store Information
           </Text>
           <View className="gap-sm">
-            <View className="flex-row items-center gap-md">
+            <View className={`${isNarrow ? 'gap-md' : 'flex-row items-center gap-md'}`}>
               <View
                 className="items-center justify-center overflow-hidden rounded-xl"
                 style={{
-                  width: 72,
-                  height: 72,
+                  width: isNarrow ? '100%' : 72,
+                  height: isNarrow ? 136 : 72,
                   backgroundColor: theme.colors.surfaceVariant,
                 }}>
                 {store?.store_logo_url ? (
@@ -424,7 +447,7 @@ export function MarketplaceProductDetailsScreen({
 
       {recommendedProducts.length > 0 ? (
         <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-          <View className="gap-md p-lg">
+          <View className="gap-md p-md">
             <MarketplaceRecommendationSection
               items={recommendedProducts}
               subtitle="Recommended nearby products based on this product's category and current harvest availability."
@@ -448,7 +471,7 @@ export function MarketplaceProductDetailsScreen({
       ) : null}
 
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
-        <View className="gap-md p-lg">
+        <View className="gap-md p-md">
           <View className="gap-xs">
             <Text variant="titleLarge" style={{ fontWeight: '700' }}>
               Related Products
