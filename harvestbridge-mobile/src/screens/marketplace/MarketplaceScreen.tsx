@@ -408,7 +408,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               emptyStateMessage={
                 isFarmer
                   ? 'No active stories are visible right now. Share an image or video update from your store.'
-                  : undefined
+                  : 'No active farmer stories are visible right now. Check back soon for fresh store updates.'
               }
               onStoryPress={(story) => {
                 navigation.navigate('StoryFeed', {
