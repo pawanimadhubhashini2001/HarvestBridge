@@ -7,14 +7,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityIndicator, Button, Chip, Searchbar, Snackbar, Text } from 'react-native-paper';
 
 import {
-  getMarketplace,
   getMarketplaceProduct,
   getMarketplaceProductQueryKey,
-  getMarketplaceQueryKey,
   type MarketplaceListingDto,
   type MarketplaceQueryParams,
   type NearbyProductSuggestionDto,
 } from '@/api/marketplace.api';
+import {
+  getRoleMarketplace,
+  getRoleMarketplaceQueryKey,
+  type RoleMarketplaceMode,
+} from '@/api/role-marketplace.api';
 import { getStoryFeed, getStoryFeedQueryKey } from '@/api/story-feed.api';
 import { ErrorState } from '@/components/common/error-state';
 import { MarketplaceProductCard } from '@/components/marketplace/MarketplaceProductCard';
@@ -43,6 +46,45 @@ interface Coordinates {
   longitude: number;
 }
 
+function getMarketplaceCopy(mode: RoleMarketplaceMode) {
+  if (mode === 'donations') {
+    return {
+      title: 'Donations',
+      smartTitle: 'Nearby Donations',
+      description:
+        'Search farmer-added donations, compare pickup locations, and contact the farmer directly.',
+      resultLabel: 'donations found',
+      emptyLabel: 'donations',
+      loadingLabel: 'farmer donations',
+      searchPlaceholder: 'Search donations...',
+    };
+  }
+
+  if (mode === 'compost') {
+    return {
+      title: 'Compost',
+      smartTitle: 'Nearby Compost',
+      description:
+        'Search compost materials added by farmers, compare pickup locations, and contact the farmer directly.',
+      resultLabel: 'compost listings found',
+      emptyLabel: 'compost listings',
+      loadingLabel: 'farmer compost listings',
+      searchPlaceholder: 'Search compost...',
+    };
+  }
+
+  return {
+    title: 'Marketplace',
+    smartTitle: 'Smart Marketplace',
+    description:
+      'Search vegetables, compare nearby produce, and jump straight to farmer contact and directions.',
+    resultLabel: 'products found',
+    emptyLabel: 'products',
+    loadingLabel: 'marketplace products',
+    searchPlaceholder: 'Search products...',
+  };
+}
+
 export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace'>) {
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
@@ -58,6 +100,14 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
   const [isResolvingLocation, setIsResolvingLocation] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const isFarmer = user?.role === 'farmer';
+  const marketplaceMode: RoleMarketplaceMode =
+    user?.role === 'ngo'
+      ? 'donations'
+      : user?.role === 'compost_business'
+        ? 'compost'
+        : 'products';
+  const isProductMarketplace = marketplaceMode === 'products';
+  const marketplaceCopy = getMarketplaceCopy(marketplaceMode);
   const horizontalPadding = width < 390 ? 12 : 16;
 
   const isAllSriLanka = selectedRadius === 'all';
@@ -148,10 +198,10 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
   }, [requestLocationPermission]);
 
   const marketplaceQuery = useInfiniteQuery({
-    queryKey: getMarketplaceQueryKey(baseQueryParams),
+    queryKey: getRoleMarketplaceQueryKey(marketplaceMode, baseQueryParams),
     initialPageParam: 1,
     queryFn: async ({ pageParam }) =>
-      getMarketplace({
+      getRoleMarketplace(marketplaceMode, {
         ...baseQueryParams,
         page: pageParam,
       }),
@@ -185,7 +235,9 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
 
   const listings = marketplaceQuery.data?.pages.flatMap((page) => page.listings) ?? [];
   const summary = marketplaceQuery.data?.pages[0] ?? null;
-  const recommendedForYou = summary?.recommended_for_you ?? summary?.nearby_suggestions ?? [];
+  const recommendedForYou = isProductMarketplace
+    ? summary?.recommended_for_you ?? summary?.nearby_suggestions ?? []
+    : [];
   const storyFeed = storyFeedQuery.data?.stories ?? [];
   const isInitialLoading = marketplaceQuery.isLoading && listings.length === 0;
   const isRefreshing = marketplaceQuery.isRefetching && !marketplaceQuery.isFetchingNextPage;
@@ -213,11 +265,23 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
     setSubmittedSearch(searchDraft.trim());
   }
 
-  async function handleCallFarmer(listingId: number) {
+  async function handleCallFarmer(item: MarketplaceListingDto | NearbyProductSuggestionDto) {
+    if (!isProductMarketplace) {
+      const phoneNumber = item.store?.phone_number ?? null;
+
+      if (!phoneNumber) {
+        setActionError('Phone number is not available for this farmer.');
+        return;
+      }
+
+      await openExternalUrl(`tel:${phoneNumber}`);
+      return;
+    }
+
     try {
       const details = await queryClient.fetchQuery({
-        queryKey: getMarketplaceProductQueryKey(listingId),
-        queryFn: () => getMarketplaceProduct(listingId),
+        queryKey: getMarketplaceProductQueryKey(item.id),
+        queryFn: () => getMarketplaceProduct(item.id),
       });
 
       const phoneNumber = details.contact.phone ?? details.store?.phone_number ?? null;
@@ -247,15 +311,27 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
         <MarketplaceProductCard
           item={item}
           onPress={() => {
-            navigation.navigate('MarketplaceProductDetails', {
-              listingId: String(item.id),
-              latitude: coordinates?.latitude,
-              longitude: coordinates?.longitude,
-              distanceKm: item.distance_km ?? item.distance ?? null,
-            });
+            if (isProductMarketplace) {
+              navigation.navigate('MarketplaceProductDetails', {
+                listingId: String(item.id),
+                latitude: coordinates?.latitude,
+                longitude: coordinates?.longitude,
+                distanceKm: item.distance_km ?? item.distance ?? null,
+              });
+              return;
+            }
+
+            if (item.store?.id) {
+              navigation.navigate('StoreDetails', {
+                storeId: String(item.store.id),
+                latitude: coordinates?.latitude,
+                longitude: coordinates?.longitude,
+                distanceKm: item.distance_km ?? item.distance ?? null,
+              });
+            }
           }}
           onCallPress={() => {
-            void handleCallFarmer(item.id);
+            void handleCallFarmer(item);
           }}
           onDirectionsPress={() => {
             handleDirections(item);
@@ -263,11 +339,18 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
           onOrderPress={
             user?.role === 'consumer'
               ? () => {
-                  navigation.navigate('OrderCheckout', {
-                    listingId: String(item.id),
-                  });
-                }
+                navigation.navigate('OrderCheckout', {
+                  listingId: String(item.id),
+                });
+              }
               : undefined
+          }
+          listingKind={
+            marketplaceMode === 'donations'
+              ? 'donation'
+              : marketplaceMode === 'compost'
+                ? 'compost'
+                : 'product'
           }
         />
       </View>
@@ -317,19 +400,12 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                 borderColor: theme.colors.outline,
               }}>
               <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
-                {shouldUseLocation ? 'Smart Marketplace' : 'Marketplace'}
+                {shouldUseLocation ? marketplaceCopy.smartTitle : marketplaceCopy.title}
               </Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Search vegetables, compare nearby produce, and jump straight to farmer contact and
-                directions.
+                {marketplaceCopy.description}
               </Text>
-              {shouldUseLocation ? (
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Using your current location with a{' '}
-                  {typeof selectedRadius === 'number' ? `${selectedRadius} km` : 'countrywide'}{' '}
-                  radius.
-                </Text>
-              ) : locationState === 'denied' || locationState === 'unavailable' ? (
+              {(locationState === 'denied' || locationState === 'unavailable') && (
                 <View
                   className="gap-sm rounded-md px-md py-md"
                   style={{ backgroundColor: theme.colors.secondaryContainer }}>
@@ -344,7 +420,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                     Enable Location
                   </Button>
                 </View>
-              ) : null}
+              )}
             </View>
 
             <StoriesRow
@@ -359,8 +435,8 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               onActionPress={
                 isFarmer
                   ? () => {
-                      navigation.navigate('CreateStory');
-                    }
+                    navigation.navigate('CreateStory');
+                  }
                   : undefined
               }
               emptyStateMessage={
@@ -380,7 +456,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
             />
 
             <Searchbar
-              placeholder="Search Products..."
+              placeholder={marketplaceCopy.searchPlaceholder}
               value={searchDraft}
               onChangeText={setSearchDraft}
               onIconPress={handleSearchSubmit}
@@ -439,7 +515,9 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
 
             {summary ? (
               <View className="flex-row flex-wrap gap-sm">
-                <Chip compact>{summary.results_found} products found</Chip>
+                <Chip compact>
+                  {summary.results_found} {marketplaceCopy.resultLabel}
+                </Chip>
                 {summary.used_radius ? (
                   <Chip compact>
                     Radius:{' '}
@@ -458,20 +536,20 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
             <View className="flex-1 items-center justify-center gap-md px-lg">
               <ActivityIndicator size="large" color={theme.colors.primary} />
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Loading marketplace products...
+                Loading {marketplaceCopy.loadingLabel}...
               </Text>
             </View>
           ) : (
             <View className="flex-1 items-center justify-center gap-md px-lg">
               <Text variant="headlineSmall" style={{ textAlign: 'center' }}>
-                No products found
+                No {marketplaceCopy.emptyLabel} found
               </Text>
               <Text
                 variant="bodyMedium"
                 style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
                 {shouldUseLocation
-                  ? `No products found within ${selectedRadius} km.`
-                  : 'No products matched the current search and filter settings.'}
+                  ? `No ${marketplaceCopy.emptyLabel} found within ${selectedRadius} km.`
+                  : `No ${marketplaceCopy.emptyLabel} matched the current search and filter settings.`}
               </Text>
               <Button
                 mode="outlined"
@@ -488,30 +566,32 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
         }
         ListFooterComponent={
           <View className="gap-md" style={{ paddingHorizontal: horizontalPadding }}>
-            <MarketplaceRecommendationSection
-              items={recommendedForYou}
-              subtitle="Nearby products selected from your current search, store distance, and seasonal availability."
-              onItemPress={(item) => {
-                navigation.navigate('MarketplaceProductDetails', {
-                  listingId: String(item.id),
-                  latitude: coordinates?.latitude,
-                  longitude: coordinates?.longitude,
-                  distanceKm: item.distance_km ?? item.distance ?? null,
-                });
-              }}
-              onCallPress={(item) => {
-                void handleCallFarmer(item.id);
-              }}
-              onDirectionsPress={(item) => {
-                handleDirections(item);
-              }}
-            />
+            {isProductMarketplace ? (
+              <MarketplaceRecommendationSection
+                items={recommendedForYou}
+                subtitle="Nearby products selected from your current search, store distance, and seasonal availability."
+                onItemPress={(item) => {
+                  navigation.navigate('MarketplaceProductDetails', {
+                    listingId: String(item.id),
+                    latitude: coordinates?.latitude,
+                    longitude: coordinates?.longitude,
+                    distanceKm: item.distance_km ?? item.distance ?? null,
+                  });
+                }}
+                onCallPress={(item) => {
+                  void handleCallFarmer(item);
+                }}
+                onDirectionsPress={(item) => {
+                  handleDirections(item);
+                }}
+              />
+            ) : null}
 
             {marketplaceQuery.isFetchingNextPage ? (
               <View className="flex-row items-center justify-center gap-sm py-md">
                 <ActivityIndicator size="small" color={theme.colors.primary} />
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  Loading more products...
+                  Loading more {marketplaceCopy.emptyLabel}...
                 </Text>
               </View>
             ) : null}

@@ -5,6 +5,8 @@ export interface DonationDto {
   id: number;
   status: string;
   collection_status?: string;
+  distance?: number | null;
+  distance_km?: number | null;
   quantity: number | string;
   unit: string;
   price_per_unit?: number | string | null;
@@ -14,11 +16,11 @@ export interface DonationDto {
   pickup_date?: string | null;
   pickup_time?: string | null;
   available_until?: string | null;
-  images?: Array<{
+  images?: {
     id: number;
     url: string;
     sort_order?: number | null;
-  }>;
+  }[];
   primary_image?: {
     id: number;
     url: string;
@@ -36,8 +38,74 @@ export interface DonationDto {
     listing_unit?: string | null;
     listing_status?: string | null;
   } | null;
+  farmer?: {
+    id?: number;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
+  store?: {
+    id?: number;
+    store_name?: string | null;
+    district?: string | null;
+    address?: string | null;
+    phone_number?: string | null;
+    business_status?: string | null;
+    store_logo_url?: string | null;
+  } | null;
+  location?: {
+    pickup_location?: string | null;
+    district?: string | null;
+    address?: string | null;
+    latitude?: number | string | null;
+    longitude?: number | string | null;
+    google_maps_url?: string | null;
+    open_maps_action?: {
+      type: string;
+      label: string;
+      url: string;
+    } | null;
+  } | null;
+  actions?: {
+    phone?: string | null;
+    google_maps_url?: string | null;
+    open_maps_action?: {
+      type: string;
+      label: string;
+      url: string;
+    } | null;
+    can_mark_collected?: boolean;
+  } | null;
   created_at: string;
   updated_at?: string | null;
+}
+
+export interface DonationMarketplaceQueryParams {
+  search?: string;
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
+  page?: number;
+  per_page?: number;
+  sort?: 'nearest' | 'newest' | 'quantity';
+}
+
+export interface AvailableDonationsDto {
+  donations: DonationDto[];
+  sort?: string | null;
+  radius?: number | string | null;
+  pagination?: {
+    links?: unknown;
+    meta?: {
+      current_page: number;
+      last_page: number;
+      per_page: number;
+      total: number;
+      from: number | null;
+      to: number | null;
+      [key: string]: unknown;
+    } | null;
+  };
 }
 
 export interface CreateDonationPayload {
@@ -53,12 +121,12 @@ export interface CreateDonationPayload {
   pickup_time?: string;
   available_until: string;
   notes?: string;
-  images?: Array<{
+  images?: {
     uri: string;
     name: string;
     type: string;
     file?: Blob | null;
-  }>;
+  }[];
 }
 
 export function getDonationsQueryKey() {
@@ -67,6 +135,21 @@ export function getDonationsQueryKey() {
 
 export async function getDonations() {
   const response = await apiClient.get<ApiSuccessResponse<DonationDto[]>>('/donations');
+
+  return response.data.data;
+}
+
+export function getAvailableDonationsQueryKey(params: Partial<DonationMarketplaceQueryParams>) {
+  return ['available-donations', params] as const;
+}
+
+export async function getAvailableDonations(params: DonationMarketplaceQueryParams) {
+  const response = await apiClient.get<ApiSuccessResponse<AvailableDonationsDto>>(
+    '/available-donations',
+    {
+      params,
+    },
+  );
 
   return response.data.data;
 }

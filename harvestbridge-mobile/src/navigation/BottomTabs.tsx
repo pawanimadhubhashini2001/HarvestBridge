@@ -25,6 +25,9 @@ export function BottomTabs() {
   const theme = useAppTheme();
   const { user } = useAuth();
   const isConsumer = user?.role === 'consumer';
+  const isNgo = user?.role === 'ngo';
+  const isCompostBusiness = user?.role === 'compost_business';
+  const usesMarketplaceTabs = isConsumer || isNgo || isCompostBusiness;
   const [seenOrderStatusUpdates, setSeenOrderStatusUpdates] = useState<string[]>([]);
   const consumerOrdersQuery = useQuery({
     queryKey: getMyOrdersQueryKey(),
@@ -106,7 +109,7 @@ export function BottomTabs() {
 
   return (
     <Tab.Navigator
-      initialRouteName={isConsumer ? 'Marketplace' : 'Home'}
+      initialRouteName={usesMarketplaceTabs ? 'Marketplace' : 'Home'}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
@@ -169,21 +172,31 @@ export function BottomTabs() {
         },
         tabBarActiveBackgroundColor: theme.colors.primaryContainer,
       })}>
-      {isConsumer ? (
+      {usesMarketplaceTabs ? (
         <>
-          <Tab.Screen name="Marketplace" component={MarketplaceScreen} />
-          <Tab.Screen name="Favorites" component={FavoritesScreen} />
           <Tab.Screen
-            name="MyOrders"
-            component={MyOrdersScreen}
+            name="Marketplace"
+            component={MarketplaceScreen}
             options={{
-              tabBarLabel: 'Orders',
-            }}
-            listeners={{
-              focus: markOrderStatusUpdatesSeen,
-              tabPress: markOrderStatusUpdatesSeen,
+              tabBarLabel: isNgo ? 'Donations' : isCompostBusiness ? 'Compost' : 'Market',
             }}
           />
+          {isConsumer ? (
+            <>
+              <Tab.Screen name="Favorites" component={FavoritesScreen} />
+              <Tab.Screen
+                name="MyOrders"
+                component={MyOrdersScreen}
+                options={{
+                  tabBarLabel: 'Orders',
+                }}
+                listeners={{
+                  focus: markOrderStatusUpdatesSeen,
+                  tabPress: markOrderStatusUpdatesSeen,
+                }}
+              />
+            </>
+          ) : null}
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
         </>

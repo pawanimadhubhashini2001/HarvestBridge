@@ -14,6 +14,7 @@ interface MarketplaceProductCardProps {
   onCallPress: () => void;
   onDirectionsPress: () => void;
   onOrderPress?: () => void;
+  listingKind?: 'product' | 'donation' | 'compost';
   compact?: boolean;
 }
 
@@ -28,6 +29,24 @@ function formatCurrency(value: number | string, unit?: string) {
     : `LKR ${value}`;
 
   return unit ? `${formattedAmount} / ${unit}` : formattedAmount;
+}
+
+function formatListingValue(
+  value: number | string,
+  unit: string | undefined,
+  listingKind: NonNullable<MarketplaceProductCardProps['listingKind']>,
+) {
+  const amount = Number(value);
+
+  if (listingKind === 'donation' && (!Number.isFinite(amount) || amount === 0)) {
+    return 'Donation';
+  }
+
+  if (listingKind === 'compost' && (!Number.isFinite(amount) || amount === 0)) {
+    return 'Free compost';
+  }
+
+  return formatCurrency(value, unit);
 }
 
 function formatDistance(distance?: number | null) {
@@ -69,6 +88,7 @@ export function MarketplaceProductCard({
   onCallPress,
   onDirectionsPress,
   onOrderPress,
+  listingKind = 'product',
   compact = false,
 }: MarketplaceProductCardProps) {
   const theme = useAppTheme();
@@ -82,6 +102,18 @@ export function MarketplaceProductCard({
   const distance = item.distance_km ?? item.distance ?? null;
   const imageSize = compact ? 84 : 104;
   const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
+  const fallbackTitle =
+    listingKind === 'donation'
+      ? 'Farmer Donation'
+      : listingKind === 'compost'
+        ? 'Compost Material'
+        : 'Marketplace Product';
+  const availabilityLabel =
+    listingKind === 'donation'
+      ? `${item.available_quantity} ${item.unit} available to donate`
+      : listingKind === 'compost'
+        ? `${item.available_quantity} ${item.unit} available for compost`
+        : formatAvailability(item);
 
   return (
     <Card
@@ -115,7 +147,7 @@ export function MarketplaceProductCard({
           <View className="flex-row items-start justify-between gap-sm">
             <View className="flex-1 gap-1">
               <Text variant={compact ? 'titleMedium' : 'titleLarge'} style={{ fontWeight: '700' }}>
-                {title ?? 'Marketplace Product'}
+                {title ?? fallbackTitle}
               </Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
                 {storeName}
@@ -133,11 +165,11 @@ export function MarketplaceProductCard({
               <Chip compact>{formatStoreStatus(item.store.business_status)}</Chip>
             ) : null}
             {item.quality_grade ? <Chip compact>Grade {item.quality_grade}</Chip> : null}
-            <Chip compact>{formatAvailability(item)}</Chip>
+            <Chip compact>{availabilityLabel}</Chip>
           </View>
 
           <Text variant={compact ? 'titleMedium' : 'headlineSmall'} style={{ color: theme.colors.primary }}>
-            {formatCurrency(item.price_per_unit, item.unit)}
+            {formatListingValue(item.price_per_unit, item.unit, listingKind)}
           </Text>
 
           {recommendationReason ? (

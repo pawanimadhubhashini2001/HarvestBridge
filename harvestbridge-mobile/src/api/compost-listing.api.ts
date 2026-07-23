@@ -12,6 +12,8 @@ export interface CompostListingDto {
   id: number;
   waste_type: string;
   crop_category?: string | null;
+  distance?: number | null;
+  distance_km?: number | null;
   quantity: number | string;
   unit: string;
   price_per_unit?: number | string | null;
@@ -32,8 +34,46 @@ export interface CompostListingDto {
     url: string;
     sort_order?: number | null;
   } | null;
+  farmer?: {
+    id?: number;
+    name?: string | null;
+    phone?: string | null;
+  } | null;
+  store?: {
+    id?: number;
+    store_name?: string | null;
+    district?: string | null;
+    address?: string | null;
+    phone_number?: string | null;
+    business_status?: string | null;
+    store_logo_url?: string | null;
+  } | null;
+  actions?: {
+    phone?: string | null;
+    google_maps_url?: string | null;
+    open_maps_action?: {
+      type: string;
+      label: string;
+      url: string;
+    } | null;
+    can_mark_collected?: boolean;
+  } | null;
   created_at: string;
   updated_at?: string | null;
+}
+
+export interface CompostMarketplaceQueryParams {
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
+  waste_type?: string;
+  pickup_location?: string;
+  date?: string;
+}
+
+export interface AvailableCompostDto {
+  listings: CompostListingDto[];
+  radius?: number | string | null;
 }
 
 export interface CreateCompostListingPayload {
@@ -57,6 +97,21 @@ export function getCompostListingsQueryKey() {
 
 export async function getCompostListings() {
   const response = await apiClient.get<ApiSuccessResponse<CompostListingDto[]>>('/compost-listings');
+
+  return response.data.data;
+}
+
+export function getAvailableCompostQueryKey(params: Partial<CompostMarketplaceQueryParams>) {
+  return ['available-compost', params] as const;
+}
+
+export async function getAvailableCompost(params: CompostMarketplaceQueryParams) {
+  const response = await apiClient.get<ApiSuccessResponse<AvailableCompostDto>>(
+    '/available-compost',
+    {
+      params,
+    },
+  );
 
   return response.data.data;
 }
