@@ -57,6 +57,7 @@ function getMarketplaceCopy(mode: RoleMarketplaceMode) {
       emptyLabel: 'donations',
       loadingLabel: 'farmer donations',
       searchPlaceholder: 'Search donations...',
+      orderLabel: 'Order Donation',
     };
   }
 
@@ -70,6 +71,7 @@ function getMarketplaceCopy(mode: RoleMarketplaceMode) {
       emptyLabel: 'compost listings',
       loadingLabel: 'farmer compost listings',
       searchPlaceholder: 'Search compost...',
+      orderLabel: 'Order Compost',
     };
   }
 
@@ -82,6 +84,7 @@ function getMarketplaceCopy(mode: RoleMarketplaceMode) {
     emptyLabel: 'products',
     loadingLabel: 'marketplace products',
     searchPlaceholder: 'Search products...',
+    orderLabel: 'Order Now',
   };
 }
 
@@ -232,7 +235,6 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
         per_page: 10,
       }),
   });
-
   const listings = marketplaceQuery.data?.pages.flatMap((page) => page.listings) ?? [];
   const summary = marketplaceQuery.data?.pages[0] ?? null;
   const recommendedForYou = isProductMarketplace
@@ -343,8 +345,22 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                   listingId: String(item.id),
                 });
               }
+              : marketplaceMode === 'donations' || marketplaceMode === 'compost'
+                ? () => {
+                  navigation.navigate('OrderCheckout', {
+                    listingId: String(item.id),
+                    listingType: marketplaceMode === 'donations' ? 'donation' : 'compost',
+                    title: item.crop ?? undefined,
+                    storeName: item.store?.store_name ?? item.farmer ?? undefined,
+                    unit: item.unit,
+                    availableQuantity: String(item.available_quantity),
+                    pricePerUnit: String(item.price_per_unit),
+                    description: item.description ?? undefined,
+                  });
+                }
               : undefined
           }
+          orderLabel={marketplaceCopy.orderLabel}
           listingKind={
             marketplaceMode === 'donations'
               ? 'donation'

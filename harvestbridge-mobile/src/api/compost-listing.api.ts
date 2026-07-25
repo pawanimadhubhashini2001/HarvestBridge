@@ -24,11 +24,11 @@ export interface CompostListingDto {
   available_until?: string | null;
   status: string;
   collection_status?: string;
-  images?: Array<{
+  images?: {
     id: number;
     url: string;
     sort_order?: number | null;
-  }>;
+  }[];
   primary_image?: {
     id: number;
     url: string;
@@ -76,6 +76,35 @@ export interface AvailableCompostDto {
   radius?: number | string | null;
 }
 
+export interface CompostRequestDto {
+  id: number;
+  compost_listing_id: number;
+  business_id: number;
+  quantity?: number | string | null;
+  pickup_date: string;
+  pickup_time: string;
+  status: string;
+  notes?: string | null;
+  compost_listing?: CompostListingDto | null;
+  actions?: {
+    phone?: string | null;
+    google_maps_url?: string | null;
+    open_maps_action?: {
+      type: string;
+      label: string;
+      url: string;
+    } | null;
+  } | null;
+}
+
+export interface CreateCompostRequestPayload {
+  compost_listing_id: number;
+  quantity: number;
+  pickup_date: string;
+  pickup_time: string;
+  notes?: string;
+}
+
 export interface CreateCompostListingPayload {
   harvest_listing_id?: number;
   waste_type: string;
@@ -105,12 +134,33 @@ export function getAvailableCompostQueryKey(params: Partial<CompostMarketplaceQu
   return ['available-compost', params] as const;
 }
 
+export function getCompostRequestsQueryKey() {
+  return ['my-compost-requests'] as const;
+}
+
 export async function getAvailableCompost(params: CompostMarketplaceQueryParams) {
   const response = await apiClient.get<ApiSuccessResponse<AvailableCompostDto>>(
     '/available-compost',
     {
       params,
     },
+  );
+
+  return response.data.data;
+}
+
+export async function createCompostRequest(payload: CreateCompostRequestPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<CompostRequestDto>>(
+    '/compost-requests',
+    payload,
+  );
+
+  return response.data.data;
+}
+
+export async function getCompostRequests() {
+  const response = await apiClient.get<ApiSuccessResponse<CompostRequestDto[]>>(
+    '/my-compost-requests',
   );
 
   return response.data.data;

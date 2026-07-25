@@ -3,11 +3,20 @@ import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { Button, Card, Chip, HelperText, Snackbar, Text, TextInput } from 'react-native-paper';
 
+import {
+  createCompostRequest,
+  getCompostRequestsQueryKey,
+} from '@/api/compost-listing.api';
+import {
+  createDonationRequest,
+  getDonationRequestsQueryKey,
+} from '@/api/donation.api';
 import { getMarketplaceProduct, getMarketplaceProductQueryKey } from '@/api/marketplace.api';
 import { createOrder, getMyOrdersQueryKey } from '@/api/order.api';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
+import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
@@ -43,29 +52,47 @@ export function OrderCheckoutScreen({
 }: AppStackScreenProps<'OrderCheckout'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const listingId = route.params?.listingId;
+  const listingType = route.params?.listingType ?? 'product';
+  const isProductOrder = listingType === 'product';
+  const isDonationOrder = listingType === 'donation';
+  const isCompostOrder = listingType === 'compost';
   const [quantity, setQuantity] = useState('');
   const [visitDate, setVisitDate] = useState(getTomorrowDateInput());
+  const [pickupTime, setPickupTime] = useState('09:00');
   const [notes, setNotes] = useState('');
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const detailsQuery = useQuery({
     queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing'),
     queryFn: () => getMarketplaceProduct(listingId ?? ''),
-    enabled: Boolean(listingId),
+    enabled: Boolean(listingId) && isProductOrder,
   });
 
   const product = detailsQuery.data?.product;
   const store = detailsQuery.data?.store;
-  const availableQuantity = Number(product?.available_quantity ?? 0);
+  const listingTitle =
+    product?.crop_name
+    ?? route.params?.title
+    ?? (isDonationOrder ? 'Farmer Donation' : isCompostOrder ? 'Compost Material' : 'Marketplace Product');
+  const storeName = store?.store_name ?? route.params?.storeName ?? 'Store unavailable';
+  const listingUnit = product?.unit ?? route.params?.unit ?? '';
+  const listingAvailableQuantity = product?.available_quantity ?? route.params?.availableQuantity ?? '0';
+  const listingPricePerUnit = product?.price_per_unit ?? route.params?.pricePerUnit ?? '0';
+  const availableQuantity = Number(listingAvailableQuantity);
   const selectedQuantity = Number(quantity);
-  const subtotal = Number.isFinite(selectedQuantity) && product
-    ? selectedQuantity * Number(product.price_per_unit)
+  const unitPrice = Number(listingPricePerUnit);
+  const shouldShowEstimatedTotal = Number.isFinite(unitPrice) && unitPrice > 0;
+  const subtotal = Number.isFinite(selectedQuantity) && shouldShowEstimatedTotal
+    ? selectedQuantity * unitPrice
     : 0;
 
   const quantityError = useMemo(() => {
     if (!quantity.trim()) {
-      return 'Enter the quantity you want to reserve.';
+      return isProductOrder
+        ? 'Enter the quantity you want to reserve.'
+        : 'Enter the quantity you want to request.';
     }
 
     if (!Number.isFinite(selectedQuantity) || selectedQuantity <= 0) {
@@ -73,13 +100,17 @@ export function OrderCheckoutScreen({
     }
 
     if (selectedQuantity > availableQuantity) {
-      return `Only ${availableQuantity} ${product?.unit ?? ''} is available.`.trim();
+      return `Only ${availableQuantity} ${listingUnit} is available.`.trim();
     }
 
     return null;
-  }, [availableQuantity, product?.unit, quantity, selectedQuantity]);
+  }, [availableQuantity, isProductOrder, listingUnit, quantity, selectedQuantity]);
 
   const visitDateError = useMemo(() => {
+    if (isDonationOrder) {
+      return null;
+    }
+
     if (!isValidDateInput(visitDate)) {
       return 'Use the date format YYYY-MM-DD.';
     }
@@ -93,16 +124,48 @@ export function OrderCheckoutScreen({
     }
 
     return null;
-  }, [visitDate]);
+  }, [isDonationOrder, visitDate]);
 
-  const orderMutation = useMutation({
+  const pickupTimeError = useMemo(() => {
+    if (!isCompostOrder) {
+      return null;
+    }
+
+    if (!pickupTime.trim()) {
+      return 'Enter a pickup time.';
+    }
+
+    return null;
+  }, [isCompostOrder, pickupTime]);
+
+  const orderMutation = useMutation<unknown, Error>({
     mutationFn: () => {
       if (!listingId) {
-        throw new Error('The selected marketplace product could not be identified.');
+        throw new Error('The selected listing could not be identified.');
       }
 
-      if (quantityError || visitDateError) {
-        throw new Error(quantityError ?? visitDateError ?? 'Check your order details.');
+      if (quantityError || visitDateError || pickupTimeError) {
+        throw new Error(
+          quantityError ?? visitDateError ?? pickupTimeError ?? 'Check your order details.',
+        );
+      }
+
+      if (isDonationOrder) {
+        return createDonationRequest({
+          donation_id: Number(listingId),
+          quantity: selectedQuantity,
+          message: notes.trim() || undefined,
+        });
+      }
+
+      if (isCompostOrder) {
+        return createCompostRequest({
+          compost_listing_id: Number(listingId),
+          quantity: selectedQuantity,
+          pickup_date: visitDate,
+          pickup_time: pickupTime.trim(),
+          notes: notes.trim() || undefined,
+        });
       }
 
       return createOrder({
@@ -113,13 +176,31 @@ export function OrderCheckoutScreen({
       });
     },
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: getMyOrdersQueryKey() }),
-        queryClient.invalidateQueries({ queryKey: ['marketplace'] }),
-        queryClient.invalidateQueries({
-          queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing'),
-        }),
-      ]);
+      const invalidations = [
+        queryClient.invalidateQueries({ queryKey: ['role-marketplace'] }),
+      ];
+
+      if (isDonationOrder) {
+        invalidations.push(
+          queryClient.invalidateQueries({ queryKey: getDonationRequestsQueryKey() }),
+          queryClient.invalidateQueries({ queryKey: ['available-donations'] }),
+        );
+      } else if (isCompostOrder) {
+        invalidations.push(
+          queryClient.invalidateQueries({ queryKey: getCompostRequestsQueryKey() }),
+          queryClient.invalidateQueries({ queryKey: ['available-compost'] }),
+        );
+      } else {
+        invalidations.push(
+          queryClient.invalidateQueries({ queryKey: getMyOrdersQueryKey() }),
+          queryClient.invalidateQueries({ queryKey: ['marketplace'] }),
+          queryClient.invalidateQueries({
+            queryKey: getMarketplaceProductQueryKey(listingId ?? 'missing'),
+          }),
+        );
+      }
+
+      await Promise.all(invalidations);
       navigation.replace('MainTabs', { screen: 'MyOrders' });
     },
     onError: (error) => {
@@ -130,17 +211,17 @@ export function OrderCheckoutScreen({
   if (!listingId) {
     return (
       <ErrorState
-        title="Product not found"
-        message="The selected marketplace product could not be identified."
+        title="Listing not found"
+        message="The selected listing could not be identified."
       />
     );
   }
 
-  if (detailsQuery.isLoading && !detailsQuery.data) {
+  if (isProductOrder && detailsQuery.isLoading && !detailsQuery.data) {
     return <LoadingState message="Loading order details..." />;
   }
 
-  if (detailsQuery.isError && !detailsQuery.data) {
+  if (isProductOrder && detailsQuery.isError && !detailsQuery.data) {
     return (
       <ErrorState
         title="Unable to load product"
@@ -153,7 +234,7 @@ export function OrderCheckoutScreen({
     );
   }
 
-  if (!product) {
+  if (isProductOrder && !product) {
     return (
       <ErrorState
         title="Product unavailable"
@@ -162,7 +243,21 @@ export function OrderCheckoutScreen({
     );
   }
 
-  const hasFormError = Boolean(quantityError || visitDateError);
+  const hasFormError = Boolean(quantityError || visitDateError || pickupTimeError);
+  const canSubmitForRole =
+    (isProductOrder && user?.role === 'consumer')
+    || (isDonationOrder && user?.role === 'ngo')
+    || (isCompostOrder && user?.role === 'compost_business');
+  const orderHeading = isDonationOrder
+    ? 'Request donation before visiting'
+    : isCompostOrder
+      ? 'Request compost pickup'
+      : 'Reserve before visiting';
+  const submitLabel = isDonationOrder
+    ? 'Send Donation Request'
+    : isCompostOrder
+      ? 'Send Compost Request'
+      : 'Send Order Request';
 
   return (
     <Screen scrollable contentClassName="gap-md">
@@ -171,16 +266,20 @@ export function OrderCheckoutScreen({
           <View className="gap-md">
             <View className="gap-xs">
               <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
-                {product.crop_name ?? 'Marketplace Product'}
+                {listingTitle}
               </Text>
               <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-                {store?.store_name ?? 'Store unavailable'}
+                {storeName}
               </Text>
             </View>
 
             <View className="flex-row flex-wrap gap-sm">
-              <Chip compact>{product.available_quantity} {product.unit} available</Chip>
-              <Chip compact>{formatCurrency(product.price_per_unit)} / {product.unit}</Chip>
+              <Chip compact>{listingAvailableQuantity} {listingUnit} available</Chip>
+              {isProductOrder || Number(listingPricePerUnit) > 0 ? (
+                <Chip compact>{formatCurrency(listingPricePerUnit)} / {listingUnit}</Chip>
+              ) : (
+                <Chip compact>{isDonationOrder ? 'Donation' : 'Free compost'}</Chip>
+              )}
             </View>
           </View>
         </Card.Content>
@@ -190,12 +289,12 @@ export function OrderCheckoutScreen({
         <Card.Content>
           <View className="gap-md">
             <Text variant="titleLarge" style={{ fontWeight: '700' }}>
-              Reserve before visiting
+              {orderHeading}
             </Text>
 
             <View>
               <TextInput
-                label={`Quantity (${product.unit})`}
+                label={`Quantity (${listingUnit})`}
                 value={quantity}
                 onChangeText={setQuantity}
                 keyboardType="decimal-pad"
@@ -206,21 +305,38 @@ export function OrderCheckoutScreen({
               </HelperText>
             </View>
 
-            <View>
-              <TextInput
-                label="Visit date"
-                value={visitDate}
-                onChangeText={setVisitDate}
-                placeholder="YYYY-MM-DD"
-                mode="outlined"
-              />
-              <HelperText type="error" visible={Boolean(visitDateError)}>
-                {visitDateError}
-              </HelperText>
-            </View>
+            {!isDonationOrder ? (
+              <View>
+                <TextInput
+                  label={isCompostOrder ? 'Pickup date' : 'Visit date'}
+                  value={visitDate}
+                  onChangeText={setVisitDate}
+                  placeholder="YYYY-MM-DD"
+                  mode="outlined"
+                />
+                <HelperText type="error" visible={Boolean(visitDateError)}>
+                  {visitDateError}
+                </HelperText>
+              </View>
+            ) : null}
+
+            {isCompostOrder ? (
+              <View>
+                <TextInput
+                  label="Pickup time"
+                  value={pickupTime}
+                  onChangeText={setPickupTime}
+                  placeholder="09:00"
+                  mode="outlined"
+                />
+                <HelperText type="error" visible={Boolean(pickupTimeError)}>
+                  {pickupTimeError}
+                </HelperText>
+              </View>
+            ) : null}
 
             <TextInput
-              label="Notes for farmer"
+              label={isDonationOrder ? 'Message for farmer' : 'Notes for farmer'}
               value={notes}
               onChangeText={setNotes}
               mode="outlined"
@@ -228,24 +344,26 @@ export function OrderCheckoutScreen({
               numberOfLines={3}
             />
 
-            <View
-              className="rounded-md px-md py-md"
-              style={{ backgroundColor: theme.colors.primaryContainer }}>
-              <Text variant="bodyLarge" style={{ color: theme.colors.primary, fontWeight: '700' }}>
-                Estimated total: {formatCurrency(subtotal)}
-              </Text>
-            </View>
+            {shouldShowEstimatedTotal ? (
+              <View
+                className="rounded-md px-md py-md"
+                style={{ backgroundColor: theme.colors.primaryContainer }}>
+                <Text variant="bodyLarge" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+                  Estimated total: {formatCurrency(subtotal)}
+                </Text>
+              </View>
+            ) : null}
 
             <Button
               mode="contained"
               loading={orderMutation.isPending}
-              disabled={orderMutation.isPending || hasFormError}
+              disabled={orderMutation.isPending || hasFormError || !canSubmitForRole}
               style={{ alignSelf: 'stretch' }}
               contentStyle={{ minHeight: 48 }}
               onPress={() => {
                 orderMutation.mutate();
               }}>
-              Send Order Request
+              {submitLabel}
             </Button>
           </View>
         </Card.Content>

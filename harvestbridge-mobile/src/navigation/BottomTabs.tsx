@@ -182,21 +182,23 @@ export function BottomTabs() {
             }}
           />
           {isConsumer ? (
-            <>
-              <Tab.Screen name="Favorites" component={FavoritesScreen} />
-              <Tab.Screen
-                name="MyOrders"
-                component={MyOrdersScreen}
-                options={{
-                  tabBarLabel: 'Orders',
-                }}
-                listeners={{
-                  focus: markOrderStatusUpdatesSeen,
-                  tabPress: markOrderStatusUpdatesSeen,
-                }}
-              />
-            </>
+            <Tab.Screen name="Favorites" component={FavoritesScreen} />
           ) : null}
+          <Tab.Screen
+            name="MyOrders"
+            component={MyOrdersScreen}
+            options={{
+              tabBarLabel: 'Orders',
+            }}
+            listeners={
+              isConsumer
+                ? {
+                    focus: markOrderStatusUpdatesSeen,
+                    tabPress: markOrderStatusUpdatesSeen,
+                  }
+                : undefined
+            }
+          />
           <Tab.Screen name="Notifications" component={NotificationsScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
         </>

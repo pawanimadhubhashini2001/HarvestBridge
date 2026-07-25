@@ -37,11 +37,20 @@ class CompostRequestService
             );
         }
 
+        if ((float) $data['quantity'] > (float) $listing->quantity) {
+
+            throw new Exception(
+                'Requested quantity exceeds available compost quantity.'
+            );
+        }
+
         return CompostRequest::create([
 
             'compost_listing_id' => $listing->id,
 
             'business_id' => $business->id,
+
+            'quantity' => $data['quantity'],
 
             'pickup_date' => $data['pickup_date'],
 

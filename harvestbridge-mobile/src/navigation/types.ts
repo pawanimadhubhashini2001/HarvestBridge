@@ -73,6 +73,13 @@ export type AppStackParamList = {
   };
   OrderCheckout: {
     listingId?: string;
+    listingType?: 'product' | 'donation' | 'compost';
+    title?: string;
+    storeName?: string;
+    unit?: string;
+    availableQuantity?: string;
+    pricePerUnit?: string;
+    description?: string;
   };
   FarmerOrders: undefined;
   StoreDetails: {

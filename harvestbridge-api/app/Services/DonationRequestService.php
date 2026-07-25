@@ -33,6 +33,13 @@ class DonationRequestService
                 );
             }
 
+            if ((float) $data['quantity'] > (float) $donation->quantity) {
+
+                throw new Exception(
+                    'Requested quantity exceeds available donation quantity.'
+                );
+            }
+
             /*
             |--------------------------------------------------------------------------
             | Prevent Duplicate Request
@@ -68,6 +75,8 @@ class DonationRequestService
 
                 'ngo_id' => $ngo->id,
 
+                'quantity' => $data['quantity'],
+
                 'message' => $data['message'] ?? null,
 
                 'status' => 'pending'
@@ -87,7 +96,9 @@ class DonationRequestService
             ]);
 
             return $request->load([
-                'donation',
+                'donation.farmer',
+                'donation.farmerStore',
+                'donation.harvestListing.farm',
                 'ngo'
             ]);
         });
@@ -96,7 +107,9 @@ class DonationRequestService
     public function getNgoRequests(User $ngo)
     {
         return DonationRequest::with([
-            'donation.harvestListing',
+            'donation.farmer',
+            'donation.farmerStore',
+            'donation.harvestListing.farm',
             'ngo'
         ])
             ->where('ngo_id', $ngo->id)

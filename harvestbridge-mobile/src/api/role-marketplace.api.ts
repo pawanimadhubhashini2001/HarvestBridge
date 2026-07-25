@@ -220,11 +220,11 @@ function mapStore(
 
 function mapImages(
   images:
-    | Array<{
+    | {
         id: number;
         url: string;
         sort_order?: number | null;
-      }>
+      }[]
     | undefined,
   primaryImage:
     | {

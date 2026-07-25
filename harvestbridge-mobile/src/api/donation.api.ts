@@ -108,6 +108,32 @@ export interface AvailableDonationsDto {
   };
 }
 
+export interface DonationRequestDto {
+  id: number;
+  donation_id: number;
+  ngo_id: number;
+  quantity?: number | string | null;
+  status: string;
+  message?: string | null;
+  donation?: DonationDto | null;
+  actions?: {
+    phone?: string | null;
+    google_maps_url?: string | null;
+    open_maps_action?: {
+      type: string;
+      label: string;
+      url: string;
+    } | null;
+  } | null;
+  created_at: string;
+}
+
+export interface CreateDonationRequestPayload {
+  donation_id: number;
+  quantity: number;
+  message?: string;
+}
+
 export interface CreateDonationPayload {
   harvest_listing_id?: number;
   crop_name?: string;
@@ -143,12 +169,33 @@ export function getAvailableDonationsQueryKey(params: Partial<DonationMarketplac
   return ['available-donations', params] as const;
 }
 
+export function getDonationRequestsQueryKey() {
+  return ['donation-requests'] as const;
+}
+
 export async function getAvailableDonations(params: DonationMarketplaceQueryParams) {
   const response = await apiClient.get<ApiSuccessResponse<AvailableDonationsDto>>(
     '/available-donations',
     {
       params,
     },
+  );
+
+  return response.data.data;
+}
+
+export async function createDonationRequest(payload: CreateDonationRequestPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<DonationRequestDto>>(
+    '/donation-requests',
+    payload,
+  );
+
+  return response.data.data;
+}
+
+export async function getDonationRequests() {
+  const response = await apiClient.get<ApiSuccessResponse<DonationRequestDto[]>>(
+    '/donation-requests',
   );
 
   return response.data.data;

@@ -14,6 +14,8 @@ interface MarketplaceProductCardProps {
   onCallPress: () => void;
   onDirectionsPress: () => void;
   onOrderPress?: () => void;
+  orderBusy?: boolean;
+  orderLabel?: string;
   listingKind?: 'product' | 'donation' | 'compost';
   compact?: boolean;
 }
@@ -88,6 +90,8 @@ export function MarketplaceProductCard({
   onCallPress,
   onDirectionsPress,
   onOrderPress,
+  orderBusy = false,
+  orderLabel = 'Order Now',
   listingKind = 'product',
   compact = false,
 }: MarketplaceProductCardProps) {
@@ -198,10 +202,12 @@ export function MarketplaceProductCard({
               <Button
                 mode="contained"
                 icon="basket-outline"
+                loading={orderBusy}
+                disabled={orderBusy}
                 style={actionButtonStyle}
                 contentStyle={{ minHeight: 44 }}
                 onPress={onOrderPress}>
-                Order Now
+                {orderLabel}
               </Button>
             ) : null}
             <Button
