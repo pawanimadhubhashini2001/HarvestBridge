@@ -50,8 +50,14 @@ export function AppNavigator() {
         headerTintColor: theme.colors.primary,
         headerTitleStyle: {
           fontWeight: '700',
+          color: theme.colors.onSurface,
         },
-        headerShadowVisible: false,
+        headerShadowVisible: true,
+        headerBackTitle: 'Back',
+        headerTitleAlign: 'left',
+        contentStyle: {
+          backgroundColor: theme.colors.background,
+        },
       }}>
       <Stack.Screen
         name="MainTabs"

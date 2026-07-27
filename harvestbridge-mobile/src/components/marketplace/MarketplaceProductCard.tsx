@@ -4,6 +4,7 @@ import { Button, Card, Chip, Text } from 'react-native-paper';
 
 import type { MarketplaceListingDto, NearbyProductSuggestionDto } from '@/api/marketplace.api';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { designTokens } from '@/theme';
 import { formatStoreStatus } from '@/utils/store-status';
 
 type MarketplaceCardItem = MarketplaceListingDto | NearbyProductSuggestionDto;
@@ -121,16 +122,17 @@ export function MarketplaceProductCard({
 
   return (
     <Card
-      mode="contained"
+      mode="elevated"
       onPress={onPress}
-      style={{ backgroundColor: theme.colors.surface }}>
+      style={{ backgroundColor: theme.colors.surface, borderRadius: designTokens.radius.lg }}>
       <View className={`${isNarrow ? 'gap-md' : `flex-row ${compact ? 'gap-sm' : 'gap-md'}`} p-md`}>
         <View
-          className="items-center justify-center overflow-hidden rounded-md"
+          className="items-center justify-center overflow-hidden"
           style={{
             width: isNarrow ? '100%' : imageSize,
             height: isNarrow ? (compact ? 132 : 164) : imageSize,
             backgroundColor: theme.colors.surfaceVariant,
+            borderRadius: designTokens.radius.md,
           }}>
           {imageUrl ? (
             <Image
@@ -158,7 +160,12 @@ export function MarketplaceProductCard({
               </Text>
             </View>
 
-            <Chip compact>{formatStatusLabel(item.status)}</Chip>
+            <Chip
+              compact
+              style={{ backgroundColor: theme.colors.primaryContainer }}
+              textStyle={{ color: theme.colors.primary }}>
+              {formatStatusLabel(item.status)}
+            </Chip>
           </View>
 
           <View className="flex-row flex-wrap gap-xs">
@@ -178,8 +185,11 @@ export function MarketplaceProductCard({
 
           {recommendationReason ? (
             <View
-              className="rounded-md px-sm py-sm"
-              style={{ backgroundColor: theme.colors.primaryContainer }}>
+              className="px-sm py-sm"
+              style={{
+                backgroundColor: theme.colors.primaryContainer,
+                borderRadius: designTokens.radius.sm,
+              }}>
               <Text
                 variant="bodySmall"
                 style={{ color: theme.colors.onPrimaryContainer }}>
@@ -205,7 +215,7 @@ export function MarketplaceProductCard({
                 loading={orderBusy}
                 disabled={orderBusy}
                 style={actionButtonStyle}
-                contentStyle={{ minHeight: 44 }}
+                contentStyle={{ minHeight: designTokens.touch.min }}
                 onPress={onOrderPress}>
                 {orderLabel}
               </Button>
@@ -214,7 +224,7 @@ export function MarketplaceProductCard({
               mode="outlined"
               icon="phone-outline"
               style={actionButtonStyle}
-              contentStyle={{ minHeight: 44 }}
+              contentStyle={{ minHeight: designTokens.touch.min }}
               onPress={onCallPress}>
               Call Farmer
             </Button>
@@ -222,7 +232,7 @@ export function MarketplaceProductCard({
               mode="text"
               icon="directions"
               style={actionButtonStyle}
-              contentStyle={{ minHeight: 44 }}
+              contentStyle={{ minHeight: designTokens.touch.min }}
               onPress={onDirectionsPress}>
               Directions
             </Button>

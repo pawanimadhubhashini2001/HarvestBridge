@@ -4,21 +4,21 @@ namespace App\Services;
 
 use App\Models\Crop;
 use App\Models\Farm;
-use App\Models\HarvestListingImage;
 use App\Models\HarvestListing;
-use App\Support\MediaStorage;
+use App\Models\HarvestListingImage;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class HarvestListingService
 {
     private const IMAGE_DIRECTORY = 'harvest-listings';
+
     private const MAX_IMAGES_PER_LISTING = 5;
 
     private const SUMMARY_RELATIONS = [
@@ -331,6 +331,8 @@ class HarvestListingService
             ->update([
                 'status' => HarvestListing::STATUS_EXPIRED,
             ]);
+
+        $this->syncStockDerivedStatuses();
     }
 
     public function expireElapsedFeaturedListings(): void
@@ -444,7 +446,7 @@ class HarvestListingService
         HarvestListingImage $image
     ) {
         if ($image->harvest_listing_id !== $listing->id) {
-            throw (new ModelNotFoundException())->setModel(
+            throw (new ModelNotFoundException)->setModel(
                 HarvestListingImage::class,
                 [$image->getKey()]
             );
@@ -500,7 +502,7 @@ class HarvestListingService
         HarvestListingImage $image
     ): void {
         if ($image->harvest_listing_id !== $listing->id) {
-            throw (new ModelNotFoundException())->setModel(
+            throw (new ModelNotFoundException)->setModel(
                 HarvestListingImage::class,
                 [$image->getKey()]
             );
@@ -603,7 +605,7 @@ class HarvestListingService
             return HarvestListing::STATUS_DONATED;
         }
 
-        if ($totalQuantity <= 0 || $availableQuantity <= 0) {
+        if ($totalQuantity <= 0) {
             return HarvestListing::STATUS_SOLD;
         }
 
@@ -611,15 +613,42 @@ class HarvestListingService
             return HarvestListing::STATUS_EXPIRED;
         }
 
+        if ($availableQuantity <= 0) {
+            return $reservedQuantity > 0
+                ? HarvestListing::STATUS_RESERVED
+                : HarvestListing::STATUS_SOLD;
+        }
+
         if ($currentStatus === HarvestListing::STATUS_HIDDEN) {
             return HarvestListing::STATUS_HIDDEN;
         }
 
-        if ($reservedQuantity > 0) {
-            return HarvestListing::STATUS_RESERVED;
-        }
-
         return HarvestListing::STATUS_AVAILABLE;
+    }
+
+    private function syncStockDerivedStatuses(): void
+    {
+        $notExpired = function ($query) {
+            $query->whereNull('available_until')
+                ->orWhereDate('available_until', '>=', now()->toDateString());
+        };
+
+        HarvestListing::query()
+            ->where('status', HarvestListing::STATUS_RESERVED)
+            ->where('available_quantity', '>', 0)
+            ->where($notExpired)
+            ->update([
+                'status' => HarvestListing::STATUS_AVAILABLE,
+            ]);
+
+        HarvestListing::query()
+            ->where('status', HarvestListing::STATUS_AVAILABLE)
+            ->where('available_quantity', '<=', 0)
+            ->where('reserved_quantity', '>', 0)
+            ->where($notExpired)
+            ->update([
+                'status' => HarvestListing::STATUS_RESERVED,
+            ]);
     }
 
     private function isExpired(

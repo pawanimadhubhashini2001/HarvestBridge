@@ -11,6 +11,7 @@ import { AppTextInput } from '@/components/form/app-text-input';
 import { Screen } from '@/components/layout/screen';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AuthScreenProps } from '@/navigation/types';
+import { designTokens } from '@/theme';
 import type { AppError } from '@/types/api';
 
 const forgotPasswordSchema = z.object({
@@ -59,10 +60,18 @@ export function ForgotPasswordScreen({ navigation }: AuthScreenProps<'ForgotPass
   return (
     <Screen scrollable contentClassName="justify-center">
       <View
-        className="min-h-[360px] gap-lg rounded-lg border px-lg py-xl"
-        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+        className="gap-lg"
+        style={{
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.outlineVariant,
+          borderRadius: designTokens.radius.xl,
+          borderWidth: 1,
+          minHeight: 360,
+          paddingHorizontal: designTokens.spacing.xl,
+          paddingVertical: designTokens.spacing['2xl'],
+        }}>
         <View className="gap-sm">
-          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface }}>
+          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
             Forgot Password
           </Text>
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>

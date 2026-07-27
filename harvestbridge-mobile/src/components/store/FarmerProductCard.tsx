@@ -46,6 +46,17 @@ function formatDate(value?: string | null) {
   }).format(date);
 }
 
+function formatQuantity(value: number | string, unit: string) {
+  const quantity = Number(value);
+  const formattedQuantity = Number.isFinite(quantity)
+    ? new Intl.NumberFormat(undefined, {
+        maximumFractionDigits: 2,
+      }).format(quantity)
+    : value;
+
+  return `${formattedQuantity} ${unit}`;
+}
+
 export function FarmerProductCard({
   item,
   onEdit,
@@ -57,6 +68,8 @@ export function FarmerProductCard({
 }: FarmerProductCardProps) {
   const theme = useAppTheme();
   const primaryImageUrl = item.images[0]?.url ?? null;
+  const reservedQuantity = Number(item.reserved_quantity);
+  const hasReservedStock = Number.isFinite(reservedQuantity) && reservedQuantity > 0;
 
   return (
     <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
@@ -96,8 +109,11 @@ export function FarmerProductCard({
               <View className="flex-row flex-wrap gap-sm">
                 <Chip compact>{item.status_label ?? item.status}</Chip>
                 <Chip compact>
-                  {item.available_quantity} {item.unit} available
+                  {formatQuantity(item.available_quantity, item.unit)} available
                 </Chip>
+                {hasReservedStock ? (
+                  <Chip compact>{formatQuantity(item.reserved_quantity, item.unit)} reserved</Chip>
+                ) : null}
                 <Chip compact>{item.is_available ? 'Visible to customers' : 'Not visible'}</Chip>
               </View>
 

@@ -4,22 +4,25 @@ namespace App\Services;
 
 use App\Models\Farm;
 use App\Models\HarvestListing;
-use App\Support\MediaStorage;
 use App\Models\User;
+use App\Support\MediaStorage;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class FarmService
 {
     private const STORE_LOGO_DIRECTORY = 'stores/logos';
+
     private const STORE_COVER_DIRECTORY = 'stores/covers';
+
     private const EARTH_RADIUS_KM = 6371;
+
     private const DEFAULT_PUBLIC_PRODUCTS_PAGE_SIZE = 12;
+
     private const MAX_PUBLIC_PRODUCTS_PAGE_SIZE = 50;
 
     public function getAll(User $user): Collection
@@ -28,7 +31,7 @@ class FarmService
             ->farms()
             ->with([
                 'user:id,name,email,phone',
-                'activeHarvestListings:id,farm_id,crop_id',
+                'activeHarvestListings:id,farm_id,crop_id,crop_name',
             ])
             ->latest()
             ->get();
@@ -40,12 +43,12 @@ class FarmService
             ->store()
             ->with([
                 'user:id,name,email,phone',
-                'activeHarvestListings:id,farm_id,crop_id',
+                'activeHarvestListings:id,farm_id,crop_id,crop_name',
             ])
             ->first();
 
         if ($store === null) {
-            throw (new ModelNotFoundException())->setModel(Farm::class);
+            throw (new ModelNotFoundException)->setModel(Farm::class);
         }
 
         return $store;
@@ -55,7 +58,7 @@ class FarmService
     {
         return $farm->load([
             'user:id,name,email,phone',
-            'activeHarvestListings:id,farm_id,crop_id',
+            'activeHarvestListings:id,farm_id,crop_id,crop_name',
         ]);
     }
 
@@ -66,7 +69,7 @@ class FarmService
             ->where('is_suspended', false)
             ->with([
                 'user:id,name,phone',
-                'activeHarvestListings:id,farm_id,crop_id',
+                'activeHarvestListings:id,farm_id,crop_id,crop_name',
             ])
             ->withCount([
                 'visibleReviews as visible_reviews_count',
@@ -141,12 +144,12 @@ class FarmService
 
         return $query
             ->orderByRaw(
-                "CASE
+                'CASE
                     WHEN is_featured = true
                         AND (featured_until IS NULL OR featured_until >= CURRENT_DATE)
                     THEN 0
                     ELSE 1
-                END"
+                END'
             )
             ->latest()
             ->paginate($this->resolvePublicProductsPerPage($filters['per_page'] ?? null))

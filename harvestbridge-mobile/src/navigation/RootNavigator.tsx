@@ -1,4 +1,4 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as ExpoSplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
@@ -27,8 +27,10 @@ export function RootNavigator() {
 
   const navigationTheme = useMemo(
     () => ({
+      ...DefaultTheme,
       dark: theme.dark,
       colors: {
+        ...DefaultTheme.colors,
         primary: theme.colors.primary,
         background: theme.colors.background,
         card: theme.colors.surface,
@@ -36,7 +38,6 @@ export function RootNavigator() {
         border: theme.colors.outline,
         notification: theme.colors.error,
       },
-      fonts: theme.fonts,
     }),
     [theme],
   );

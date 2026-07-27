@@ -4,6 +4,7 @@ import { Button, Card, Chip, Text } from 'react-native-paper';
 
 import type { OrderDto, OrderStatus } from '@/api/order.api';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { designTokens } from '@/theme';
 
 interface OrderCardProps {
   order: OrderDto;
@@ -102,16 +103,23 @@ export function OrderCard({
   const actionButtonStyle = isNarrow ? { flexGrow: 1 } : undefined;
 
   return (
-    <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+    <Card
+      mode="outlined"
+      style={{
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.outlineVariant,
+        borderRadius: designTokens.radius.lg,
+      }}>
       <Card.Content>
         <View className="gap-md">
           <View className={`${isNarrow ? 'gap-md' : 'flex-row items-start gap-md'}`}>
             <View
-              className="items-center justify-center overflow-hidden rounded-md"
+              className="items-center justify-center overflow-hidden"
               style={{
                 width: isNarrow ? '100%' : 72,
                 height: isNarrow ? 144 : 72,
                 backgroundColor: theme.colors.surfaceVariant,
+                borderRadius: designTokens.radius.md,
               }}>
               {product?.image_url ? (
                 <Image
@@ -174,7 +182,7 @@ export function OrderCard({
                 mode="contained"
                 icon="map-marker-path"
                 style={actionButtonStyle}
-                contentStyle={{ minHeight: 44 }}
+                contentStyle={{ minHeight: designTokens.touch.min }}
                 onPress={onDirectionsPress}>
                 Directions
               </Button>
@@ -189,7 +197,7 @@ export function OrderCard({
                   loading={isUpdating}
                   disabled={isUpdating}
                   style={actionButtonStyle}
-                  contentStyle={{ minHeight: 44 }}
+                  contentStyle={{ minHeight: designTokens.touch.min }}
                   onPress={onAcceptPress}>
                   Accept
                 </Button>
@@ -198,7 +206,7 @@ export function OrderCard({
                   loading={isUpdating}
                   disabled={isUpdating}
                   style={actionButtonStyle}
-                  contentStyle={{ minHeight: 44 }}
+                  contentStyle={{ minHeight: designTokens.touch.min }}
                   onPress={onRejectPress}>
                   Reject
                 </Button>
@@ -210,7 +218,7 @@ export function OrderCard({
                 loading={isUpdating}
                 disabled={isUpdating}
                 style={actionButtonStyle}
-                contentStyle={{ minHeight: 44 }}
+                contentStyle={{ minHeight: designTokens.touch.min }}
                 onPress={onCompletePress}>
                 Mark Completed
               </Button>

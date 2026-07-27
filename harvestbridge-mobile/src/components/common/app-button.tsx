@@ -3,6 +3,7 @@ import { ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { designTokens } from '@/theme';
 
 interface AppButtonProps {
   label: string;
@@ -39,7 +40,7 @@ export function AppButton({
     outline: {
       backgroundColor: 'transparent',
       borderColor: theme.colors.outline,
-      textColor: theme.colors.onBackground,
+      textColor: theme.colors.primary,
     },
   }[mode];
 
@@ -51,7 +52,7 @@ export function AppButton({
 
   return (
     <TouchableOpacity
-      className={`min-h-button items-center justify-center rounded-md border px-lg ${
+      className={`items-center justify-center border ${
         disabled || loading ? 'opacity-55' : ''
       } ${modeClassName} ${className ?? ''}`.trim()}
       activeOpacity={0.86}
@@ -61,13 +62,18 @@ export function AppButton({
         {
           backgroundColor: palette.backgroundColor,
           borderColor: palette.borderColor,
+          borderRadius: designTokens.radius.md,
+          minHeight: designTokens.touch.large,
+          paddingHorizontal: designTokens.spacing.xl,
         },
         style,
       ]}>
       {loading ? (
         <ActivityIndicator color={palette.textColor} />
       ) : (
-        <Text variant="labelLarge" style={{ color: palette.textColor, fontWeight: '700' }}>
+        <Text
+          variant="labelLarge"
+          style={{ color: palette.textColor, fontWeight: '700', textAlign: 'center' }}>
           {label}
         </Text>
       )}

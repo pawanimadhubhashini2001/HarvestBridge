@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Farm extends Model
 {
     public const BUSINESS_STATUS_OPEN = 'open';
+
     public const BUSINESS_STATUS_CLOSED = 'closed';
+
     public const BUSINESS_STATUS_TEMPORARILY_CLOSED = 'temporarily_closed';
 
     protected $fillable = [
@@ -115,6 +117,27 @@ class Farm extends Model
         return $this->hasMany(HarvestListing::class)
             ->whereIn('status', HarvestListing::marketplaceVisibleStatuses())
             ->where('available_quantity', '>', 0);
+    }
+
+    public function activeCropCount(): int
+    {
+        if (! $this->relationLoaded('activeHarvestListings')) {
+            return 0;
+        }
+
+        return $this->activeHarvestListings
+            ->map(function (HarvestListing $listing) {
+                if ($listing->crop_id !== null) {
+                    return 'id:'.$listing->crop_id;
+                }
+
+                $cropName = strtolower(trim((string) $listing->crop_name));
+
+                return $cropName !== '' ? 'name:'.$cropName : null;
+            })
+            ->filter()
+            ->unique()
+            ->count();
     }
 
     public function predictions(): HasMany

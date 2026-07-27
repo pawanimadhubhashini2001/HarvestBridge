@@ -17,6 +17,7 @@ import { RecommendationsScreen } from '@/screens/recommendation/recommendations-
 import { ProfileScreen } from '@/screens/settings/profile-screen';
 import type { AppTabParamList } from '@/navigation/types';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { designTokens } from '@/theme';
 
 const Tab = createBottomTabNavigator<AppTabParamList>();
 const SEEN_ORDER_STATUS_UPDATES_STORAGE_KEY = 'orders-seen-status-updates';
@@ -116,25 +117,32 @@ export function BottomTabs() {
         tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.outline,
+          borderTopColor: theme.colors.outlineVariant,
           borderTopWidth: 1,
-          height: 72,
-          paddingTop: 8,
-          paddingBottom: 10,
+          height: 76,
+          paddingTop: designTokens.spacing.xs,
+          paddingBottom: designTokens.spacing.sm,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '700',
+          lineHeight: 16,
         },
         tabBarIcon: ({ color, size, focused }) => {
           const showOrderUpdateBadge = route.name === 'MyOrders' && orderUpdateCount > 0;
 
           return (
-            <View style={{ minWidth: 32, alignItems: 'center', justifyContent: 'center' }}>
+            <View
+              style={{
+                minWidth: designTokens.touch.min,
+                minHeight: 30,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
               <MaterialCommunityIcons
                 name={iconMap[route.name]}
                 color={color}
-                size={focused ? size + 2 : size}
+                size={focused ? 26 : Math.max(size, 23)}
               />
               {showOrderUpdateBadge ? (
                 <View
@@ -167,8 +175,9 @@ export function BottomTabs() {
           );
         },
         tabBarItemStyle: {
-          marginHorizontal: 2,
-          borderRadius: 12,
+          marginHorizontal: 3,
+          borderRadius: designTokens.radius.lg,
+          minHeight: designTokens.touch.min,
         },
         tabBarActiveBackgroundColor: theme.colors.primaryContainer,
       })}>

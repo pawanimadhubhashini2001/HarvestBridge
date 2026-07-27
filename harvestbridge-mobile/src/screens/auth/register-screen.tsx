@@ -13,6 +13,7 @@ import { Screen } from '@/components/layout/screen';
 import { useAuth } from '@/hooks/use-auth';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AuthScreenProps } from '@/navigation/types';
+import { designTokens } from '@/theme';
 import type { AppError } from '@/types/api';
 import type { UserRole } from '@/types/auth';
 
@@ -107,10 +108,18 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
   return (
     <Screen scrollable contentClassName="justify-center">
       <View
-        className="min-h-[540px] gap-lg rounded-lg border px-lg py-xl"
-        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+        className="gap-lg"
+        style={{
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.outlineVariant,
+          borderRadius: designTokens.radius.xl,
+          borderWidth: 1,
+          minHeight: 540,
+          paddingHorizontal: designTokens.spacing.xl,
+          paddingVertical: designTokens.spacing['2xl'],
+        }}>
         <View className="gap-sm">
-          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface }}>
+          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
             Create Account
           </Text>
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -166,11 +175,13 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                 <RadioButton.Group onValueChange={onChange} value={value}>
                   {roleOptions.map((option) => (
                     <Pressable
-                      className="mb-xs rounded-md border"
+                      className="mb-xs border"
                       key={option.value}
                       onPress={() => onChange(option.value)}
                       style={[
                         {
+                          borderRadius: designTokens.radius.md,
+                          minHeight: designTokens.touch.min,
                           borderColor:
                             value === option.value
                               ? theme.colors.primary

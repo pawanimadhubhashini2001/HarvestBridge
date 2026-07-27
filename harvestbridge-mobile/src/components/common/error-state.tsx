@@ -3,6 +3,7 @@ import { Chip, Text } from 'react-native-paper';
 
 import { AppButton } from '@/components/common/app-button';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import { designTokens } from '@/theme';
 
 interface ErrorStateProps {
   title?: string;
@@ -22,17 +23,21 @@ export function ErrorState({
   return (
     <View
       className="flex-1 items-center justify-center gap-md px-lg"
-      style={{ backgroundColor: theme.colors.background }}>
+      style={{ backgroundColor: theme.colors.background, padding: designTokens.spacing.xl }}>
       <Chip
         compact
-        style={{ backgroundColor: theme.colors.surfaceVariant }}
+        style={{ backgroundColor: theme.colors.errorContainer }}
         textStyle={{ color: theme.colors.error }}>
         Attention Needed
       </Chip>
-      <Text variant="headlineSmall" style={{ color: theme.colors.error, textAlign: 'center' }}>
+      <Text
+        variant="headlineSmall"
+        style={{ color: theme.colors.onSurface, fontWeight: '700', textAlign: 'center' }}>
         {title}
       </Text>
-      <Text variant="bodyMedium" style={{ color: theme.colors.onBackground, textAlign: 'center' }}>
+      <Text
+        variant="bodyMedium"
+        style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
         {message}
       </Text>
       {onAction ? <AppButton label={actionLabel} onPress={onAction} /> : null}

@@ -43,7 +43,7 @@ class FarmResource extends JsonResource
             'description' => $this->description,
             'active_crop_count' => $this->whenLoaded(
                 'activeHarvestListings',
-                fn () => $this->activeHarvestListings->pluck('crop_id')->filter()->unique()->count(),
+                fn () => $this->activeCropCount(),
                 0
             ),
             'owner' => $this->whenLoaded('user', fn () => [

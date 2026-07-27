@@ -285,30 +285,6 @@ export function StoreDetailsScreen({
           <View className="gap-md pb-md" style={{ paddingHorizontal: horizontalPadding }}>
             <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
               <View>
-                {store.store_cover_image_url ? (
-                  <Image
-                    source={{ uri: store.store_cover_image_url }}
-                    style={{
-                      width: '100%',
-                      height: isNarrow ? 180 : 220,
-                      borderTopLeftRadius: 12,
-                      borderTopRightRadius: 12,
-                      backgroundColor: theme.colors.surfaceVariant,
-                    }}
-                    contentFit="cover"
-                  />
-                ) : (
-                  <View
-                    className="items-center justify-center"
-                    style={{
-                      height: 180,
-                      backgroundColor: theme.colors.surfaceVariant,
-                    }}>
-                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                      No cover image available
-                    </Text>
-                  </View>
-                )}
 
                 <View className="gap-md p-md">
                   <View className={`${isNarrow ? 'gap-md' : 'flex-row gap-md'}`}>
