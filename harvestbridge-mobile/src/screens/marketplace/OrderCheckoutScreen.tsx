@@ -13,6 +13,10 @@ import {
 } from '@/api/donation.api';
 import { getMarketplaceProduct, getMarketplaceProductQueryKey } from '@/api/marketplace.api';
 import { createOrder, getMyOrdersQueryKey } from '@/api/order.api';
+import {
+  createPreOrderRequest,
+  getPreOrderRequestsQueryKey,
+} from '@/api/pre-order.api';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
@@ -56,6 +60,7 @@ export function OrderCheckoutScreen({
   const listingId = route.params?.listingId;
   const listingType = route.params?.listingType ?? 'product';
   const isProductOrder = listingType === 'product';
+  const isPreOrder = listingType === 'pre_order';
   const isDonationOrder = listingType === 'donation';
   const isCompostOrder = listingType === 'compost';
   const [quantity, setQuantity] = useState('');
@@ -75,7 +80,13 @@ export function OrderCheckoutScreen({
   const listingTitle =
     product?.crop_name
     ?? route.params?.title
-    ?? (isDonationOrder ? 'Farmer Donation' : isCompostOrder ? 'Compost Material' : 'Marketplace Product');
+    ?? (isDonationOrder
+      ? 'Farmer Donation'
+      : isCompostOrder
+        ? 'Compost Material'
+        : isPreOrder
+          ? 'Pre-order Product'
+          : 'Marketplace Product');
   const storeName = store?.store_name ?? route.params?.storeName ?? 'Store unavailable';
   const listingUnit = product?.unit ?? route.params?.unit ?? '';
   const listingAvailableQuantity = product?.available_quantity ?? route.params?.availableQuantity ?? '0';
@@ -123,8 +134,16 @@ export function OrderCheckoutScreen({
       return 'Visit date cannot be in the past.';
     }
 
+    if (isPreOrder && route.params?.expectedHarvestDate) {
+      const expectedHarvestDate = new Date(`${route.params.expectedHarvestDate}T00:00:00`);
+
+      if (!Number.isNaN(expectedHarvestDate.getTime()) && selectedDate < expectedHarvestDate) {
+        return 'Pickup date must be on or after the expected harvest date.';
+      }
+    }
+
     return null;
-  }, [isDonationOrder, visitDate]);
+  }, [isDonationOrder, isPreOrder, route.params?.expectedHarvestDate, visitDate]);
 
   const pickupTimeError = useMemo(() => {
     if (!isCompostOrder) {
@@ -168,6 +187,15 @@ export function OrderCheckoutScreen({
         });
       }
 
+      if (isPreOrder) {
+        return createPreOrderRequest({
+          pre_order_product_id: Number(listingId),
+          quantity: selectedQuantity,
+          preferred_pickup_date: visitDate,
+          notes: notes.trim() || undefined,
+        });
+      }
+
       return createOrder({
         harvest_listing_id: listingId,
         quantity: selectedQuantity,
@@ -189,6 +217,12 @@ export function OrderCheckoutScreen({
         invalidations.push(
           queryClient.invalidateQueries({ queryKey: getCompostRequestsQueryKey() }),
           queryClient.invalidateQueries({ queryKey: ['available-compost'] }),
+        );
+      } else if (isPreOrder) {
+        invalidations.push(
+          queryClient.invalidateQueries({ queryKey: getPreOrderRequestsQueryKey() }),
+          queryClient.invalidateQueries({ queryKey: ['available-pre-orders'] }),
+          queryClient.invalidateQueries({ queryKey: ['role-marketplace'] }),
         );
       } else {
         invalidations.push(
@@ -246,17 +280,22 @@ export function OrderCheckoutScreen({
   const hasFormError = Boolean(quantityError || visitDateError || pickupTimeError);
   const canSubmitForRole =
     (isProductOrder && user?.role === 'consumer')
+    || (isPreOrder && user?.role === 'consumer')
     || (isDonationOrder && user?.role === 'ngo')
     || (isCompostOrder && user?.role === 'compost_business');
   const orderHeading = isDonationOrder
     ? 'Request donation before visiting'
     : isCompostOrder
       ? 'Request compost pickup'
+      : isPreOrder
+        ? 'Pre-order before harvest'
       : 'Reserve before visiting';
   const submitLabel = isDonationOrder
     ? 'Send Donation Request'
     : isCompostOrder
       ? 'Send Compost Request'
+      : isPreOrder
+        ? 'Send Pre-order Request'
       : 'Send Order Request';
 
   return (
@@ -274,6 +313,7 @@ export function OrderCheckoutScreen({
             </View>
 
             <View className="flex-row flex-wrap gap-sm">
+              {isPreOrder ? <Chip compact>Pre-order</Chip> : null}
               <Chip compact>{listingAvailableQuantity} {listingUnit} available</Chip>
               {isProductOrder || Number(listingPricePerUnit) > 0 ? (
                 <Chip compact>{formatCurrency(listingPricePerUnit)} / {listingUnit}</Chip>
@@ -308,7 +348,7 @@ export function OrderCheckoutScreen({
             {!isDonationOrder ? (
               <View>
                 <TextInput
-                  label={isCompostOrder ? 'Pickup date' : 'Visit date'}
+                  label={isCompostOrder || isPreOrder ? 'Pickup date' : 'Visit date'}
                   value={visitDate}
                   onChangeText={setVisitDate}
                   placeholder="YYYY-MM-DD"

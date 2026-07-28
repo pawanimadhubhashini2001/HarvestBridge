@@ -38,7 +38,7 @@ export type AppStackParamList = {
     farmId?: string;
   };
   AddHarvestListing: {
-    listingType?: 'product' | 'donation' | 'compost';
+    listingType?: 'product' | 'donation' | 'compost' | 'pre_order';
     compostListingId?: number;
   } | undefined;
   AddFarm: undefined;
@@ -73,12 +73,13 @@ export type AppStackParamList = {
   };
   OrderCheckout: {
     listingId?: string;
-    listingType?: 'product' | 'donation' | 'compost';
+    listingType?: 'product' | 'donation' | 'compost' | 'pre_order';
     title?: string;
     storeName?: string;
     unit?: string;
     availableQuantity?: string;
     pricePerUnit?: string;
+    expectedHarvestDate?: string;
     description?: string;
   };
   FarmerOrders: undefined;

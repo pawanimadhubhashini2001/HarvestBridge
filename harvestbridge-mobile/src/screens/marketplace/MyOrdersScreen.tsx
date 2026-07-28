@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
-import { Button, Card, Chip, Snackbar, Text } from 'react-native-paper';
+import { Button, Card, Chip, SegmentedButtons, Snackbar, Text } from 'react-native-paper';
 
 import {
   getCompostRequests,
@@ -14,6 +14,11 @@ import {
   type DonationRequestDto,
 } from '@/api/donation.api';
 import { getMyOrders, getMyOrdersQueryKey, type OrderDto } from '@/api/order.api';
+import {
+  getPreOrderRequests,
+  getPreOrderRequestsQueryKey,
+  type PreOrderRequestDto,
+} from '@/api/pre-order.api';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
@@ -24,11 +29,13 @@ import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 type RoleOrderDto = OrderDto | DonationRequestDto | CompostRequestDto;
+type ConsumerOrdersTab = 'orders' | 'pre_orders';
 
 export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
   const theme = useAppTheme();
   const { user } = useAuth();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<ConsumerOrdersTab>('orders');
   const orderMode =
     user?.role === 'ngo'
       ? 'donations'
@@ -54,6 +61,11 @@ export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
       return getMyOrders();
     },
   });
+  const preOrderRequestsQuery = useQuery({
+    queryKey: getPreOrderRequestsQueryKey(),
+    queryFn: getPreOrderRequests,
+    enabled: user?.role === 'consumer',
+  });
 
   async function openDirections(url?: string | null) {
     if (!url) {
@@ -68,11 +80,18 @@ export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
     }
   }
 
-  if (ordersQuery.isLoading && !ordersQuery.data) {
+  const isConsumer = user?.role === 'consumer';
+  const isPreOrdersTab = isConsumer && activeTab === 'pre_orders';
+
+  if (!isPreOrdersTab && ordersQuery.isLoading && !ordersQuery.data) {
     return <LoadingState message="Loading your orders..." />;
   }
 
-  if (ordersQuery.isError && !ordersQuery.data) {
+  if (isPreOrdersTab && preOrderRequestsQuery.isLoading && !preOrderRequestsQuery.data) {
+    return <LoadingState message="Loading your pre-order requests..." />;
+  }
+
+  if (!isPreOrdersTab && ordersQuery.isError && !ordersQuery.data) {
     return (
       <ErrorState
         title="Unable to load orders"
@@ -85,15 +104,37 @@ export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
     );
   }
 
+  if (isPreOrdersTab && preOrderRequestsQuery.isError && !preOrderRequestsQuery.data) {
+    return (
+      <ErrorState
+        title="Unable to load pre-order requests"
+        message={getErrorMessage(preOrderRequestsQuery.error)}
+        actionLabel="Retry"
+        onAction={() => {
+          void preOrderRequestsQuery.refetch();
+        }}
+      />
+    );
+  }
+
   const orders: RoleOrderDto[] = ordersQuery.data ?? [];
+  const preOrderRequests = preOrderRequestsQuery.data ?? [];
   const copy = getOrdersCopy(orderMode);
+  const activeDescription = isPreOrdersTab
+    ? 'Track pre-order requests before harvest.'
+    : copy.description;
 
   return (
     <Screen
       scrollable
       contentClassName="gap-md"
-      refreshing={ordersQuery.isRefetching}
+      refreshing={isPreOrdersTab ? preOrderRequestsQuery.isRefetching : ordersQuery.isRefetching}
       onRefresh={() => {
+        if (isPreOrdersTab) {
+          void preOrderRequestsQuery.refetch();
+          return;
+        }
+
         void ordersQuery.refetch();
       }}>
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
@@ -102,14 +143,56 @@ export function MyOrdersScreen({ navigation }: AppTabScreenProps<'MyOrders'>) {
             <Text variant="headlineSmall" style={{ fontWeight: '700' }}>
               {copy.title}
             </Text>
+            {isConsumer ? (
+              <SegmentedButtons
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as ConsumerOrdersTab)}
+                buttons={[
+                  {
+                    value: 'orders',
+                    label: `Orders (${orders.length})`,
+                  },
+                  {
+                    value: 'pre_orders',
+                    label: `Pre-orders (${preOrderRequests.length})`,
+                  },
+                ]}
+              />
+            ) : null}
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              {copy.description}
+              {activeDescription}
             </Text>
           </View>
         </Card.Content>
       </Card>
 
-      {orders.length === 0 ? (
+      {isPreOrdersTab ? (
+        preOrderRequests.length === 0 ? (
+          <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+            <Card.Content>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                No pre-order requests yet.
+              </Text>
+            </Card.Content>
+          </Card>
+        ) : (
+          <View className="gap-md">
+            {preOrderRequests.map((request) => (
+              <PreOrderRequestCard
+                key={request.id}
+                request={request}
+                onDirectionsPress={() => {
+                  void openDirections(
+                    request.actions?.open_maps_action?.url
+                      ?? request.actions?.google_maps_url
+                      ?? null,
+                  );
+                }}
+              />
+            ))}
+          </View>
+        )
+      ) : orders.length === 0 ? (
         <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
           <Card.Content>
             <View className="gap-md">
@@ -331,6 +414,66 @@ function CompostRequestCard({
             {request.quantity ? <Chip compact>{request.quantity} {listing?.unit ?? ''}</Chip> : null}
             {listing?.store?.store_name ? <Chip compact>{listing.store.store_name}</Chip> : null}
           </View>
+
+          {request.notes?.trim() ? (
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+              Notes: {request.notes}
+            </Text>
+          ) : null}
+
+          {canShowDirections ? (
+            <Button
+              mode="contained"
+              icon="map-marker-path"
+              contentStyle={{ minHeight: 44 }}
+              onPress={onDirectionsPress}>
+              Directions
+            </Button>
+          ) : null}
+        </View>
+      </Card.Content>
+    </Card>
+  );
+}
+
+function PreOrderRequestCard({
+  request,
+  onDirectionsPress,
+}: {
+  request: PreOrderRequestDto;
+  onDirectionsPress: () => void;
+}) {
+  const theme = useAppTheme();
+  const product = request.product;
+  const canShowDirections =
+    request.status === 'ready'
+    && Boolean(request.actions?.open_maps_action?.url ?? request.actions?.google_maps_url);
+
+  return (
+    <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
+      <Card.Content>
+        <View className="gap-md">
+          <View className="flex-row items-start justify-between gap-sm">
+            <View className="flex-1 gap-xs">
+              <Text variant="titleMedium" style={{ fontWeight: '700' }}>
+                {product?.crop_name ?? 'Pre-order Product'}
+              </Text>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                Expected harvest: {formatDate(product?.expected_harvest_date)}
+              </Text>
+            </View>
+            <Chip compact>{formatStatus(request.status)}</Chip>
+          </View>
+
+          <View className="flex-row flex-wrap gap-sm">
+            <Chip compact>{request.quantity} {product?.unit ?? ''}</Chip>
+            <Chip compact>LKR {request.subtotal}</Chip>
+            {product?.store?.store_name ? <Chip compact>{product.store.store_name}</Chip> : null}
+          </View>
+
+          {request.status === 'accepted' ? (
+            <Chip compact>Farmer accepted. Waiting for harvest readiness</Chip>
+          ) : null}
 
           {request.notes?.trim() ? (
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>

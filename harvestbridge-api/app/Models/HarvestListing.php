@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\OrderItem;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -13,10 +12,15 @@ use Illuminate\Support\Carbon;
 class HarvestListing extends Model
 {
     public const STATUS_AVAILABLE = 'available';
+
     public const STATUS_HIDDEN = 'hidden';
+
     public const STATUS_RESERVED = 'reserved';
+
     public const STATUS_SOLD = 'sold';
+
     public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_DONATED = 'donated';
 
     protected $fillable = [

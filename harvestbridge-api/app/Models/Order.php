@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_ACCEPTED = 'accepted';
+
+    public const STATUS_REJECTED = 'rejected';
+
+    public const STATUS_COMPLETED = 'completed';
+
     protected $fillable = [
 
         'consumer_id',
@@ -22,7 +30,7 @@ class Order extends Model
 
         'delivery_date',
 
-        'notes'
+        'notes',
 
     ];
 
@@ -43,27 +51,29 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
     public function review()
     {
         return $this->hasOne(Review::class);
     }
+
     public function isPending()
     {
-        return $this->order_status === 'pending';
+        return $this->order_status === self::STATUS_PENDING;
     }
 
     public function isAccepted()
     {
-        return $this->order_status === 'accepted';
+        return $this->order_status === self::STATUS_ACCEPTED;
     }
 
     public function isCompleted()
     {
-        return $this->order_status === 'completed';
+        return $this->order_status === self::STATUS_COMPLETED;
     }
 
     public function isRejected()
     {
-        return $this->order_status === 'rejected';
+        return $this->order_status === self::STATUS_REJECTED;
     }
 }

@@ -14,6 +14,10 @@ import {
 } from '@/api/compost-listing.api';
 import { createDonation, getDonationsQueryKey } from '@/api/donation.api';
 import {
+  createPreOrderProduct,
+  getPreOrderProductsQueryKey,
+} from '@/api/pre-order.api';
+import {
   createHarvestListing,
   getHarvestListingsQueryKey,
   type HarvestListingImageAsset,
@@ -36,7 +40,7 @@ const optionalTextSchema = z
   .transform((value) => value ?? '');
 
 const MAX_PRODUCT_IMAGES = 5;
-const listingTypes = ['product', 'donation', 'compost'] as const;
+const listingTypes = ['product', 'pre_order', 'donation', 'compost'] as const;
 const productCategories = [
   'Vegetables',
   'Fruits',
@@ -73,6 +77,7 @@ const addListingSchema = z
   })
   .superRefine((values, context) => {
     const isProduct = values.listing_type === 'product';
+    const isPreOrder = values.listing_type === 'pre_order';
     const isDonation = values.listing_type === 'donation';
     const isCompost = values.listing_type === 'compost';
 
@@ -95,7 +100,7 @@ const addListingSchema = z
       });
     }
 
-    if (isProduct) {
+    if (isProduct || isPreOrder) {
       if (!values.price_per_unit.trim()) {
         context.addIssue({
           code: z.ZodIssueCode.custom,
@@ -129,6 +134,20 @@ const addListingSchema = z
         });
       }
 
+      if (isPreOrder && values.harvest_date.trim() && !Number.isNaN(new Date(values.harvest_date).getTime())) {
+        const harvestDate = new Date(`${values.harvest_date}T00:00:00`);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (harvestDate <= today) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['harvest_date'],
+            message: 'Expected harvest date must be after today.',
+          });
+        }
+      }
+
       if (
         values.available_until.trim()
         && Number.isNaN(new Date(values.available_until).getTime())
@@ -141,7 +160,8 @@ const addListingSchema = z
       }
 
       if (
-        values.harvest_date.trim()
+        isProduct
+        && values.harvest_date.trim()
         && values.available_until.trim()
         && new Date(values.available_until) < new Date(values.harvest_date)
       ) {
@@ -149,6 +169,20 @@ const addListingSchema = z
           code: z.ZodIssueCode.custom,
           path: ['available_until'],
           message: 'Available until must be on or after the harvest date.',
+        });
+      }
+
+      if (
+        isPreOrder
+        &&
+        values.harvest_date.trim()
+        && values.available_until.trim()
+        && new Date(values.available_until) > new Date(values.harvest_date)
+      ) {
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['available_until'],
+          message: 'Order deadline must be on or before the expected harvest date.',
         });
       }
     }
@@ -288,7 +322,9 @@ function getListingLabel(listingType: ListingType) {
     ? 'Donation'
     : listingType === 'compost'
       ? 'Compost'
-      : 'Product';
+      : listingType === 'pre_order'
+        ? 'Pre-order'
+        : 'Product';
 }
 
 export function AddHarvestListingScreen({
@@ -331,12 +367,16 @@ export function AddHarvestListingScreen({
   const listingLabel = getListingLabel(listingType);
   const showCategory = true;
   const showPrice = true;
-  const showQualityGrade = listingType === 'product';
+  const showQualityGrade = listingType === 'product' || listingType === 'pre_order';
   const showHarvestDate = listingType !== 'donation';
-  const showPickupLocation = listingType !== 'product';
-  const showImages = true;
+  const showPickupLocation = listingType !== 'product' && listingType !== 'pre_order';
+  const showImages = listingType !== 'pre_order';
   const dateFieldLabel =
-    listingType === 'compost' ? 'Available From' : 'Harvest Date';
+    listingType === 'compost'
+      ? 'Available From'
+      : listingType === 'pre_order'
+        ? 'Expected Harvest Date'
+        : 'Harvest Date';
 
   const storeQuery = useQuery({
     queryKey: getMyStoreQueryKey(),
@@ -356,6 +396,28 @@ export function AddHarvestListingScreen({
     mutationFn: async (values: AddListingSubmitValues) => {
       if (!storeQuery.data?.id) {
         throw new Error('Create your store profile before adding listings.');
+      }
+
+      if (values.listing_type === 'pre_order') {
+        return {
+          listingType: values.listing_type,
+          result: await createPreOrderProduct({
+            farm_id: storeQuery.data.id,
+            crop_name: values.crop_name.trim(),
+            crop_category: values.category,
+            expected_quantity: Number(values.quantity),
+            unit: values.unit.trim(),
+            price_per_unit: Number(values.price_per_unit),
+            ...(values.quality_grade.trim()
+              ? { quality_grade: values.quality_grade.trim() }
+              : {}),
+            expected_harvest_date: values.harvest_date.trim(),
+            ...(values.available_until.trim()
+              ? { order_deadline: values.available_until.trim() }
+              : {}),
+            ...(values.description.trim() ? { description: values.description.trim() } : {}),
+          }),
+        };
       }
 
       if (values.listing_type === 'donation') {
@@ -431,6 +493,7 @@ export function AddHarvestListingScreen({
         queryClient.invalidateQueries({ queryKey: getHarvestListingsQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getDonationsQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getCompostListingsQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getPreOrderProductsQueryKey() }),
         queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
         storeQuery.data?.id
           ? queryClient.invalidateQueries({
@@ -450,7 +513,7 @@ export function AddHarvestListingScreen({
     onError: (error: AppError) => {
       setFeedbackMessage(error.message);
 
-      const fieldNames: Array<keyof AddListingFormValues> = [
+      const fieldNames: (keyof AddListingFormValues)[] = [
         'listing_type',
         'category',
         'crop_name',
@@ -544,12 +607,20 @@ export function AddHarvestListingScreen({
       return 'Create a compost listing for agricultural waste collection. Price is not required.';
     }
 
+    if (listingType === 'pre_order') {
+      return 'Create a pre-order product so consumers can request produce before harvest.';
+    }
+
     return 'Create a marketplace product listing for your store.';
   }, [listingType]);
 
   const nameFieldLabel = 'Crop Name';
   const availableUntilLabel =
-    listingType === 'donation' ? 'Available Until' : 'Available Until (optional)';
+    listingType === 'donation'
+      ? 'Available Until'
+      : listingType === 'pre_order'
+        ? 'Order Deadline (optional)'
+        : 'Available Until (optional)';
   const priceLabel =
     listingType === 'product'
       ? 'Price Per Unit (LKR)'

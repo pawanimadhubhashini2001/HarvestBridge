@@ -75,6 +75,20 @@ function getMarketplaceCopy(mode: RoleMarketplaceMode) {
     };
   }
 
+  if (mode === 'pre_orders') {
+    return {
+      title: 'Pre-orders',
+      smartTitle: 'Pre-orders',
+      description:
+        'Request produce before harvest and track when the farmer accepts, marks ready, and completes it.',
+      resultLabel: 'pre-orders found',
+      emptyLabel: 'pre-orders',
+      loadingLabel: 'pre-order products',
+      searchPlaceholder: 'Search pre-orders...',
+      orderLabel: 'Pre-order',
+    };
+  }
+
   return {
     title: 'Marketplace',
     smartTitle: 'Smart Marketplace',
@@ -93,6 +107,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
   const { width } = useWindowDimensions();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const [consumerProductMode, setConsumerProductMode] = useState<'products' | 'pre_orders'>('products');
   const [searchDraft, setSearchDraft] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [selectedRadius, setSelectedRadius] = useState<RadiusOptionValue>(50);
@@ -108,7 +123,7 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
       ? 'donations'
       : user?.role === 'compost_business'
         ? 'compost'
-        : 'products';
+        : consumerProductMode;
   const isProductMarketplace = marketplaceMode === 'products';
   const marketplaceCopy = getMarketplaceCopy(marketplaceMode);
   const horizontalPadding = width < 390 ? 12 : 16;
@@ -343,6 +358,14 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
               ? () => {
                 navigation.navigate('OrderCheckout', {
                   listingId: String(item.id),
+                  listingType: marketplaceMode === 'pre_orders' ? 'pre_order' : 'product',
+                  title: item.crop ?? undefined,
+                  storeName: item.store?.store_name ?? item.farmer ?? undefined,
+                  unit: item.unit,
+                  availableQuantity: String(item.available_quantity),
+                  pricePerUnit: String(item.price_per_unit),
+                  expectedHarvestDate: item.harvest_date ?? undefined,
+                  description: item.description ?? undefined,
                 });
               }
               : marketplaceMode === 'donations' || marketplaceMode === 'compost'
@@ -470,6 +493,22 @@ export function MarketplaceScreen({ navigation }: AppTabScreenProps<'Marketplace
                 navigation.navigate('StoryFeed', storyFeedRouteParams);
               }}
             />
+
+            {user?.role === 'consumer' ? (
+              <View className="flex-row flex-wrap gap-sm">
+                {(['products', 'pre_orders'] as const).map((modeOption) => (
+                  <Chip
+                    key={modeOption}
+                    selected={consumerProductMode === modeOption}
+                    showSelectedCheck={false}
+                    onPress={() => {
+                      setConsumerProductMode(modeOption);
+                    }}>
+                    {modeOption === 'pre_orders' ? 'Pre-orders' : 'Products'}
+                  </Chip>
+                ))}
+              </View>
+            ) : null}
 
             <Searchbar
               placeholder={marketplaceCopy.searchPlaceholder}

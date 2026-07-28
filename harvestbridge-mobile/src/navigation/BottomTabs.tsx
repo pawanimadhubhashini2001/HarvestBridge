@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { getMyOrders, getMyOrdersQueryKey } from '@/api/order.api';
+import { getPreOrderRequests, getPreOrderRequestsQueryKey } from '@/api/pre-order.api';
 import { FarmsScreen } from '@/screens/farms/farms-screen';
 import { HomeScreen } from '@/screens/dashboard/HomeScreen';
 import { useAuth } from '@/hooks/use-auth';
@@ -21,6 +22,7 @@ import { designTokens } from '@/theme';
 
 const Tab = createBottomTabNavigator<AppTabParamList>();
 const SEEN_ORDER_STATUS_UPDATES_STORAGE_KEY = 'orders-seen-status-updates';
+const ACTIONED_PRE_ORDER_STATUSES = new Set(['accepted', 'rejected', 'ready']);
 
 export function BottomTabs() {
   const theme = useAppTheme();
@@ -39,19 +41,39 @@ export function BottomTabs() {
     refetchOnReconnect: true,
     staleTime: 5000,
   });
+  const consumerPreOrderRequestsQuery = useQuery({
+    queryKey: getPreOrderRequestsQueryKey(),
+    queryFn: getPreOrderRequests,
+    enabled: isConsumer,
+    refetchInterval: 10000,
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
+    staleTime: 5000,
+  });
 
   const actionedOrderStatusUpdates = useMemo(
     () =>
       consumerOrdersQuery.data
         ?.filter((order) => order.order_status === 'accepted' || order.order_status === 'rejected')
-        .map((order) => `${order.id}:${order.order_status}`) ?? [],
+        .map((order) => `order:${order.id}:${order.order_status}`) ?? [],
     [consumerOrdersQuery.data],
+  );
+  const actionedPreOrderStatusUpdates = useMemo(
+    () =>
+      consumerPreOrderRequestsQuery.data
+        ?.filter((request) => ACTIONED_PRE_ORDER_STATUSES.has(request.status))
+        .map((request) => `pre-order:${request.id}:${request.status}`) ?? [],
+    [consumerPreOrderRequestsQuery.data],
+  );
+  const actionedStatusUpdates = useMemo(
+    () => [...actionedOrderStatusUpdates, ...actionedPreOrderStatusUpdates],
+    [actionedOrderStatusUpdates, actionedPreOrderStatusUpdates],
   );
   const seenOrderStatusUpdateSet = useMemo(
     () => new Set(seenOrderStatusUpdates),
     [seenOrderStatusUpdates],
   );
-  const orderUpdateCount = actionedOrderStatusUpdates.filter(
+  const orderUpdateCount = actionedStatusUpdates.filter(
     (statusUpdateKey) => !seenOrderStatusUpdateSet.has(statusUpdateKey),
   ).length;
   const orderUpdateBadgeLabel = orderUpdateCount > 99 ? '99+' : String(orderUpdateCount);
@@ -82,12 +104,12 @@ export function BottomTabs() {
   }, [isConsumer]);
 
   const markOrderStatusUpdatesSeen = useCallback(() => {
-    if (actionedOrderStatusUpdates.length === 0) {
+    if (actionedStatusUpdates.length === 0) {
       return;
     }
 
     const nextSeenOrderStatusUpdates = Array.from(
-      new Set([...seenOrderStatusUpdates, ...actionedOrderStatusUpdates]),
+      new Set([...seenOrderStatusUpdates, ...actionedStatusUpdates]),
     );
 
     setSeenOrderStatusUpdates(nextSeenOrderStatusUpdates);
@@ -95,7 +117,7 @@ export function BottomTabs() {
       SEEN_ORDER_STATUS_UPDATES_STORAGE_KEY,
       JSON.stringify(nextSeenOrderStatusUpdates),
     );
-  }, [actionedOrderStatusUpdates, seenOrderStatusUpdates]);
+  }, [actionedStatusUpdates, seenOrderStatusUpdates]);
 
   const iconMap: Record<keyof AppTabParamList, keyof typeof MaterialCommunityIcons.glyphMap> = {
     Home: 'sprout',

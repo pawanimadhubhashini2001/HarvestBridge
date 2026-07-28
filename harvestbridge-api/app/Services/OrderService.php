@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\HarvestListing;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\HarvestListing;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
@@ -77,9 +77,9 @@ class OrderService
 
                 'payment_method' => null,
 
-                'payment_status' => 'pending',
+                'payment_status' => Order::STATUS_PENDING,
 
-                'order_status' => 'pending',
+                'order_status' => Order::STATUS_PENDING,
 
                 'delivery_address' => $data['delivery_address']
                     ?? $listing->farm?->address
@@ -88,7 +88,7 @@ class OrderService
 
                 'delivery_date' => $data['visit_date'],
 
-                'notes' => $data['notes'] ?? null
+                'notes' => $data['notes'] ?? null,
 
             ]);
 
@@ -102,23 +102,20 @@ class OrderService
 
                 'order_id' => $order->id,
 
-                'harvest_listing_id'
-                => $listing->id,
+                'harvest_listing_id' => $listing->id,
 
-                'quantity'
-                => $data['quantity'],
+                'quantity' => $data['quantity'],
 
-                'price'
-                => $listing->price_per_unit,
+                'price' => $listing->price_per_unit,
 
-                'subtotal'
-                => $subtotal
+                'subtotal' => $subtotal,
 
             ]);
 
             return $this->loadOrderDetails($order);
         });
     }
+
     public function getConsumerOrders(User $consumer)
     {
         return Order::query()
@@ -150,6 +147,7 @@ class OrderService
             ->latest()
             ->get();
     }
+
     public function updateStatus(
         Order $order,
         string $status,
@@ -180,20 +178,15 @@ class OrderService
             $current = $lockedOrder->order_status;
 
             $allowedTransitions = [
-
-                'pending' => [
-                    'accepted',
-                    'rejected'
+                Order::STATUS_PENDING => [
+                    Order::STATUS_ACCEPTED,
+                    Order::STATUS_REJECTED,
                 ],
-
-                'accepted' => [
-                    'completed'
+                Order::STATUS_ACCEPTED => [
+                    Order::STATUS_COMPLETED,
                 ],
-
-                'completed' => [],
-
-                'rejected' => []
-
+                Order::STATUS_COMPLETED => [],
+                Order::STATUS_REJECTED => [],
             ];
 
             if (
@@ -213,14 +206,17 @@ class OrderService
                     continue;
                 }
 
-                if ($current === 'pending' && $status === 'rejected') {
+                if ($current === Order::STATUS_PENDING && $status === Order::STATUS_REJECTED) {
                     $this->harvestListingService->releaseReservedStock(
                         $item->harvestListing,
                         (float) $item->quantity
                     );
                 }
 
-                if ($current === 'accepted' && $status === 'completed') {
+                if (
+                    $current === Order::STATUS_ACCEPTED
+                    && $status === Order::STATUS_COMPLETED
+                ) {
                     $this->harvestListingService->completeReservedStock(
                         $item->harvestListing,
                         (float) $item->quantity
@@ -229,7 +225,7 @@ class OrderService
             }
 
             $lockedOrder->update([
-                'order_status' => $status
+                'order_status' => $status,
             ]);
 
             return $this->loadOrderDetails($lockedOrder->fresh());

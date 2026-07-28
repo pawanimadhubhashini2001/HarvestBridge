@@ -9,6 +9,10 @@ import {
   type DonationMarketplaceQueryParams,
 } from '@/api/donation.api';
 import {
+  getAvailablePreOrders,
+  type PreOrderProductDto,
+} from '@/api/pre-order.api';
+import {
   getMarketplace,
   type MarketplaceImageDto,
   type MarketplaceIndexDto,
@@ -19,7 +23,7 @@ import {
   type MarketplaceStoreSummaryDto,
 } from '@/api/marketplace.api';
 
-export type RoleMarketplaceMode = 'products' | 'donations' | 'compost';
+export type RoleMarketplaceMode = 'products' | 'pre_orders' | 'donations' | 'compost';
 
 export interface RoleMarketplaceIndexDto {
   listings: MarketplaceListingDto[];
@@ -74,6 +78,35 @@ export async function getRoleMarketplace(
     };
   }
 
+  if (mode === 'pre_orders') {
+    const response = await getAvailablePreOrders();
+    const search = params.search?.trim().toLowerCase();
+    const products = search
+      ? response.filter((product) =>
+          [
+            product.crop_name,
+            product.crop_category,
+            product.description,
+            product.store?.store_name,
+            product.store?.district,
+          ]
+            .filter(Boolean)
+            .some((value) => String(value).toLowerCase().includes(search)),
+        )
+      : response;
+
+    return {
+      listings: products.map(mapPreOrderToMarketplaceListing),
+      pagination: {
+        meta: null,
+      },
+      used_radius: null,
+      results_found: products.length,
+      expanded: false,
+      source: mode,
+    };
+  }
+
   const compostParams: CompostMarketplaceQueryParams = {
     latitude: params.latitude,
     longitude: params.longitude,
@@ -91,6 +124,52 @@ export async function getRoleMarketplace(
     results_found: response.listings.length,
     expanded: false,
     source: mode,
+  };
+}
+
+function mapPreOrderToMarketplaceListing(product: PreOrderProductDto): MarketplaceListingDto {
+  const store = product.store?.id
+    ? {
+        id: product.store.id,
+        store_name: product.store.store_name ?? 'Farmer Store',
+        phone_number: product.store.phone_number ?? product.farmer?.phone ?? null,
+        business_status: product.store.business_status ?? null,
+        district: product.store.district ?? null,
+        address: product.store.address ?? null,
+      }
+    : null;
+
+  return {
+    id: product.id,
+    crop: product.crop_name ?? product.crop_category ?? 'Pre-order Product',
+    farm: store?.store_name ?? product.farmer?.name ?? null,
+    farmer: product.farmer?.name ?? null,
+    district: product.store?.district ?? null,
+    matched_field: null,
+    recommendation_reason: 'Available for pre-order before harvest',
+    distance: null,
+    distance_km: null,
+    quantity: product.expected_quantity,
+    total_quantity: product.expected_quantity,
+    available_quantity: product.available_quantity,
+    reserved_quantity: product.reserved_quantity,
+    sold_quantity: product.fulfilled_quantity,
+    unit: product.unit,
+    price_per_unit: product.price_per_unit,
+    quality_grade: product.quality_grade ?? null,
+    harvest_date: product.expected_harvest_date,
+    available_until: product.order_deadline,
+    status: product.status,
+    is_featured: false,
+    featured_until: null,
+    description: product.description ?? null,
+    created_at: product.created_at,
+    updated_at: product.updated_at ?? null,
+    images: [],
+    store,
+    coordinates: null,
+    google_maps_url: product.store?.google_maps_url ?? null,
+    open_maps_action: mapOpenMapsAction(product.store?.open_maps_action),
   };
 }
 

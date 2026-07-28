@@ -35,6 +35,12 @@ import {
   type HarvestListingDto,
 } from '@/api/harvest-listing.api';
 import {
+  deletePreOrderProduct,
+  getPreOrderProducts,
+  getPreOrderProductsQueryKey,
+  type PreOrderProductDto,
+} from '@/api/pre-order.api';
+import {
   getMyStore,
   getMyStoreQueryKey,
   getStoreDetailsQueryKey,
@@ -50,7 +56,7 @@ import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 import { formatStoreStatus } from '@/utils/store-status';
 
-type StoreListingSection = 'products' | 'donations' | 'compost';
+type StoreListingSection = 'products' | 'pre_orders' | 'donations' | 'compost';
 
 function SummaryTile({
   label,
@@ -271,12 +277,14 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<StoreListingSection>('products');
   const [selectedListing, setSelectedListing] = useState<HarvestListingDto | null>(null);
+  const [selectedPreOrderProduct, setSelectedPreOrderProduct] = useState<PreOrderProductDto | null>(null);
   const [selectedDonation, setSelectedDonation] = useState<DonationDto | null>(null);
   const [selectedCompostListing, setSelectedCompostListing] = useState<CompostListingDto | null>(null);
   const [galleryListingId, setGalleryListingId] = useState<number | null>(null);
   const [quantityDialogVisible, setQuantityDialogVisible] = useState(false);
   const [statusDialogVisible, setStatusDialogVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [deletePreOrderDialogVisible, setDeletePreOrderDialogVisible] = useState(false);
   const [deleteDonationDialogVisible, setDeleteDonationDialogVisible] = useState(false);
   const [deleteCompostDialogVisible, setDeleteCompostDialogVisible] = useState(false);
   const [availableQuantityInput, setAvailableQuantityInput] = useState('');
@@ -305,6 +313,12 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
   const compostListingsQuery = useQuery({
     queryKey: getCompostListingsQueryKey(),
     queryFn: getCompostListings,
+    enabled: Boolean(storeId),
+  });
+
+  const preOrderProductsQuery = useQuery({
+    queryKey: getPreOrderProductsQueryKey(),
+    queryFn: getPreOrderProducts,
     enabled: Boolean(storeId),
   });
 
@@ -360,6 +374,23 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
       setDeleteDialogVisible(false);
       setSelectedListing(null);
       setFeedbackMessage('Product deleted successfully.');
+    },
+    onError: (error) => {
+      setFeedbackMessage(getErrorMessage(error));
+    },
+  });
+
+  const deletePreOrderProductMutation = useMutation({
+    mutationFn: async (productId: number) => deletePreOrderProduct(productId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getPreOrderProductsQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: getMyStoreQueryKey() }),
+      ]);
+
+      setDeletePreOrderDialogVisible(false);
+      setSelectedPreOrderProduct(null);
+      setFeedbackMessage('Pre-order product deleted successfully.');
     },
     onError: (error) => {
       setFeedbackMessage(getErrorMessage(error));
@@ -438,6 +469,7 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
 
   const currentStoreStatus = store.business_status ?? 'open';
   const harvestListings = harvestListingsQuery.data ?? [];
+  const preOrderProducts = preOrderProductsQuery.data ?? [];
   const donations = donationsQuery.data ?? [];
   const compostListings = compostListingsQuery.data ?? [];
   const galleryListing =
@@ -508,6 +540,10 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
 
   function handleAddListing(listingType: 'product' | 'donation' | 'compost') {
     navigation.navigate('AddHarvestListing', { listingType });
+  }
+
+  function handleAddPreOrder() {
+    navigation.navigate('AddHarvestListing', { listingType: 'pre_order' });
   }
 
   return (
@@ -619,6 +655,12 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                   label: 'My Products',
                   count: harvestListings.length,
                   icon: 'basket-outline',
+                },
+                {
+                  key: 'pre_orders' as const,
+                  label: 'Pre-orders',
+                  count: preOrderProducts.length,
+                  icon: 'calendar-clock',
                 },
                 {
                   key: 'donations' as const,
@@ -740,6 +782,75 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
             )}
 
             {galleryListing ? <HarvestListingGalleryManager listing={galleryListing} /> : null}
+          </View>
+        </Card.Content>
+      </Card>
+      ) : null}
+
+      {activeSection === 'pre_orders' ? (
+      <Card
+        mode="outlined"
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
+      >
+        <Card.Content>
+          <View className="gap-md">
+            <View className="flex-row items-center justify-between gap-md">
+              <View className="flex-1 gap-xs">
+                <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                  Pre-order Products
+                </Text>
+              </View>
+              <Button
+                mode="contained-tonal"
+                compact
+                icon="plus"
+                onPress={handleAddPreOrder}
+              >
+                Add Pre-order
+              </Button>
+            </View>
+
+            {preOrderProductsQuery.isLoading && preOrderProducts.length === 0 ? (
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                Loading your pre-order products...
+              </Text>
+            ) : preOrderProductsQuery.isError && preOrderProducts.length === 0 ? (
+              <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
+                {getErrorMessage(preOrderProductsQuery.error)}
+              </Text>
+            ) : preOrderProducts.length === 0 ? (
+              <ListingEmptyState
+                title="No pre-order products yet"
+                message="Add produce before harvest so consumers can request early."
+                actionLabel="Add Pre-order"
+                onAction={handleAddPreOrder}
+              />
+            ) : (
+              <View className="gap-md">
+                {preOrderProducts.map((product) => (
+                  <StoreListingManagementCard
+                    key={product.id}
+                    title={product.crop_name ?? 'Pre-order Product'}
+                    subtitle={product.crop_category ?? 'Pre-order'}
+                    status={product.status_label ?? product.status}
+                    quantity={product.available_quantity}
+                    unit={product.unit}
+                    price={product.price_per_unit}
+                    dateLabel="Expected Harvest"
+                    dateValue={product.expected_harvest_date}
+                    description={product.description ?? null}
+                    busy={deletePreOrderProductMutation.isPending}
+                    onEdit={() => {
+                      setFeedbackMessage('Pre-order editing is prepared for the next form update.');
+                    }}
+                    onDelete={() => {
+                      setSelectedPreOrderProduct(product);
+                      setDeletePreOrderDialogVisible(true);
+                    }}
+                  />
+                ))}
+              </View>
+            )}
           </View>
         </Card.Content>
       </Card>
@@ -1044,6 +1155,25 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
           }
 
           void deleteHarvestListingMutation.mutateAsync(selectedListing.id);
+        }}
+      />
+
+      <ConfirmationDialog
+        visible={deletePreOrderDialogVisible}
+        title="Delete Pre-order Product?"
+        message="This will permanently remove the selected pre-order product if it has no requests."
+        confirmLabel="Delete Pre-order"
+        cancelLabel="Cancel"
+        loading={deletePreOrderProductMutation.isPending}
+        onCancel={() => {
+          setDeletePreOrderDialogVisible(false);
+        }}
+        onConfirm={() => {
+          if (!selectedPreOrderProduct) {
+            return;
+          }
+
+          void deletePreOrderProductMutation.mutateAsync(selectedPreOrderProduct.id);
         }}
       />
 

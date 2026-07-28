@@ -1,30 +1,32 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminModerationController;
 use App\Http\Controllers\AIAnalyticsController;
+use App\Http\Controllers\AIPredictionController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompostListingController;
 use App\Http\Controllers\CompostRequestController;
 use App\Http\Controllers\CropController;
+use App\Http\Controllers\DonationController;
+use App\Http\Controllers\DonationRequestController;
 use App\Http\Controllers\FarmController;
-use App\Http\Controllers\AdminModerationController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\HarvestListingController;
+use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PreOrderProductController;
+use App\Http\Controllers\PreOrderRequestController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RecommendationReportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\StoreReviewController;
 use App\Http\Controllers\StoreStoryController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HarvestListingController;
-use App\Http\Controllers\MarketplaceController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\DonationController;
-use App\Http\Controllers\DonationRequestController;
-use App\Http\Controllers\AIPredictionController;
 use App\Http\Controllers\WeatherController;
-use App\Http\Controllers\RecommendationReportController;
+use Illuminate\Support\Facades\Route;
 
 // =============================
 // Public Routes
@@ -145,6 +147,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/harvest-listings/{harvestListing}/images/{image}', [HarvestListingController::class, 'deleteImage']);
         Route::delete('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'destroy']);
 
+        Route::get('/pre-order-products', [PreOrderProductController::class, 'index']);
+        Route::post('/pre-order-products', [PreOrderProductController::class, 'store']);
+        Route::put('/pre-order-products/{preOrderProduct}', [PreOrderProductController::class, 'update']);
+        Route::delete('/pre-order-products/{preOrderProduct}', [PreOrderProductController::class, 'destroy']);
+        Route::get('/farmer/pre-order-requests', [PreOrderRequestController::class, 'farmerRequests']);
+        Route::patch('/pre-order-requests/{preOrderRequest}/status', [PreOrderRequestController::class, 'updateStatus']);
+
         Route::get(
             '/farmer/orders',
             [OrderController::class, 'farmerOrders']
@@ -235,7 +244,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/consumer/dashboard', function () {
             return response()->json([
-                'message' => 'Welcome Consumer'
+                'message' => 'Welcome Consumer',
             ]);
         });
         Route::post(
@@ -248,6 +257,9 @@ Route::middleware('auth:sanctum')->group(function () {
             [OrderController::class, 'index']
         );
         Route::get('/favorites', [FavoriteController::class, 'index']);
+        Route::get('/available-pre-orders', [PreOrderProductController::class, 'available']);
+        Route::post('/pre-order-requests', [PreOrderRequestController::class, 'store']);
+        Route::get('/pre-order-requests', [PreOrderRequestController::class, 'consumerRequests']);
         Route::post('/favorites/stores/{store}', [FavoriteController::class, 'favoriteStore']);
         Route::delete('/favorites/stores/{store}', [FavoriteController::class, 'unfavoriteStore']);
         Route::post('/favorites/products/{harvestListing}', [FavoriteController::class, 'favoriteProduct']);
@@ -267,7 +279,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/ngo/dashboard', function () {
             return response()->json([
-                'message' => 'Welcome NGO'
+                'message' => 'Welcome NGO',
             ]);
         });
         Route::get(
@@ -305,7 +317,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/compost/dashboard', function () {
             return response()->json([
-                'message' => 'Welcome Compost Business'
+                'message' => 'Welcome Compost Business',
             ]);
         });
 
