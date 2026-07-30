@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\CompostRequest;
+use App\Models\DonationRequest;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PredictionHistory;
 use App\Models\User;
 use App\Models\WeatherAlert;
@@ -10,6 +14,7 @@ use App\Notifications\SystemMessageNotification;
 use App\Notifications\WeatherAlertNotification;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class NotificationService
 {
@@ -65,6 +70,188 @@ class NotificationService
         );
     }
 
+    public function notifyOrderSubmitted(Order $order): void
+    {
+        $item = $order->items->first();
+        $listing = $item?->harvestListing;
+        $farmer = $listing?->farmer;
+
+        if (! $item instanceof OrderItem || ! $listing || ! $farmer) {
+            return;
+        }
+
+        $this->sendInApp(
+            $farmer,
+            'New Product Order',
+            sprintf(
+                '%s ordered %s %s of %s.',
+                $order->consumer?->name ?? 'A consumer',
+                $item->quantity,
+                $listing->unit,
+                $listing->crop?->name ?? $listing->crop_name ?? 'your product'
+            ),
+            $order->consumer,
+            [
+                'category' => 'normal_order_request',
+                'order_id' => $order->id,
+                'listing_id' => $listing->id,
+                'status' => $order->order_status,
+                'route' => 'FarmerOrders',
+            ]
+        );
+    }
+
+    public function notifyOrderStatusUpdated(Order $order, User $farmer): void
+    {
+        $consumer = $order->consumer;
+
+        if (! $consumer) {
+            return;
+        }
+
+        $item = $order->items->first();
+        $listing = $item?->harvestListing;
+        $statusLabel = $this->formatStatus($order->order_status);
+
+        $this->sendInApp(
+            $consumer,
+            "Order {$statusLabel}",
+            sprintf(
+                'Your order for %s has been %s.',
+                $listing?->crop?->name ?? $listing?->crop_name ?? 'a product',
+                $order->order_status
+            ),
+            $farmer,
+            [
+                'category' => 'normal_order_status',
+                'order_id' => $order->id,
+                'listing_id' => $listing?->id,
+                'status' => $order->order_status,
+                'route' => 'MyOrders',
+            ]
+        );
+    }
+
+    public function notifyDonationRequestSubmitted(DonationRequest $request): void
+    {
+        $donation = $request->donation;
+        $farmer = $donation?->farmer;
+
+        if (! $donation || ! $farmer) {
+            return;
+        }
+
+        $this->sendInApp(
+            $farmer,
+            'New Donation Request',
+            sprintf(
+                '%s requested %s %s of %s.',
+                $request->ngo?->name ?? 'An NGO',
+                $request->quantity,
+                $donation->unit,
+                $donation->crop_name ?? 'your donation'
+            ),
+            $request->ngo,
+            [
+                'category' => 'donation_request',
+                'donation_request_id' => $request->id,
+                'donation_id' => $donation->id,
+                'status' => $request->status,
+                'route' => 'FarmerOrders',
+            ]
+        );
+    }
+
+    public function notifyDonationRequestStatusUpdated(DonationRequest $request, User $farmer): void
+    {
+        $ngo = $request->ngo;
+        $donation = $request->donation;
+
+        if (! $ngo || ! $donation) {
+            return;
+        }
+
+        $statusLabel = $this->formatStatus($request->status);
+
+        $this->sendInApp(
+            $ngo,
+            "Donation Request {$statusLabel}",
+            sprintf(
+                'Your donation request for %s has been %s.',
+                $donation->crop_name ?? 'a donation',
+                $request->status
+            ),
+            $farmer,
+            [
+                'category' => 'donation_request_status',
+                'donation_request_id' => $request->id,
+                'donation_id' => $donation->id,
+                'status' => $request->status,
+                'route' => 'MyOrders',
+            ]
+        );
+    }
+
+    public function notifyCompostRequestSubmitted(CompostRequest $request): void
+    {
+        $listing = $request->compostListing;
+        $farmer = $listing?->farmer;
+
+        if (! $listing || ! $farmer) {
+            return;
+        }
+
+        $this->sendInApp(
+            $farmer,
+            'New Compost Request',
+            sprintf(
+                '%s requested %s %s of %s.',
+                $request->business?->name ?? 'A compost business',
+                $request->quantity,
+                $listing->unit,
+                $listing->waste_type ?? 'your compost listing'
+            ),
+            $request->business,
+            [
+                'category' => 'compost_request',
+                'compost_request_id' => $request->id,
+                'compost_listing_id' => $listing->id,
+                'status' => $request->status,
+                'route' => 'FarmerOrders',
+            ]
+        );
+    }
+
+    public function notifyCompostRequestStatusUpdated(CompostRequest $request, User $farmer): void
+    {
+        $business = $request->business;
+        $listing = $request->compostListing;
+
+        if (! $business || ! $listing) {
+            return;
+        }
+
+        $statusLabel = $this->formatStatus($request->status);
+
+        $this->sendInApp(
+            $business,
+            "Compost Request {$statusLabel}",
+            sprintf(
+                'Your compost request for %s has been %s.',
+                $listing->waste_type ?? 'a compost listing',
+                $request->status
+            ),
+            $farmer,
+            [
+                'category' => 'compost_request_status',
+                'compost_request_id' => $request->id,
+                'compost_listing_id' => $listing->id,
+                'status' => $request->status,
+                'route' => 'MyOrders',
+            ]
+        );
+    }
+
     public function notifications(User $user)
     {
         return $user->notifications()->latest()->paginate(15);
@@ -79,6 +266,14 @@ class NotificationService
         }
 
         return $notification;
+    }
+
+    private function formatStatus(string $status): string
+    {
+        return Str::of($status)
+            ->replace('_', ' ')
+            ->title()
+            ->toString();
     }
 
     public function dispatchWeatherAlerts(string $district, string $severity, string $message, array $weatherData = []): Collection

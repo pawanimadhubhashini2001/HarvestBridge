@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
+import { getNotifications, getNotificationsQueryKey } from '@/api/notification.api';
 import { getMyOrders, getMyOrdersQueryKey } from '@/api/order.api';
 import { getPreOrderRequests, getPreOrderRequestsQueryKey } from '@/api/pre-order.api';
 import { FarmsScreen } from '@/screens/farms/farms-screen';
@@ -51,6 +52,15 @@ export function BottomTabs() {
     refetchOnReconnect: true,
     staleTime: 5000,
   });
+  const notificationsQuery = useQuery({
+    queryKey: getNotificationsQueryKey(),
+    queryFn: getNotifications,
+    enabled: Boolean(user),
+    refetchInterval: 10000,
+    refetchOnMount: 'always',
+    refetchOnReconnect: true,
+    staleTime: 5000,
+  });
 
   const actionedOrderStatusUpdates = useMemo(
     () =>
@@ -78,6 +88,14 @@ export function BottomTabs() {
     (statusUpdateKey) => !seenOrderStatusUpdateSet.has(statusUpdateKey),
   ).length;
   const orderUpdateBadgeLabel = orderUpdateCount > 99 ? '99+' : String(orderUpdateCount);
+  const notifications = Array.isArray(notificationsQuery.data?.data)
+    ? notificationsQuery.data.data
+    : [];
+  const unreadNotificationCount = notifications.filter(
+    (notification) => notification.read_at === null,
+  ).length;
+  const notificationBadgeLabel =
+    unreadNotificationCount > 99 ? '99+' : String(unreadNotificationCount);
 
   useEffect(() => {
     if (!isConsumer) {
@@ -154,6 +172,8 @@ export function BottomTabs() {
         },
         tabBarIcon: ({ color, size, focused }) => {
           const showOrderUpdateBadge = route.name === 'MyOrders' && orderUpdateCount > 0;
+          const showNotificationBadge =
+            route.name === 'Notifications' && unreadNotificationCount > 0;
 
           return (
             <View
@@ -168,7 +188,7 @@ export function BottomTabs() {
                 color={color}
                 size={focused ? 26 : Math.max(size, 23)}
               />
-              {showOrderUpdateBadge ? (
+              {showOrderUpdateBadge || showNotificationBadge ? (
                 <View
                   style={{
                     position: 'absolute',
@@ -191,7 +211,7 @@ export function BottomTabs() {
                       fontWeight: '700',
                       lineHeight: 12,
                     }}>
-                    {orderUpdateBadgeLabel}
+                    {showNotificationBadge ? notificationBadgeLabel : orderUpdateBadgeLabel}
                   </Text>
                 </View>
               ) : null}

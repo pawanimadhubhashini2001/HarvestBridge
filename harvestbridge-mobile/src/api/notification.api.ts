@@ -9,6 +9,29 @@ export interface NotificationDto {
   created_at: string | null;
 }
 
+export type NotificationsPage = LaravelPaginatedData<NotificationDto>;
+
+type NotificationApiPage =
+  | NotificationsPage
+  | {
+      data: NotificationsPage;
+    };
+
+const emptyNotificationsPage: NotificationsPage = {
+  data: [],
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0,
+  from: null,
+  to: null,
+  first_page_url: '',
+  last_page_url: '',
+  next_page_url: null,
+  prev_page_url: null,
+  links: [],
+};
+
 export interface SendEmailNotificationPayload {
   user_id: number;
   subject: string;
@@ -38,12 +61,30 @@ export interface DispatchRecommendationAlertPayload {
   prediction_history_id: number;
 }
 
+export function getNotificationsQueryKey() {
+  return ['notifications'] as const;
+}
+
 export async function getNotifications() {
-  const response = await apiClient.get<ApiSuccessResponse<LaravelPaginatedData<NotificationDto>>>(
+  const response = await apiClient.get<ApiSuccessResponse<NotificationApiPage>>(
     '/notifications',
   );
 
-  return response.data.data;
+  const payload = response.data.data;
+
+  if (!payload) {
+    return emptyNotificationsPage;
+  }
+
+  if ('data' in payload && Array.isArray(payload.data)) {
+    return payload;
+  }
+
+  if ('data' in payload && payload.data && Array.isArray(payload.data.data)) {
+    return payload.data;
+  }
+
+  return emptyNotificationsPage;
 }
 
 export async function markNotificationAsRead(notificationId: string) {

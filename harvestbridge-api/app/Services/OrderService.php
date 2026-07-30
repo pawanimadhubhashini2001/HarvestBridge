@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 class OrderService
 {
     public function __construct(
-        protected HarvestListingService $harvestListingService
+        protected HarvestListingService $harvestListingService,
+        protected NotificationService $notificationService
     ) {}
 
     public function createOrder(
@@ -112,7 +113,11 @@ class OrderService
 
             ]);
 
-            return $this->loadOrderDetails($order);
+            $order = $this->loadOrderDetails($order);
+
+            $this->notificationService->notifyOrderSubmitted($order);
+
+            return $order;
         });
     }
 
@@ -228,7 +233,11 @@ class OrderService
                 'order_status' => $status,
             ]);
 
-            return $this->loadOrderDetails($lockedOrder->fresh());
+            $updatedOrder = $this->loadOrderDetails($lockedOrder->fresh());
+
+            $this->notificationService->notifyOrderStatusUpdated($updatedOrder, $farmer);
+
+            return $updatedOrder;
         });
     }
 
