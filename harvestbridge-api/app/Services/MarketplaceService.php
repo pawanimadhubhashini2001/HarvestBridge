@@ -4,21 +4,29 @@ namespace App\Services;
 
 use App\Models\Crop;
 use App\Models\HarvestListing;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class MarketplaceService
 {
     private const EARTH_RADIUS_KM = 6371;
+
     private const COUNTRYWIDE_SCOPE = 'countrywide';
+
     private const DEFAULT_PAGE_SIZE = 10;
+
     private const MAX_PAGE_SIZE = 50;
+
     private const DEFAULT_SORT = 'newest';
+
     private const DEFAULT_RADIUS_KM = 50;
+
     private const MAX_RADIUS_KM = 200;
+
     private const AUTO_EXPANSION_RADII = [50, 75, 100];
+
     private const ACTIVE_STATUSES = [
         HarvestListing::STATUS_AVAILABLE,
         HarvestListing::STATUS_RESERVED,
@@ -84,8 +92,7 @@ class MarketplaceService
     public function getMarketplaceProduct(
         HarvestListing $harvestListing,
         array $filters = []
-    ): HarvestListing
-    {
+    ): HarvestListing {
         $this->harvestListingService->expireElapsedListings();
         $this->harvestListingService->expireElapsedFeaturedListings();
 
@@ -178,7 +185,9 @@ class MarketplaceService
             $search = trim($search);
 
             $query->where(function ($nestedQuery) use ($search) {
-                $nestedQuery->where('description', 'ILIKE', '%'.$search.'%')
+                $nestedQuery->where('harvest_listings.description', 'ILIKE', '%'.$search.'%')
+                    ->orWhere('harvest_listings.crop_name', 'ILIKE', '%'.$search.'%')
+                    ->orWhere('harvest_listings.crop_category', 'ILIKE', '%'.$search.'%')
                     ->orWhereHas('crop', function ($cropQuery) use ($search) {
                         $cropQuery->where('name', 'ILIKE', '%'.$search.'%')
                             ->orWhere('category', 'ILIKE', '%'.$search.'%');
@@ -195,32 +204,35 @@ class MarketplaceService
             $this->applyMatchedFieldMetadata($query, $search);
         }
 
-        if (!empty($filters['crop_name'])) {
-            $query->whereHas('crop', function ($cropQuery) use ($filters) {
-                $cropQuery->where('name', 'ILIKE', '%'.$filters['crop_name'].'%');
+        if (! empty($filters['crop_name'])) {
+            $query->where(function ($nestedQuery) use ($filters) {
+                $nestedQuery->where('harvest_listings.crop_name', 'ILIKE', '%'.$filters['crop_name'].'%')
+                    ->orWhereHas('crop', function ($cropQuery) use ($filters) {
+                        $cropQuery->where('name', 'ILIKE', '%'.$filters['crop_name'].'%');
+                    });
             });
         }
 
-        if (!empty($filters['farmer_name'])) {
+        if (! empty($filters['farmer_name'])) {
             $query->whereHas('farmer', function ($farmerQuery) use ($filters) {
                 $farmerQuery->where('name', 'ILIKE', '%'.$filters['farmer_name'].'%');
             });
         }
 
-        if (!empty($filters['farm_name'])) {
+        if (! empty($filters['farm_name'])) {
             $query->whereHas('farm', function ($farmQuery) use ($filters) {
                 $farmQuery->where('farm_name', 'ILIKE', '%'.$filters['farm_name'].'%');
             });
         }
 
-        if (!empty($filters['description'])) {
-            $query->where('description', 'ILIKE', '%'.$filters['description'].'%');
+        if (! empty($filters['description'])) {
+            $query->where('harvest_listings.description', 'ILIKE', '%'.$filters['description'].'%');
         }
     }
 
     private function applyFilters($query, array $filters): void
     {
-        if (!empty($filters['district'])) {
+        if (! empty($filters['district'])) {
             $query->whereHas('farm', function ($farmQuery) use ($filters) {
                 $farmQuery->where('district', 'ILIKE', '%'.$filters['district'].'%');
             });
@@ -234,21 +246,21 @@ class MarketplaceService
             $query->where('price_per_unit', '<=', $filters['max_price']);
         }
 
-        if (!empty($filters['quality_grade'])) {
+        if (! empty($filters['quality_grade'])) {
             $query->where('quality_grade', 'ILIKE', $filters['quality_grade']);
         }
 
-        if (!empty($filters['crop_category'])) {
+        if (! empty($filters['crop_category'])) {
             $query->whereHas('crop', function ($cropQuery) use ($filters) {
                 $cropQuery->where('category', 'ILIKE', $filters['crop_category']);
             });
         }
 
-        if (!empty($filters['harvest_date'])) {
+        if (! empty($filters['harvest_date'])) {
             $query->whereDate('harvest_date', $filters['harvest_date']);
         }
 
-        if (!empty($filters['available_until'])) {
+        if (! empty($filters['available_until'])) {
             $query->whereDate('available_until', $filters['available_until']);
         }
 
@@ -268,7 +280,7 @@ class MarketplaceService
             }
         }
 
-        if (!empty($filters['unit'])) {
+        if (! empty($filters['unit'])) {
             $query->where('unit', 'ILIKE', $filters['unit']);
         }
     }
@@ -357,12 +369,12 @@ class MarketplaceService
             case 'featured':
             case 'featured_first':
                 $query->orderByRaw(
-                    "CASE
+                    'CASE
                         WHEN is_featured = true
                             AND (featured_until IS NULL OR featured_until >= CURRENT_DATE)
                         THEN 0
                         ELSE 1
-                    END"
+                    END'
                 )->latest();
                 break;
 
@@ -576,18 +588,21 @@ class MarketplaceService
                     WHERE crops.id = harvest_listings.crop_id
                         AND LOWER(crops.name) = ?
                 ) THEN 'crop_name'
+                WHEN LOWER(harvest_listings.crop_name) = ? THEN 'crop_name'
                 WHEN EXISTS (
                     SELECT 1
                     FROM crops
                     WHERE crops.id = harvest_listings.crop_id
                         AND crops.name ILIKE ?
                 ) THEN 'crop_name'
+                WHEN harvest_listings.crop_name ILIKE ? THEN 'crop_name'
                 WHEN EXISTS (
                     SELECT 1
                     FROM crops
                     WHERE crops.id = harvest_listings.crop_id
                         AND crops.category ILIKE ?
                 ) THEN 'category'
+                WHEN harvest_listings.crop_category ILIKE ? THEN 'category'
                 WHEN EXISTS (
                     SELECT 1
                     FROM users
@@ -611,6 +626,9 @@ class MarketplaceService
             END as matched_field",
             [
                 $exactSearch,
+                $exactSearch,
+                $partialSearch,
+                $partialSearch,
                 $partialSearch,
                 $partialSearch,
                 $partialSearch,
@@ -654,11 +672,11 @@ class MarketplaceService
         });
 
         $query->orderByRaw(
-            "CASE
+            'CASE
                 WHEN status = ? THEN 0
                 WHEN status = ? THEN 1
                 ELSE 2
-            END",
+            END',
             [
                 HarvestListing::STATUS_AVAILABLE,
                 HarvestListing::STATUS_RESERVED,

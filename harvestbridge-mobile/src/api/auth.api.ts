@@ -19,6 +19,11 @@ export interface ForgotPasswordPayload {
   email: string;
 }
 
+export interface OtpPayload {
+  email: string;
+  otp: string;
+}
+
 export async function login(payload: LoginPayload) {
   const response = await apiClient.post<ApiSuccessResponse<AuthSession>>('/login', payload);
 
@@ -27,6 +32,42 @@ export async function login(payload: LoginPayload) {
 
 export async function register(payload: RegisterPayload) {
   const response = await apiClient.post<ApiSuccessResponse<AuthSession>>('/register', payload);
+
+  return response.data.data;
+}
+
+export async function requestRegistrationOtp(payload: RegisterPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<null>>(
+    '/auth/register/request-otp',
+    payload,
+  );
+
+  return response.data;
+}
+
+export async function verifyRegistrationOtp(payload: OtpPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<AuthSession>>(
+    '/auth/register/verify-otp',
+    payload,
+  );
+
+  return response.data.data;
+}
+
+export async function requestLoginOtp(payload: LoginPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<null>>(
+    '/auth/login/request-otp',
+    payload,
+  );
+
+  return response.data;
+}
+
+export async function verifyLoginOtp(payload: OtpPayload) {
+  const response = await apiClient.post<ApiSuccessResponse<AuthSession>>(
+    '/auth/login/verify-otp',
+    payload,
+  );
 
   return response.data.data;
 }

@@ -6,7 +6,7 @@ import { Pressable, TouchableOpacity, View } from 'react-native';
 import { Divider, RadioButton, Text, TextInput as PaperTextInput } from 'react-native-paper';
 import { z } from 'zod';
 
-import { register } from '@/api/auth.api';
+import { requestRegistrationOtp, verifyRegistrationOtp } from '@/api/auth.api';
 import { AppButton } from '@/components/common/app-button';
 import { AppTextInput } from '@/components/form/app-text-input';
 import { Screen } from '@/components/layout/screen';
@@ -24,6 +24,7 @@ const registerSchema = z
     role: z.enum(['farmer', 'consumer', 'ngo', 'compost_business']),
     password: z.string().min(8, 'Password must be at least 8 characters.'),
     password_confirmation: z.string().min(1, 'Please confirm your password.'),
+    otp: z.string().optional(),
   })
   .refine((values) => values.password === values.password_confirmation, {
     message: 'Passwords do not match.',
@@ -51,10 +52,13 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isOtpStep, setIsOtpStep] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
     setError,
+    watch,
     formState: { errors, isValid },
   } = useForm<RegisterFormValues>({
     defaultValues: {
@@ -63,17 +67,26 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
       role: 'farmer',
       password: '',
       password_confirmation: '',
+      otp: '',
     },
     resolver: zodResolver(registerSchema),
     mode: 'onChange',
   });
 
-  const registerMutation = useMutation({
-    mutationFn: async (values: RegisterMutationVariables) => register(values),
-    onSuccess: async (session) => {
+  const requestOtpMutation = useMutation({
+    mutationFn: async (values: RegisterMutationVariables) =>
+      requestRegistrationOtp({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        role: values.role,
+        password: values.password,
+        password_confirmation: values.password_confirmation,
+      }),
+    onSuccess: (_, variables) => {
       setApiError(null);
-      setSuccessMessage('Account created successfully. Signing you in...');
-      await setSession(session);
+      setRegistrationEmail(variables.email.trim());
+      setIsOtpStep(true);
+      setSuccessMessage('OTP sent to your email. Enter the code to finish registration.');
     },
     onError: (error: AppError) => {
       setSuccessMessage(null);
@@ -99,11 +112,57 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
     },
   });
 
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (values: RegisterMutationVariables) =>
+      verifyRegistrationOtp({
+        email: registrationEmail ?? values.email.trim(),
+        otp: values.otp?.trim() ?? '',
+      }),
+    onSuccess: async (session) => {
+      setApiError(null);
+      setSuccessMessage('Account verified successfully. Signing you in...');
+      await setSession(session);
+    },
+    onError: (error: AppError) => {
+      setSuccessMessage(null);
+      setApiError(error.message);
+
+      const emailError = error.errors?.email;
+      const otpError = error.errors?.otp;
+
+      if (emailError) {
+        setError('email', {
+          message: Array.isArray(emailError) ? emailError[0] : emailError,
+        });
+      }
+
+      if (otpError) {
+        setError('otp', {
+          message: Array.isArray(otpError) ? otpError[0] : otpError,
+        });
+      }
+    },
+  });
+
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
     setSuccessMessage(null);
-    await registerMutation.mutateAsync(values);
+
+    if (isOtpStep) {
+      if (!values.otp?.trim()) {
+        setError('otp', { message: 'OTP is required.' });
+        return;
+      }
+
+      await verifyOtpMutation.mutateAsync(values);
+      return;
+    }
+
+    await requestOtpMutation.mutateAsync(values);
   });
+
+  const otpValue = watch('otp');
+  const isWorking = requestOtpMutation.isPending || verifyOtpMutation.isPending;
 
   return (
     <Screen scrollable contentClassName="justify-center">
@@ -123,7 +182,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
             Create Account
           </Text>
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-            Register with the role required by the current HarvestBridge API.
+            Create your account and verify your email with an OTP.
           </Text>
         </View>
 
@@ -141,6 +200,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                 autoCapitalize="words"
                 textContentType="name"
                 errorMessage={errors.name?.message}
+                disabled={isOtpStep || isWorking}
               />
             )}
           />
@@ -160,6 +220,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                 autoCorrect={false}
                 textContentType="emailAddress"
                 errorMessage={errors.email?.message}
+                disabled={isOtpStep || isWorking}
               />
             )}
           />
@@ -177,6 +238,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                     <Pressable
                       className="mb-xs border"
                       key={option.value}
+                      disabled={isOtpStep || isWorking}
                       onPress={() => onChange(option.value)}
                       style={[
                         {
@@ -193,7 +255,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                         },
                       ]}>
                       <View className="flex-row items-center px-sm py-xs">
-                        <RadioButton value={option.value} />
+                        <RadioButton value={option.value} disabled={isOtpStep || isWorking} />
                         <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
                           {option.label}
                         </Text>
@@ -225,6 +287,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                 autoCorrect={false}
                 textContentType="newPassword"
                 errorMessage={errors.password?.message}
+                disabled={isOtpStep || isWorking}
                 right={
                   <PaperTextInput.Icon
                     icon={isPasswordVisible ? 'eye-off' : 'eye'}
@@ -250,6 +313,7 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
                 autoCorrect={false}
                 textContentType="password"
                 errorMessage={errors.password_confirmation?.message}
+                disabled={isOtpStep || isWorking}
                 right={
                   <PaperTextInput.Icon
                     icon={isConfirmPasswordVisible ? 'eye-off' : 'eye'}
@@ -259,6 +323,28 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
               />
             )}
           />
+
+          {isOtpStep ? (
+            <Controller
+              control={control}
+              name="otp"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <AppTextInput
+                  containerClassName="gap-0"
+                  label="Email OTP"
+                  value={value ?? ''}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="number-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="oneTimeCode"
+                  errorMessage={errors.otp?.message}
+                  disabled={isWorking}
+                />
+              )}
+            />
+          ) : null}
 
           {apiError ? (
             <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
@@ -273,11 +359,25 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
           ) : null}
 
           <AppButton
-            label="Create Account"
+            label={isOtpStep ? 'Verify OTP & Register' : 'Register'}
             onPress={() => void onSubmit()}
-            loading={registerMutation.isPending}
-            disabled={!isValid || registerMutation.isPending}
+            loading={isWorking}
+            disabled={!isValid || isWorking || (isOtpStep && !otpValue?.trim())}
           />
+
+          {isOtpStep ? (
+            <AppButton
+              label="Edit Details"
+              mode="outline"
+              onPress={() => {
+                setIsOtpStep(false);
+                setRegistrationEmail(null);
+                setSuccessMessage(null);
+                setApiError(null);
+              }}
+              disabled={isWorking}
+            />
+          ) : null}
         </View>
 
         <Divider />

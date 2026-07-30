@@ -24,6 +24,7 @@ export type AuthStackParamList = {
 export type AppTabParamList = {
   Home: undefined;
   Marketplace: undefined;
+  ProductSearch: undefined;
   Favorites: undefined;
   MyOrders: undefined;
   Farms: undefined;
@@ -142,6 +143,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
             screens: {
               Home: '',
               Marketplace: 'marketplace',
+              ProductSearch: 'search',
               Favorites: 'favorites',
               MyOrders: 'orders',
               Farms: 'store',

@@ -14,6 +14,7 @@ import { NotificationsScreen } from '@/screens/notification/notifications-screen
 import { MarketplaceScreen } from '@/screens/marketplace/MarketplaceScreen';
 import { FavoritesScreen } from '@/screens/marketplace/FavoritesScreen';
 import { MyOrdersScreen } from '@/screens/marketplace/MyOrdersScreen';
+import { ProductSearchMapScreen } from '@/screens/marketplace/ProductSearchMapScreen';
 import { RecommendationsScreen } from '@/screens/recommendation/recommendations-screen';
 import { ProfileScreen } from '@/screens/settings/profile-screen';
 import type { AppTabParamList } from '@/navigation/types';
@@ -122,6 +123,7 @@ export function BottomTabs() {
   const iconMap: Record<keyof AppTabParamList, keyof typeof MaterialCommunityIcons.glyphMap> = {
     Home: 'sprout',
     Marketplace: 'storefront-outline',
+    ProductSearch: 'magnify',
     Favorites: 'heart-outline',
     MyOrders: 'clipboard-list-outline',
     Farms: 'storefront',
@@ -212,6 +214,13 @@ export function BottomTabs() {
               tabBarLabel: isNgo ? 'Donations' : isCompostBusiness ? 'Compost' : 'Market',
             }}
           />
+          {isConsumer ? (
+            <Tab.Screen
+              name="ProductSearch"
+              component={ProductSearchMapScreen}
+              options={{ tabBarLabel: 'Search' }}
+            />
+          ) : null}
           {isConsumer ? (
             <Tab.Screen name="Favorites" component={FavoritesScreen} />
           ) : null}

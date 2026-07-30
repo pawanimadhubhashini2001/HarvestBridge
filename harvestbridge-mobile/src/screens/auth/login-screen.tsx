@@ -6,7 +6,7 @@ import { Pressable, TouchableOpacity, View } from 'react-native';
 import { Checkbox, Divider, Text, TextInput as PaperTextInput } from 'react-native-paper';
 import { z } from 'zod';
 
-import { login } from '@/api/auth.api';
+import { requestLoginOtp, verifyLoginOtp } from '@/api/auth.api';
 import { AppButton } from '@/components/common/app-button';
 import { AppTextInput } from '@/components/form/app-text-input';
 import { Screen } from '@/components/layout/screen';
@@ -19,6 +19,7 @@ import type { AppError } from '@/types/api';
 const loginSchema = z.object({
   email: z.email('Enter a valid email address.'),
   password: z.string().min(1, 'Password is required.'),
+  otp: z.string().optional(),
   rememberMe: z.boolean(),
 });
 
@@ -29,35 +30,42 @@ type LoginMutationVariables = LoginFormValues;
 export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
   const theme = useAppTheme();
   const { setSession, authError, clearAuthError } = useAuth();
+  const [isOtpStep, setIsOtpStep] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [otpSentToEmail, setOtpSentToEmail] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
     setError,
+    watch,
     formState: { errors, isValid },
   } = useForm<LoginFormValues>({
     defaultValues: {
       email: '',
       password: '',
+      otp: '',
       rememberMe: true,
     },
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
   });
 
-  const loginMutation = useMutation({
+  const requestOtpMutation = useMutation({
     mutationFn: async (values: LoginMutationVariables) =>
-      login({
+      requestLoginOtp({
         email: values.email.trim(),
         password: values.password,
       }),
-    onSuccess: async (session, variables) => {
-      clearAuthError();
+    onSuccess: (_, variables) => {
       setApiError(null);
-      await setSession(session, { persist: variables.rememberMe });
+      setIsOtpStep(true);
+      setOtpSentToEmail(variables.email.trim());
+      setSuccessMessage('OTP sent to your email. Enter the code to finish login.');
     },
     onError: (error: AppError) => {
+      setSuccessMessage(null);
       setApiError(error.message);
 
       const emailError = error.errors?.email;
@@ -77,11 +85,64 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
     },
   });
 
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (values: LoginMutationVariables) =>
+      verifyLoginOtp({
+        email: values.email.trim(),
+        otp: values.otp?.trim() ?? '',
+      }),
+    onSuccess: async (session, variables) => {
+      clearAuthError();
+      setApiError(null);
+      setSuccessMessage(null);
+      await setSession(session, { persist: variables.rememberMe });
+    },
+    onError: (error: AppError) => {
+      setSuccessMessage(null);
+      setApiError(error.message);
+
+      const emailError = error.errors?.email;
+      const otpError = error.errors?.otp;
+
+      if (emailError) {
+        setError('email', {
+          message: Array.isArray(emailError) ? emailError[0] : emailError,
+        });
+      }
+
+      if (otpError) {
+        setError('otp', {
+          message: Array.isArray(otpError) ? otpError[0] : otpError,
+        });
+      }
+    },
+  });
+
   const onSubmit = handleSubmit(async (values) => {
     clearAuthError();
     setApiError(null);
-    await loginMutation.mutateAsync(values);
+    setSuccessMessage(null);
+
+    if (isOtpStep && !values.otp?.trim()) {
+      setError('otp', { message: 'OTP is required.' });
+      return;
+    }
+
+    if (isOtpStep) {
+      await verifyOtpMutation.mutateAsync(values);
+      return;
+    }
+
+    await requestOtpMutation.mutateAsync(values);
   });
+
+  const passwordValue = watch('password');
+  const otpValue = watch('otp');
+  const isSubmitting = requestOtpMutation.isPending || verifyOtpMutation.isPending;
+  const canSubmit =
+    isValid
+    && !isSubmitting
+    && (isOtpStep ? Boolean(otpValue?.trim()) : Boolean(passwordValue?.trim()));
 
   return (
     <Screen scrollable contentClassName="justify-center">
@@ -101,7 +162,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
             Welcome Back
           </Text>
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-            Sign in to continue to HarvestBridge.
+            Sign in with your password, then verify the OTP sent to your email.
           </Text>
         </View>
 
@@ -121,6 +182,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
                 autoCorrect={false}
                 textContentType="emailAddress"
                 errorMessage={errors.email?.message}
+                disabled={isOtpStep || isSubmitting}
               />
             )}
           />
@@ -140,6 +202,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
                 autoCorrect={false}
                 textContentType="password"
                 errorMessage={errors.password?.message}
+                disabled={isOtpStep || isSubmitting}
                 right={
                   <PaperTextInput.Icon
                     icon={isPasswordVisible ? 'eye-off' : 'eye'}
@@ -149,6 +212,28 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
               />
             )}
           />
+
+          {isOtpStep ? (
+            <Controller
+              control={control}
+              name="otp"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <AppTextInput
+                  containerClassName="gap-0"
+                  label="Email OTP"
+                  value={value ?? ''}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="number-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="oneTimeCode"
+                  errorMessage={errors.otp?.message}
+                  disabled={isSubmitting}
+                />
+              )}
+            />
+          ) : null}
 
           <Controller
             control={control}
@@ -174,22 +259,57 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
             </Text>
           ) : null}
 
+          {successMessage ? (
+            <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
+              {successMessage}
+            </Text>
+          ) : null}
+
           <AppButton
-            label="Login"
+            label={isOtpStep ? 'Verify OTP & Login' : 'Login'}
             onPress={() => void onSubmit()}
-            loading={loginMutation.isPending}
-            disabled={!isValid || loginMutation.isPending}
+            loading={isSubmitting}
+            disabled={!canSubmit}
           />
+
+          {isOtpStep ? (
+            <>
+              <AppButton
+                label="Resend OTP"
+                mode="outline"
+                onPress={() => void requestOtpMutation.mutateAsync({
+                  email: otpSentToEmail ?? '',
+                  password: passwordValue,
+                  rememberMe: true,
+                })}
+                loading={requestOtpMutation.isPending}
+                disabled={requestOtpMutation.isPending}
+              />
+              <AppButton
+                label="Edit Login Details"
+                mode="outline"
+                onPress={() => {
+                  setIsOtpStep(false);
+                  setOtpSentToEmail(null);
+                  setSuccessMessage(null);
+                  setApiError(null);
+                }}
+                disabled={isSubmitting}
+              />
+            </>
+          ) : null}
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.75}
-          onPress={() => navigation.navigate('ForgotPassword')}
-          className="self-start">
-          <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
-            Forgot Password?
-          </Text>
-        </TouchableOpacity>
+        {!isOtpStep ? (
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={() => navigation.navigate('ForgotPassword')}
+            className="self-start">
+            <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
+              Forgot Password?
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         <Divider />
 
