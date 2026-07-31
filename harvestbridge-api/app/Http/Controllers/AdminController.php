@@ -241,10 +241,14 @@ class AdminController extends Controller
         );
     }
 
-    public function analytics()
+    public function analytics(Request $request)
     {
+        $validated = $request->validate([
+            'period' => ['nullable', 'in:monthly,three_months,annual'],
+        ]);
+
         return ApiResponse::success(
-            $this->adminService->analytics(),
+            $this->adminService->analytics($validated['period'] ?? 'monthly'),
             'Admin analytics retrieved successfully.'
         );
     }

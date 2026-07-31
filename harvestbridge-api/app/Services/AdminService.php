@@ -11,6 +11,8 @@ use App\Models\FavoriteStore;
 use App\Models\Farm;
 use App\Models\HarvestListing;
 use App\Models\MarketPrice;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\PredictionHistory;
 use App\Models\Review;
 use App\Models\StoreStory;
@@ -193,11 +195,12 @@ class AdminService
         ]);
     }
 
-    public function analytics(): array
+    public function analytics(string $period = 'monthly'): array
     {
         return [
             'overview' => $this->overviewMetrics(),
             'charts' => $this->chartMetrics(),
+            'top_selling_analysis' => $this->topSellingAnalysis($period),
             'users_by_role' => User::query()
                 ->select('role', DB::raw('COUNT(*) as total'))
                 ->groupBy('role')
@@ -424,5 +427,134 @@ class AdminService
             ->values();
 
         return $farmers->all();
+    }
+
+    private function topSellingAnalysis(string $period): array
+    {
+        [$startDate, $endDate, $label] = $this->salesPeriodRange($period);
+        $cropExpression = "COALESCE(crops.name, harvest_listings.crop_name, 'Unknown Product')";
+        $categoryExpression = "COALESCE(crops.category, harvest_listings.crop_category, 'Uncategorized')";
+
+        $baseQuery = OrderItem::query()
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('harvest_listings', 'harvest_listings.id', '=', 'order_items.harvest_listing_id')
+            ->leftJoin('crops', 'crops.id', '=', 'harvest_listings.crop_id')
+            ->leftJoin('users as farmers', 'farmers.id', '=', 'harvest_listings.user_id')
+            ->leftJoin('farms', 'farms.id', '=', 'harvest_listings.farm_id')
+            ->whereIn('orders.order_status', [
+                Order::STATUS_ACCEPTED,
+                Order::STATUS_COMPLETED,
+            ])
+            ->whereBetween('orders.created_at', [$startDate, $endDate]);
+
+        $totals = (clone $baseQuery)
+            ->selectRaw('COUNT(DISTINCT orders.id) as orders_count')
+            ->selectRaw('SUM(order_items.quantity) as total_quantity')
+            ->selectRaw('SUM(order_items.subtotal) as total_revenue')
+            ->first();
+
+        $topCrops = (clone $baseQuery)
+            ->selectRaw("{$cropExpression} as crop_name")
+            ->selectRaw("{$categoryExpression} as crop_category")
+            ->selectRaw('COUNT(DISTINCT orders.id) as orders_count')
+            ->selectRaw('SUM(order_items.quantity) as total_quantity')
+            ->selectRaw('SUM(order_items.subtotal) as total_revenue')
+            ->groupByRaw("{$cropExpression}, {$categoryExpression}")
+            ->orderByDesc('total_quantity')
+            ->orderByDesc('total_revenue')
+            ->limit(10)
+            ->get()
+            ->map(fn ($item) => [
+                'crop_name' => $item->crop_name,
+                'crop_category' => $item->crop_category,
+                'orders_count' => (int) $item->orders_count,
+                'total_quantity' => round((float) $item->total_quantity, 2),
+                'total_revenue' => round((float) $item->total_revenue, 2),
+            ])
+            ->values()
+            ->all();
+
+        $farmerCropRows = (clone $baseQuery)
+            ->selectRaw('farmers.id as farmer_id')
+            ->selectRaw("COALESCE(farmers.name, 'Unknown Farmer') as farmer_name")
+            ->selectRaw('farms.farm_name as store_name')
+            ->selectRaw("{$cropExpression} as crop_name")
+            ->selectRaw('COUNT(DISTINCT orders.id) as orders_count')
+            ->selectRaw('SUM(order_items.quantity) as total_quantity')
+            ->selectRaw('SUM(order_items.subtotal) as total_revenue')
+            ->groupBy('farmers.id', 'farmers.name', 'farms.farm_name')
+            ->groupByRaw($cropExpression)
+            ->orderByDesc('total_quantity')
+            ->get();
+
+        $farmerBreakdown = $farmerCropRows
+            ->groupBy(fn ($item) => $item->farmer_id ?? 'unknown')
+            ->map(function ($rows) {
+                $sortedRows = $rows
+                    ->sortByDesc(fn ($row) => (float) $row->total_quantity)
+                    ->values();
+                $first = $sortedRows->first();
+                $crops = $sortedRows
+                    ->map(fn ($row) => [
+                        'crop_name' => $row->crop_name,
+                        'orders_count' => (int) $row->orders_count,
+                        'total_quantity' => round((float) $row->total_quantity, 2),
+                        'total_revenue' => round((float) $row->total_revenue, 2),
+                    ])
+                    ->values()
+                    ->all();
+
+                return [
+                    'farmer_id' => $first->farmer_id !== null ? (int) $first->farmer_id : null,
+                    'farmer_name' => $first->farmer_name,
+                    'store_name' => $first->store_name,
+                    'top_crop' => $crops[0]['crop_name'] ?? 'Unknown Product',
+                    'orders_count' => array_sum(array_column($crops, 'orders_count')),
+                    'total_quantity' => round(array_sum(array_column($crops, 'total_quantity')), 2),
+                    'total_revenue' => round(array_sum(array_column($crops, 'total_revenue')), 2),
+                    'crops' => array_slice($crops, 0, 5),
+                ];
+            })
+            ->sortByDesc('total_quantity')
+            ->take(10)
+            ->values()
+            ->all();
+
+        return [
+            'period' => $period,
+            'label' => $label,
+            'from' => $startDate->toDateString(),
+            'to' => $endDate->toDateString(),
+            'confirmed_statuses' => [
+                Order::STATUS_ACCEPTED,
+                Order::STATUS_COMPLETED,
+            ],
+            'orders_count' => (int) ($totals->orders_count ?? 0),
+            'total_quantity' => round((float) ($totals->total_quantity ?? 0), 2),
+            'total_revenue' => round((float) ($totals->total_revenue ?? 0), 2),
+            'top_crops' => $topCrops,
+            'farmer_breakdown' => $farmerBreakdown,
+        ];
+    }
+
+    private function salesPeriodRange(string $period): array
+    {
+        return match ($period) {
+            'three_months' => [
+                now()->subMonths(2)->startOfMonth(),
+                now()->endOfDay(),
+                'Last 3 months',
+            ],
+            'annual' => [
+                now()->startOfYear(),
+                now()->endOfYear(),
+                'This year',
+            ],
+            default => [
+                now()->startOfMonth(),
+                now()->endOfMonth(),
+                'This month',
+            ],
+        };
     }
 }

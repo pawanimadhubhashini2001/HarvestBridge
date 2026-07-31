@@ -1,0 +1,1 @@
+import{r as t,g as d}from"./index-CIYZB3Ue.js";function E(s,o=[]){const[n,u]=t.useState(null),[l,r]=t.useState(!0),[c,e]=t.useState(null),a=t.useCallback(async()=>{r(!0),e(null);try{u(await s())}catch(i){e(d(i))}finally{r(!1)}},o);return t.useEffect(()=>{a()},[a]),{data:n,loading:l,error:c,reload:a}}export{E as u};

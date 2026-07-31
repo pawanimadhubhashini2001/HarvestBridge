@@ -1,0 +1,6 @@
+import{c as t,j as e,d as a,B as s}from"./index-CIYZB3Ue.js";/**
+ * @license lucide-react v0.468.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const d=t("ShieldAlert",[["path",{d:"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",key:"oel41y"}],["path",{d:"M12 8v4",key:"1got3b"}],["path",{d:"M12 16h.01",key:"1drbdi"}]]);function r(){return e.jsx("main",{className:"grid min-h-screen place-items-center bg-[#f6f7f4] p-6",children:e.jsxs("section",{className:"w-full max-w-md rounded-lg border border-slate-200 bg-white p-7 text-center shadow-soft",children:[e.jsx("div",{className:"mx-auto grid h-12 w-12 place-items-center rounded-md bg-red-50 text-red-700",children:e.jsx(d,{size:24})}),e.jsx("h1",{className:"mt-5 text-2xl font-bold text-slate-950",children:"Unauthorized"}),e.jsx("p",{className:"mt-2 text-sm leading-6 text-slate-600",children:"This dashboard is only available to administrator accounts."}),e.jsx(a,{to:"/login",className:"mt-6 inline-flex",children:e.jsx(s,{children:"Back to Login"})})]})})}export{r as UnauthorizedPage};
