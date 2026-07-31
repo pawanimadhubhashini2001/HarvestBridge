@@ -20,16 +20,42 @@ export function AuthNavigator({ initialRouteName = 'Login' }: AuthNavigatorProps
     <Stack.Navigator
       initialRouteName={initialRouteName}
       screenOptions={{
-        headerShown: false,
         animation: 'slide_from_right',
+        headerStyle: {
+          backgroundColor: theme.colors.surface,
+        },
+        headerTintColor: theme.colors.primary,
+        headerTitleStyle: {
+          fontWeight: '700',
+          color: theme.colors.onSurface,
+        },
+        headerShadowVisible: true,
+        headerBackTitle: 'Back',
+        headerTitleAlign: 'left',
         contentStyle: {
           backgroundColor: theme.colors.background,
         },
       }}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen
+        name="Splash"
+        component={SplashScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreen}
+        options={{ title: 'Create Account' }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ title: 'Forgot Password' }}
+      />
     </Stack.Navigator>
   );
 }
