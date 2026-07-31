@@ -19,6 +19,10 @@ class StoreCompostRequestRequest extends FormRequest
 
             'required|exists:compost_listings,id',
 
+            'quantity' =>
+
+            'required|numeric|min:0.01',
+
             'pickup_date' =>
 
             'required|date',

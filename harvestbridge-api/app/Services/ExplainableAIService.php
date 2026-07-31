@@ -25,7 +25,7 @@ class ExplainableAIService
             ),
 
             'market' => $this->marketExplanation(
-                $input['Market_Demand']
+                $input['Market_Demand'] ?? null
             ),
 
         ];
@@ -55,8 +55,11 @@ class ExplainableAIService
     }
 
     private function marketExplanation(
-        string $demand
+        ?string $demand
     ): string {
+        if ($demand === null || trim($demand) === '') {
+            return 'Current market demand data was not provided for this recommendation.';
+        }
 
         return "Current market demand is {$demand}.";
     }

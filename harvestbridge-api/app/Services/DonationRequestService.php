@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\DB;
 
 class DonationRequestService
 {
+    public function __construct(
+        protected NotificationService $notificationService
+    ) {}
+
     public function create(
         User $ngo,
         array $data
@@ -33,6 +37,13 @@ class DonationRequestService
                 );
             }
 
+            if ((float) $data['quantity'] > (float) $donation->quantity) {
+
+                throw new Exception(
+                    'Requested quantity exceeds available donation quantity.'
+                );
+            }
+
             /*
             |--------------------------------------------------------------------------
             | Prevent Duplicate Request
@@ -44,11 +55,11 @@ class DonationRequestService
                     'donation_id',
                     $donation->id
                 )
-                ->where(
-                    'ngo_id',
-                    $ngo->id
-                )
-                ->exists()
+                    ->where(
+                        'ngo_id',
+                        $ngo->id
+                    )
+                    ->exists()
             ) {
 
                 throw new Exception(
@@ -68,9 +79,11 @@ class DonationRequestService
 
                 'ngo_id' => $ngo->id,
 
+                'quantity' => $data['quantity'],
+
                 'message' => $data['message'] ?? null,
 
-                'status' => 'pending'
+                'status' => 'pending',
 
             ]);
 
@@ -82,32 +95,41 @@ class DonationRequestService
 
             $donation->update([
 
-                'status' => 'requested'
+                'status' => 'requested',
 
             ]);
 
-            return $request->load([
-                'donation',
-                'ngo'
+            $request = $request->load([
+                'donation.farmer',
+                'donation.farmerStore',
+                'donation.harvestListing.farm',
+                'ngo',
             ]);
+
+            $this->notificationService->notifyDonationRequestSubmitted($request);
+
+            return $request;
         });
     }
 
     public function getNgoRequests(User $ngo)
     {
         return DonationRequest::with([
-            'donation.harvestListing',
-            'ngo'
+            'donation.farmer',
+            'donation.farmerStore',
+            'donation.harvestListing.farm',
+            'ngo',
         ])
             ->where('ngo_id', $ngo->id)
             ->latest()
             ->get();
     }
+
     public function getFarmerRequests(User $farmer)
     {
         return DonationRequest::with([
             'ngo',
-            'donation.harvestListing'
+            'donation.harvestListing',
         ])
             ->whereHas('donation', function ($query) use ($farmer) {
 
@@ -116,6 +138,7 @@ class DonationRequestService
             ->latest()
             ->get();
     }
+
     public function updateStatus(
         DonationRequest $request,
         string $status,
@@ -123,7 +146,7 @@ class DonationRequestService
     ) {
         if ($request->donation->farmer_id != $farmer->id) {
 
-            throw new \Exception(
+            throw new Exception(
                 'Unauthorized.'
             );
         }
@@ -140,7 +163,7 @@ class DonationRequestService
 
                 $request->update([
 
-                    'status' => 'approved'
+                    'status' => 'approved',
 
                 ]);
 
@@ -154,7 +177,7 @@ class DonationRequestService
 
                     'ngo_id' => $request->ngo_id,
 
-                    'status' => 'approved'
+                    'status' => 'approved',
 
                 ]);
 
@@ -182,7 +205,7 @@ class DonationRequestService
                     )
                     ->update([
 
-                        'status' => 'rejected'
+                        'status' => 'rejected',
 
                     ]);
             });
@@ -190,14 +213,18 @@ class DonationRequestService
 
             $request->update([
 
-                'status' => 'rejected'
+                'status' => 'rejected',
 
             ]);
         }
 
-        return $request->fresh()->load([
+        $updatedRequest = $request->fresh()->load([
             'ngo',
-            'donation'
+            'donation',
         ]);
+
+        $this->notificationService->notifyDonationRequestStatusUpdated($updatedRequest, $farmer);
+
+        return $updatedRequest;
     }
 }

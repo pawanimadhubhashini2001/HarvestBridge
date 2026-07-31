@@ -1,56 +1,47 @@
-# Welcome to your Expo app 👋
+# HarvestBridge Mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Lesson 101 configures the React Native project foundation for Laravel API integration.
 
-## Get started
+## Setup
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Create a local environment file from `.env.example`.
+2. Set `EXPO_PUBLIC_API_BASE_URL` to your Laravel API base URL, including `/api`.
+3. Install dependencies:
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+4. Start the app:
 
-### Other setup steps
+```bash
+npm run start
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Architecture
 
-## Learn more
+- `src/app`: Expo Router route files
+- `src/api`: Axios client and React Query client
+- `src/components`: shared UI primitives
+- `src/contexts`: auth session state
+- `src/screens`: feature screens
+- `src/services`: storage and session helpers
+- `src/theme`: app themes and tokens
+- `src/types`: shared TypeScript contracts
+- `src/utils`: environment and error helpers
 
-To learn more about developing your project with Expo, look at the following resources:
+## Backend Integration
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Configured endpoints:
 
-## Join the community
+- `GET /api/profile`
+- `POST /api/logout`
 
-Join our community of developers creating universal apps.
+Authentication storage uses `expo-secure-store` and sends Sanctum bearer tokens through Axios interceptors.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Tooling
+
+- `npm run lint`
+- `npm run lint:fix`
+- `npm run format`
+- `npm run format:check`

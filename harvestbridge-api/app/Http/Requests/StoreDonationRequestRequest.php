@@ -19,6 +19,10 @@ class StoreDonationRequestRequest extends FormRequest
 
                 'required|exists:donations,id',
 
+            'quantity' =>
+
+                'required|numeric|min:0.01',
+
             'message' =>
 
                 'nullable|string|max:1000'

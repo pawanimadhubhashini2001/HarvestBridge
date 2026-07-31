@@ -15,10 +15,10 @@ class PredictionRequest(BaseModel):
 
     Humidity_pct: float
 
-    pH: float
+    pH: float | None = None
 
     Previous_Crop: str | None = None
 
     Previous_Yield_t_ha: float | None = None
 
-    Market_Demand: str
+    Market_Demand: str | None = None

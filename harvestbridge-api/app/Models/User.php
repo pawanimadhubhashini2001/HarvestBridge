@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -57,11 +59,17 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function farms()
+    public function farms(): HasMany
     {
         return $this->hasMany(Farm::class);
     }
-    public function harvestListings()
+
+    public function store(): HasOne
+    {
+        return $this->hasOne(Farm::class)->latestOfMany();
+    }
+
+    public function harvestListings(): HasMany
     {
         return $this->hasMany(HarvestListing::class);
     }
@@ -100,6 +108,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'reviewed_user_id');
     }
+
+    public function storeReviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewer_id')
+            ->whereNotNull('farm_id');
+    }
     public function consumerOrders()
     {
         return $this->hasMany(
@@ -137,5 +151,15 @@ class User extends Authenticatable
     public function auditLogs()
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    public function favoriteStores(): HasMany
+    {
+        return $this->hasMany(FavoriteStore::class);
+    }
+
+    public function favoriteProducts(): HasMany
+    {
+        return $this->hasMany(FavoriteProduct::class);
     }
 }

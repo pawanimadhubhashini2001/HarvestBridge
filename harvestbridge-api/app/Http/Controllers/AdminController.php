@@ -10,13 +10,17 @@ use App\Http\Requests\AdminMarketPriceFilterRequest;
 use App\Http\Requests\AdminUpdateUserStatusRequest;
 use App\Http\Requests\AdminUserIndexRequest;
 use App\Http\Requests\StoreMarketPriceRequest;
+use App\Http\Requests\UpdateHarvestListingFeaturedRequest;
 use App\Http\Requests\UpdateMarketPriceRequest;
+use App\Http\Resources\AdminUserProfileResource;
 use App\Http\Resources\AdminUserResource;
 use App\Http\Resources\AuditLogResource;
 use App\Http\Resources\CropResource;
 use App\Http\Resources\FarmResource;
+use App\Http\Resources\HarvestListingResource;
 use App\Http\Resources\MarketPriceResource;
 use App\Http\Resources\WeatherAlertResource;
+use App\Models\HarvestListing;
 use App\Models\MarketPrice;
 use App\Models\User;
 use App\Services\AdminService;
@@ -48,6 +52,16 @@ class AdminController extends Controller
         );
     }
 
+    public function showUser(User $user)
+    {
+        return ApiResponse::success(
+            new AdminUserProfileResource(
+                $this->adminService->userProfile($user)
+            ),
+            'User profile retrieved successfully.'
+        );
+    }
+
     public function updateUserStatus(AdminUpdateUserStatusRequest $request, User $user)
     {
         $updatedUser = $this->adminService->updateUserStatus(
@@ -68,6 +82,46 @@ class AdminController extends Controller
         return ApiResponse::success(
             new AdminUserResource($updatedUser),
             'User status updated successfully.'
+        );
+    }
+
+    public function suspendUser(Request $request, User $user)
+    {
+        $updatedUser = $this->adminService->suspendUser($user);
+
+        $this->auditLogService->log(
+            'admin.user.suspended',
+            $request->user()->id,
+            $updatedUser,
+            [
+                'status' => $updatedUser->status,
+            ],
+            $request
+        );
+
+        return ApiResponse::success(
+            new AdminUserResource($updatedUser),
+            'User suspended successfully.'
+        );
+    }
+
+    public function activateUser(Request $request, User $user)
+    {
+        $updatedUser = $this->adminService->activateUser($user);
+
+        $this->auditLogService->log(
+            'admin.user.activated',
+            $request->user()->id,
+            $updatedUser,
+            [
+                'status' => $updatedUser->status,
+            ],
+            $request
+        );
+
+        return ApiResponse::success(
+            new AdminUserResource($updatedUser),
+            'User activated successfully.'
         );
     }
 
@@ -160,6 +214,30 @@ class AdminController extends Controller
         return ApiResponse::success(
             new MarketPriceResource($marketPrice),
             'Market price updated successfully.'
+        );
+    }
+
+    public function updateHarvestListingFeatured(
+        UpdateHarvestListingFeaturedRequest $request,
+        HarvestListing $harvestListing
+    )
+    {
+        $updatedListing = $this->adminService->updateHarvestListingFeatured(
+            $harvestListing,
+            $request->validated()
+        );
+
+        $this->auditLogService->log(
+            'admin.harvest-listing.featured.updated',
+            $request->user()->id,
+            $updatedListing,
+            $request->validated(),
+            $request
+        );
+
+        return ApiResponse::success(
+            new HarvestListingResource($updatedListing),
+            'Harvest listing featured status updated successfully.'
         );
     }
 

@@ -12,6 +12,8 @@ class CompostRequest extends Model
 
         'business_id',
 
+        'quantity',
+
         'pickup_date',
 
         'pickup_time',

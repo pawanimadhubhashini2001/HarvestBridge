@@ -12,6 +12,8 @@ class DonationRequest extends Model
 
         'ngo_id',
 
+        'quantity',
+
         'message',
 
         'status'

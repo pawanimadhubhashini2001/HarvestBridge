@@ -1,25 +1,32 @@
 <?php
 
-use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminModerationController;
 use App\Http\Controllers\AIAnalyticsController;
+use App\Http\Controllers\AIPredictionController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompostListingController;
 use App\Http\Controllers\CompostRequestController;
 use App\Http\Controllers\CropController;
-use App\Http\Controllers\FarmController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HarvestListingController;
-use App\Http\Controllers\MarketplaceController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationRequestController;
-use App\Http\Controllers\AIPredictionController;
-use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\FarmController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\HarvestListingController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PreOrderProductController;
+use App\Http\Controllers\PreOrderRequestController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecommendationReportController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\StoreReviewController;
+use App\Http\Controllers\StoreStoryController;
+use App\Http\Controllers\WeatherController;
+use Illuminate\Support\Facades\Route;
 
 // =============================
 // Public Routes
@@ -27,6 +34,11 @@ use App\Http\Controllers\RecommendationReportController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/register/request-otp', [AuthController::class, 'requestRegistrationOtp']);
+Route::post('/auth/register/verify-otp', [AuthController::class, 'verifyRegistrationOtp']);
+Route::post('/auth/login/request-otp', [AuthController::class, 'requestLoginOtp']);
+Route::post('/auth/login/verify-otp', [AuthController::class, 'verifyLoginOtp']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 // =============================
 // Protected Routes
@@ -54,7 +66,25 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/admin/users', [AdminController::class, 'users']);
+        Route::get('/admin/users/{user}', [AdminController::class, 'showUser']);
         Route::patch('/admin/users/{user}/status', [AdminController::class, 'updateUserStatus']);
+        Route::patch('/admin/users/{user}/suspend', [AdminController::class, 'suspendUser']);
+        Route::patch('/admin/users/{user}/activate', [AdminController::class, 'activateUser']);
+        Route::get('/admin/moderation/products', [AdminModerationController::class, 'products']);
+        Route::patch('/admin/moderation/products/{harvestListing}/hide', [AdminModerationController::class, 'hideProduct']);
+        Route::delete('/admin/moderation/products/{harvestListing}', [AdminModerationController::class, 'deleteProduct']);
+        Route::get('/admin/moderation/stores', [AdminModerationController::class, 'stores']);
+        Route::patch('/admin/moderation/stores/{store}/suspend', [AdminModerationController::class, 'suspendStore']);
+        Route::get('/admin/moderation/stories', [AdminModerationController::class, 'stories']);
+        Route::patch('/admin/moderation/stories/{story}/hide', [AdminModerationController::class, 'hideStory']);
+        Route::delete('/admin/moderation/stories/{story}', [AdminModerationController::class, 'deleteStory']);
+        Route::get('/admin/moderation/donations', [AdminModerationController::class, 'donations']);
+        Route::patch('/admin/moderation/donations/{donation}/hide', [AdminModerationController::class, 'hideDonation']);
+        Route::delete('/admin/moderation/donations/{donation}', [AdminModerationController::class, 'deleteDonation']);
+        Route::get('/admin/moderation/compost-listings', [AdminModerationController::class, 'compostListings']);
+        Route::patch('/admin/moderation/compost-listings/{compostListing}/hide', [AdminModerationController::class, 'hideCompostListing']);
+        Route::delete('/admin/moderation/compost-listings/{compostListing}', [AdminModerationController::class, 'deleteCompostListing']);
+        Route::get('/admin/moderation/reports', [AdminModerationController::class, 'reports']);
         Route::get('/admin/farms', [AdminController::class, 'farms']);
         Route::get('/admin/crops', [AdminController::class, 'crops']);
         Route::get('/admin/ai-logs', [AdminController::class, 'aiLogs']);
@@ -62,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/market-prices', [AdminController::class, 'marketPrices']);
         Route::post('/admin/market-prices', [AdminController::class, 'storeMarketPrice']);
         Route::put('/admin/market-prices/{marketPrice}', [AdminController::class, 'updateMarketPrice']);
+        Route::patch('/admin/harvest-listings/{harvestListing}/featured', [AdminController::class, 'updateHarvestListingFeatured']);
         Route::get('/admin/analytics', [AdminController::class, 'analytics']);
         Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs']);
         Route::get('/admin/reports', [AdminController::class, 'reports']);
@@ -85,21 +116,47 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:farmer')->group(function () {
 
-        Route::get('/farmer/dashboard', function () {
-            return response()->json([
-                'message' => 'Welcome Farmer'
-            ]);
-        });
+        Route::get('/farmer/dashboard', [AnalyticsController::class, 'farmerMarketplaceDashboard']);
 
         Route::get('/farms', [FarmController::class, 'index']);
         Route::post('/farms', [FarmController::class, 'store']);
         Route::put('/farms/{farm}', [FarmController::class, 'update']);
         Route::delete('/farms/{farm}', [FarmController::class, 'destroy']);
+        Route::get('/stores', [StoreController::class, 'index']);
+        Route::get('/stores/me', [StoreController::class, 'me']);
+        Route::get('/stores/{store}', [StoreController::class, 'show']);
+        Route::post('/stores', [StoreController::class, 'store']);
+        Route::put('/stores/{store}', [StoreController::class, 'update']);
+        Route::get('/stores/{store}/status', [StoreController::class, 'status']);
+        Route::put('/stores/{store}/status', [StoreController::class, 'updateStatus']);
+        Route::post('/stores/{store}/logo', [StoreController::class, 'uploadLogo']);
+        Route::post('/stores/{store}/cover', [StoreController::class, 'uploadCover']);
+        Route::delete('/stores/{store}/logo', [StoreController::class, 'deleteLogo']);
+        Route::delete('/stores/{store}/cover', [StoreController::class, 'deleteCover']);
+        Route::put('/stores/{store}/location', [StoreController::class, 'updateLocation']);
+        Route::delete('/stores/{store}', [StoreController::class, 'destroy']);
+        Route::get('/stores/me/stories', [StoreStoryController::class, 'index']);
+        Route::post('/stores/{store}/stories', [StoreStoryController::class, 'store']);
+        Route::put('/stores/{store}/stories/{story}', [StoreStoryController::class, 'update']);
+        Route::delete('/stores/{store}/stories/{story}', [StoreStoryController::class, 'destroy']);
 
         Route::get('/harvest-listings', [HarvestListingController::class, 'index']);
+        Route::get('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'show']);
         Route::post('/harvest-listings', [HarvestListingController::class, 'store']);
+        Route::post('/harvest-listings/{harvestListing}/images', [HarvestListingController::class, 'uploadImages']);
         Route::put('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'update']);
+        Route::patch('/harvest-listings/{harvestListing}/availability', [HarvestListingController::class, 'updateAvailability']);
+        Route::patch('/harvest-listings/{harvestListing}/images/order', [HarvestListingController::class, 'reorderImages']);
+        Route::patch('/harvest-listings/{harvestListing}/images/{image}/primary', [HarvestListingController::class, 'setPrimaryImage']);
+        Route::delete('/harvest-listings/{harvestListing}/images/{image}', [HarvestListingController::class, 'deleteImage']);
         Route::delete('/harvest-listings/{harvestListing}', [HarvestListingController::class, 'destroy']);
+
+        Route::get('/pre-order-products', [PreOrderProductController::class, 'index']);
+        Route::post('/pre-order-products', [PreOrderProductController::class, 'store']);
+        Route::put('/pre-order-products/{preOrderProduct}', [PreOrderProductController::class, 'update']);
+        Route::delete('/pre-order-products/{preOrderProduct}', [PreOrderProductController::class, 'destroy']);
+        Route::get('/farmer/pre-order-requests', [PreOrderRequestController::class, 'farmerRequests']);
+        Route::patch('/pre-order-requests/{preOrderRequest}/status', [PreOrderRequestController::class, 'updateStatus']);
 
         Route::get(
             '/farmer/orders',
@@ -191,7 +248,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/consumer/dashboard', function () {
             return response()->json([
-                'message' => 'Welcome Consumer'
+                'message' => 'Welcome Consumer',
             ]);
         });
         Route::post(
@@ -203,6 +260,17 @@ Route::middleware('auth:sanctum')->group(function () {
             '/orders',
             [OrderController::class, 'index']
         );
+        Route::get('/favorites', [FavoriteController::class, 'index']);
+        Route::get('/available-pre-orders', [PreOrderProductController::class, 'available']);
+        Route::post('/pre-order-requests', [PreOrderRequestController::class, 'store']);
+        Route::get('/pre-order-requests', [PreOrderRequestController::class, 'consumerRequests']);
+        Route::post('/favorites/stores/{store}', [FavoriteController::class, 'favoriteStore']);
+        Route::delete('/favorites/stores/{store}', [FavoriteController::class, 'unfavoriteStore']);
+        Route::post('/favorites/products/{harvestListing}', [FavoriteController::class, 'favoriteProduct']);
+        Route::delete('/favorites/products/{harvestListing}', [FavoriteController::class, 'unfavoriteProduct']);
+        Route::post('/stores/{store}/reviews', [StoreReviewController::class, 'store']);
+        Route::put('/stores/{store}/reviews/{review}', [StoreReviewController::class, 'update']);
+        Route::delete('/stores/{store}/reviews/{review}', [StoreReviewController::class, 'destroy']);
     });
 
     /*
@@ -215,7 +283,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/ngo/dashboard', function () {
             return response()->json([
-                'message' => 'Welcome NGO'
+                'message' => 'Welcome NGO',
             ]);
         });
         Route::get(
@@ -253,7 +321,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/compost/dashboard', function () {
             return response()->json([
-                'message' => 'Welcome Compost Business'
+                'message' => 'Welcome Compost Business',
             ]);
         });
 
@@ -289,13 +357,28 @@ Route::middleware('auth:sanctum')->group(function () {
     */
 
     Route::get('/crops', [CropController::class, 'index']);
+    Route::get('/crops/categories', [CropController::class, 'categories']);
+    Route::get('/stores/public/{store}', [StoreController::class, 'publicShow']);
+    Route::get('/stores/public/{store}/products', [StoreController::class, 'publicProducts']);
+    Route::get('/stores/public/{store}/reviews', [StoreReviewController::class, 'index']);
+    Route::get('/stores/{store}/location', [StoreController::class, 'location']);
+    Route::get('/stories/feed', [StoreStoryController::class, 'feed']);
+    Route::post('/stories/{story}/view', [StoreStoryController::class, 'recordView']);
     Route::get(
         '/marketplace',
         [MarketplaceController::class, 'index']
     );
+    Route::get(
+        '/marketplace/{harvestListing}',
+        [MarketplaceController::class, 'show']
+    );
     Route::post(
         '/ai/predict',
         [AIPredictionController::class, 'predict']
+    );
+    Route::post(
+        '/ai/disease-detect',
+        [AIPredictionController::class, 'detectDisease']
     );
     Route::get(
         '/ai/history',

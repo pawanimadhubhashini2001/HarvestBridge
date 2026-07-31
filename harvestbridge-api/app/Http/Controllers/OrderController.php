@@ -39,6 +39,18 @@ class OrderController extends Controller
 
         );
     }
+    public function index(Request $request)
+    {
+        $orders = $this->service->getConsumerOrders(
+            $request->user()
+        );
+
+        return ApiResponse::success(
+            OrderResource::collection($orders),
+            'Orders retrieved successfully'
+        );
+    }
+
     public function farmerOrders(Request $request)
     {
         $orders = $this->service->getFarmerOrders(

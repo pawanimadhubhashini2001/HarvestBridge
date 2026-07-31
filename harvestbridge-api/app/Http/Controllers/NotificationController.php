@@ -42,7 +42,7 @@ class NotificationController extends Controller
     {
         $recipient = User::findOrFail($request->validated('user_id'));
 
-        if (!$recipient->phone) {
+        if (! $recipient->phone) {
             return ApiResponse::error('Recipient does not have a phone number.', 422);
         }
 
@@ -107,10 +107,12 @@ class NotificationController extends Controller
 
     public function index(Request $request)
     {
+        $notificationCollection = DatabaseNotificationResource::collection(
+            $this->notificationService->notifications($request->user())
+        )->response()->getData(true);
+
         return ApiResponse::success(
-            DatabaseNotificationResource::collection(
-                $this->notificationService->notifications($request->user())
-            ),
+            $notificationCollection,
             'Notifications retrieved successfully.'
         );
     }
@@ -122,7 +124,7 @@ class NotificationController extends Controller
             $notification
         );
 
-        if (!$notificationModel) {
+        if (! $notificationModel) {
             return ApiResponse::error('Notification not found.', 404);
         }
 

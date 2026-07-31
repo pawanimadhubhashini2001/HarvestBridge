@@ -1,0 +1,12 @@
+declare namespace NodeJS {
+  interface ProcessEnv {
+    EXPO_PUBLIC_API_BASE_URL?: string;
+    EXPO_PUBLIC_API_TIMEOUT?: string;
+  }
+}
+
+declare module '*.css';
+declare module '*.module.css' {
+  const classes: Record<string, string>;
+  export default classes;
+}

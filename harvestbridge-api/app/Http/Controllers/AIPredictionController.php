@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
 use App\Http\Requests\CropPredictionRequest;
+use App\Http\Requests\DetectPlantDiseaseRequest;
 use App\Http\Requests\SmartPredictionRequest;
 use App\Http\Resources\MarketPriceResource;
 use App\Http\Resources\PredictionHistoryResource;
@@ -26,20 +27,25 @@ class AIPredictionController extends Controller
      */
     public function predict(CropPredictionRequest $request)
     {
-        $prediction = $this->service->predict(
-            $request->validated()
-        );
-
-        $this->service->savePrediction(
-            $request->user(),
-            $request->validated(),
-            $prediction,
-            $request
-        );
-
         return ApiResponse::success(
-            $prediction,
+            $this->service->recommendCrops(
+                $request->user(),
+                $request->validated(),
+                $request
+            ),
             'Crop recommendation generated successfully.'
+        );
+    }
+
+    public function detectDisease(DetectPlantDiseaseRequest $request)
+    {
+        return ApiResponse::success(
+            $this->service->detectPlantDisease(
+                $request->user(),
+                $request->file('image'),
+                $request
+            ),
+            'Plant disease prediction generated successfully.'
         );
     }
 
@@ -142,6 +148,8 @@ class AIPredictionController extends Controller
             'prediction' => [
 
                 'recommended_crop' => $prediction['recommended_crop'],
+
+                'recommended_crops' => $prediction['recommended_crops'] ?? [],
 
                 'confidence' => $prediction['confidence'],
 

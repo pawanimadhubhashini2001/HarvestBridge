@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateOrderStatusRequest extends FormRequest
 {
@@ -23,8 +25,12 @@ class UpdateOrderStatusRequest extends FormRequest
 
             'status' => [
                 'required',
-                'in:accepted,rejected,completed'
-            ]
+                Rule::in([
+                    Order::STATUS_ACCEPTED,
+                    Order::STATUS_REJECTED,
+                    Order::STATUS_COMPLETED,
+                ]),
+            ],
 
         ];
     }
