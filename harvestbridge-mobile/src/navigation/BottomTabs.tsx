@@ -9,6 +9,7 @@ import { getNotifications, getNotificationsQueryKey } from '@/api/notification.a
 import { getMyOrders, getMyOrdersQueryKey } from '@/api/order.api';
 import { getPreOrderRequests, getPreOrderRequestsQueryKey } from '@/api/pre-order.api';
 import { FarmsScreen } from '@/screens/farms/farms-screen';
+import { FarmerOrdersScreen } from '@/screens/farms/FarmerOrdersScreen';
 import { HomeScreen } from '@/screens/dashboard/HomeScreen';
 import { useAuth } from '@/hooks/use-auth';
 import { NotificationsScreen } from '@/screens/notification/notifications-screen';
@@ -145,6 +146,7 @@ export function BottomTabs() {
     Favorites: 'heart-outline',
     MyOrders: 'clipboard-list-outline',
     Farms: 'storefront',
+    FarmerOrders: 'clipboard-list-outline',
     Recommendations: 'chart-timeline-variant',
     Notifications: 'bell-ring-outline',
     Profile: 'account-circle-outline',
@@ -269,6 +271,11 @@ export function BottomTabs() {
             name="Farms"
             component={FarmsScreen}
             options={{ tabBarLabel: 'Store' }}
+          />
+          <Tab.Screen
+            name="FarmerOrders"
+            component={FarmerOrdersScreen}
+            options={{ tabBarLabel: 'Orders' }}
           />
           <Tab.Screen
             name="Recommendations"

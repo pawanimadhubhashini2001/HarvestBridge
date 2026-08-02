@@ -6,7 +6,6 @@ import type { AppStackParamList } from '@/navigation/types';
 import { AddHarvestListingScreen } from '@/screens/farms/AddHarvestListingScreen';
 import { AddFarmScreen } from '@/screens/farms/AddFarmScreen';
 import { EditFarmScreen } from '@/screens/farms/EditFarmScreen';
-import { FarmerOrdersScreen } from '@/screens/farms/FarmerOrdersScreen';
 import { FarmDetailsScreen } from '@/screens/farms/FarmDetailsScreen';
 import { MarketplaceProductDetailsScreen } from '@/screens/marketplace/MarketplaceProductDetailsScreen';
 import { OrderCheckoutScreen } from '@/screens/marketplace/OrderCheckoutScreen';
@@ -150,11 +149,6 @@ export function AppNavigator() {
         name="OrderCheckout"
         component={OrderCheckoutScreen}
         options={{ title: 'Order Now' }}
-      />
-      <Stack.Screen
-        name="FarmerOrders"
-        component={FarmerOrdersScreen}
-        options={{ title: 'Customer Orders' }}
       />
       <Stack.Screen
         name="StoreDetails"

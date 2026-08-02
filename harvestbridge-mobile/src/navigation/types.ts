@@ -28,6 +28,7 @@ export type AppTabParamList = {
   Favorites: undefined;
   MyOrders: undefined;
   Farms: undefined;
+  FarmerOrders: undefined;
   Recommendations: undefined;
   Notifications: undefined;
   Profile: undefined;
@@ -83,7 +84,6 @@ export type AppStackParamList = {
     expectedHarvestDate?: string;
     description?: string;
   };
-  FarmerOrders: undefined;
   StoreDetails: {
     storeId?: string;
     latitude?: number;
@@ -147,6 +147,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               Favorites: 'favorites',
               MyOrders: 'orders',
               Farms: 'store',
+              FarmerOrders: 'farmer/orders',
               Recommendations: 'recommendations',
               Notifications: 'notifications',
               Profile: 'profile',
@@ -154,7 +155,6 @@ export const linking: LinkingOptions<RootStackParamList> = {
           },
           MarketplaceProductDetails: 'marketplace/:listingId',
           OrderCheckout: 'marketplace/:listingId/order',
-          FarmerOrders: 'farmer/orders',
           StoreDetails: 'marketplace/store/:storeId',
           StoreReviews: 'marketplace/store/:storeId/reviews',
           WriteStoreReview: 'marketplace/store/:storeId/reviews/write',
