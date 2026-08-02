@@ -521,6 +521,19 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
       return;
     }
 
+    const availableQuantity = Number(selectedListing.available_quantity);
+
+    if (
+      status === 'available'
+      && (!Number.isFinite(availableQuantity) || availableQuantity <= 0)
+    ) {
+      setStatusDialogVisible(false);
+      setAvailableQuantityInput('');
+      setAvailableQuantityError('Add available stock greater than 0 to make this product visible.');
+      setQuantityDialogVisible(true);
+      return;
+    }
+
     await updateAvailabilityMutation.mutateAsync({
       listingId: selectedListing.id,
       payload: {

@@ -68,8 +68,17 @@ export function FarmerProductCard({
 }: FarmerProductCardProps) {
   const theme = useAppTheme();
   const primaryImageUrl = item.images[0]?.url ?? null;
+  const availableQuantity = Number(item.available_quantity);
   const reservedQuantity = Number(item.reserved_quantity);
+  const hasAvailableStock = Number.isFinite(availableQuantity) && availableQuantity > 0;
   const hasReservedStock = Number.isFinite(reservedQuantity) && reservedQuantity > 0;
+  const visibilityLabel = item.is_available
+    ? 'Visible to customers'
+    : !hasAvailableStock
+      ? 'Not visible - add stock'
+      : item.status === 'hidden'
+        ? 'Not visible - hidden'
+        : 'Not visible';
 
   return (
     <Card mode="outlined" style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}>
@@ -114,7 +123,7 @@ export function FarmerProductCard({
                 {hasReservedStock ? (
                   <Chip compact>{formatQuantity(item.reserved_quantity, item.unit)} reserved</Chip>
                 ) : null}
-                <Chip compact>{item.is_available ? 'Visible to customers' : 'Not visible'}</Chip>
+                <Chip compact>{visibilityLabel}</Chip>
               </View>
 
               <Text variant="titleMedium" style={{ color: theme.colors.primary, fontWeight: '700' }}>

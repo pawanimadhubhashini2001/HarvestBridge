@@ -10,6 +10,35 @@ export interface ReverseGeocodeResultLike {
   country?: string | null;
 }
 
+const SRI_LANKA_DISTRICTS = [
+  'Ampara',
+  'Anuradhapura',
+  'Badulla',
+  'Batticaloa',
+  'Colombo',
+  'Dambulla',
+  'Galle',
+  'Gampaha',
+  'Hambantota',
+  'Jaffna',
+  'Kalutara',
+  'Kandy',
+  'Kegalle',
+  'Kilinochchi',
+  'Kurunegala',
+  'Mannar',
+  'Matale',
+  'Matara',
+  'Monaragala',
+  'Mullaitivu',
+  'Nuwara Eliya',
+  'Polonnaruwa',
+  'Puttalam',
+  'Ratnapura',
+  'Trincomalee',
+  'Vavuniya',
+] as const;
+
 function uniqueNonEmpty(values: (string | null | undefined)[]) {
   return values
     .map((value) => value?.trim())
@@ -109,5 +138,25 @@ export function extractDistrictFromReverseGeocode(result?: ReverseGeocodeResultL
     result?.city?.trim() ||
     result?.region?.trim() ||
     ''
+  );
+}
+
+export function extractDistrictFromAddress(address?: string | null) {
+  const normalizedAddress = address?.trim().toLowerCase();
+
+  if (!normalizedAddress) {
+    return '';
+  }
+
+  return (
+    SRI_LANKA_DISTRICTS.find((district) => {
+      const normalizedDistrict = district.toLowerCase();
+      const pattern = new RegExp(
+        `(^|[^a-z])${normalizedDistrict.replace(/\s+/g, '\\s+')}([^a-z]|$)`,
+        'i',
+      );
+
+      return pattern.test(normalizedAddress);
+    }) ?? ''
   );
 }

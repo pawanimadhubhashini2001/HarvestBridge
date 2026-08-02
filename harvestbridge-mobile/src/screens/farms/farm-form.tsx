@@ -20,6 +20,7 @@ import { getStoreStatusLabel, STORE_STATUS_OPTIONS } from '@/utils/store-status'
 import {
   buildAddressFromReverseGeocode,
   buildGoogleMapsSearchUrl,
+  extractDistrictFromAddress,
   extractDistrictFromReverseGeocode,
   formatStoreCoordinates,
 } from '@/utils/store-location';
@@ -202,10 +203,12 @@ export function toFarmFormValues(store?: Partial<StoreDto>): FarmFormValues {
 }
 
 export function toFarmPayload(values: FarmFormValues): StorePayload {
+  const inferredDistrict = extractDistrictFromAddress(values.address);
+
   return {
     store_name: values.store_name.trim(),
     phone_number: values.phone_number.trim(),
-    district: values.district.trim(),
+    district: inferredDistrict || values.district.trim(),
     address: values.address.trim(),
     ...(values.latitude.trim() ? { latitude: Number(values.latitude) } : {}),
     ...(values.longitude.trim() ? { longitude: Number(values.longitude) } : {}),
@@ -547,7 +550,10 @@ export function FarmFormFields({
   longitudeLabel?: string;
   descriptionLabel?: string;
 }) {
-  const theme = useAppTheme();
+  const currentDistrict = useWatch({
+    control,
+    name: 'district',
+  });
 
   return (
     <>
@@ -612,7 +618,22 @@ export function FarmFormFields({
             containerClassName="gap-0"
             label="Address"
             value={value}
-            onChangeText={onChange}
+            onChangeText={(nextAddress) => {
+              onChange(nextAddress);
+
+              const inferredDistrict = extractDistrictFromAddress(nextAddress);
+
+              if (
+                inferredDistrict &&
+                inferredDistrict.toLowerCase() !== currentDistrict?.trim().toLowerCase()
+              ) {
+                setValue('district', inferredDistrict, {
+                  shouldDirty: true,
+                  shouldTouch: true,
+                  shouldValidate: true,
+                });
+              }
+            }}
             onBlur={onBlur}
             multiline
             numberOfLines={3}
