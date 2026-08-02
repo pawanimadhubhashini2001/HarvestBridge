@@ -169,7 +169,7 @@ export function AIRecommendationCard() {
                 label="New Recommendation"
                 style={{ flex: 1 }}
                 onPress={() => {
-                  navigation.navigate('AIRecommendationForm');
+                  navigation.navigate('MainTabs', { screen: 'Recommendations' });
                 }}
               />
             </View>
@@ -206,7 +206,7 @@ export function AIRecommendationCard() {
                 label="New Recommendation"
                 style={{ flex: 1 }}
                 onPress={() => {
-                  navigation.navigate('AIRecommendationForm');
+                  navigation.navigate('MainTabs', { screen: 'Recommendations' });
                 }}
               />
             </View>
@@ -277,7 +277,7 @@ export function AIRecommendationCard() {
               label="New Recommendation"
               style={{ flex: 1 }}
               onPress={() => {
-                navigation.navigate('AIRecommendationForm');
+                navigation.navigate('MainTabs', { screen: 'Recommendations' });
               }}
             />
           </View>

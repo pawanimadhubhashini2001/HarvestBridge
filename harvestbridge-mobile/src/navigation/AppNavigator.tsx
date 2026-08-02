@@ -15,7 +15,6 @@ import { PlantDiseaseDetectionScreen } from '@/screens/recommendation/PlantDisea
 import { PlantDiseasePredictionScreen } from '@/screens/recommendation/PlantDiseasePredictionScreen';
 import { WriteReviewScreen } from '@/screens/marketplace/WriteReviewScreen';
 import { RecommendationResultScreen } from '@/screens/recommendation/RecommendationResultScreen';
-import { SmartRecommendationScreen } from '@/screens/recommendation/SmartRecommendationScreen';
 import { SettingsScreen } from '@/screens/settings/settings-screen';
 import { PlaceholderScreen } from '@/screens/shared/placeholder-screen';
 import { CreateStoryScreen } from '@/screens/stories/CreateStoryScreen';
@@ -121,11 +120,6 @@ export function AppNavigator() {
         )}
       </Stack.Screen>
       <Stack.Screen
-        name="AIRecommendationForm"
-        component={SmartRecommendationScreen}
-        options={{ title: 'Smart Recommendation' }}
-      />
-      <Stack.Screen
         name="PlantDiseaseDetection"
         component={PlantDiseaseDetectionScreen}
         options={{ title: 'Plant Disease Detection' }}
@@ -165,17 +159,6 @@ export function AppNavigator() {
         component={WriteReviewScreen}
         options={{ title: 'Write Review' }}
       />
-      <Stack.Screen
-        name="WeatherDetails"
-        options={{ title: 'Weather Details' }}>
-        {() => (
-          <StackPlaceholder
-            title="Weather Details"
-            description="Prepared for detailed weather insights."
-            badgeLabel="Weather"
-          />
-        )}
-      </Stack.Screen>
       <Stack.Screen
         name="Settings"
         component={SettingsScreen}

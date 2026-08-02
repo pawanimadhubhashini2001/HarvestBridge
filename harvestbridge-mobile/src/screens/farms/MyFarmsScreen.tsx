@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { View } from 'react-native';
-import { Button, Card, Chip, Text } from 'react-native-paper';
+import { Button, Card, Chip, IconButton, Text } from 'react-native-paper';
 
 import { getMyStore, getMyStoreQueryKey } from '@/api/store.api';
 import { DeleteStoreButton } from '@/components/store/DeleteStoreButton';
@@ -18,6 +18,14 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
     queryKey: getMyStoreQueryKey(),
     queryFn: getMyStore,
   });
+  const handleBackPress = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate('Home');
+  };
 
   if (storeQuery.isLoading && storeQuery.data === undefined) {
     return <LoadingState message="Loading your store profile..." />;
@@ -39,6 +47,18 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
   if (!storeQuery.data) {
     return (
       <Screen scrollable contentClassName="gap-lg">
+        <View className="flex-row items-center gap-sm">
+          <IconButton
+            icon="arrow-left"
+            size={24}
+            onPress={handleBackPress}
+            accessibilityLabel="Go back"
+          />
+          <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+            Store
+          </Text>
+        </View>
+
         <View
           className="gap-sm rounded-lg border px-lg py-lg"
           style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
@@ -98,6 +118,18 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
       }}
       contentClassName="gap-lg"
     >
+      <View className="flex-row items-center gap-sm">
+        <IconButton
+          icon="arrow-left"
+          size={24}
+          onPress={handleBackPress}
+          accessibilityLabel="Go back"
+        />
+        <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+          Store
+        </Text>
+      </View>
+
       <View
         className="gap-sm rounded-lg border px-lg py-lg"
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}

@@ -1,13 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useWindowDimensions, View } from 'react-native';
 import { Card, Chip, Text } from 'react-native-paper';
 
 import { getCurrentWeather, getCurrentWeatherQueryKey } from '@/api/weather.api';
 import { AppButton } from '@/components/common/app-button';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import type { AppStackParamList } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 interface WeatherCardProps {
@@ -124,7 +121,6 @@ function WeatherMetric({ label, value }: WeatherMetricProps) {
 
 export function WeatherCard({ city }: WeatherCardProps) {
   const theme = useAppTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
   const weatherQuery = useQuery({
@@ -133,15 +129,10 @@ export function WeatherCard({ city }: WeatherCardProps) {
     enabled: Boolean(city),
   });
 
-  const handleOpenDetails = () => {
-    navigation.navigate('WeatherDetails', { district: city });
-  };
-
   if (!city) {
     return (
       <Card
         mode="outlined"
-        onPress={handleOpenDetails}
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Card.Content>
@@ -158,9 +149,6 @@ export function WeatherCard({ city }: WeatherCardProps) {
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
               Pull down on the dashboard to refresh once your profile location is set.
-            </Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              Tap to open Weather Details
             </Text>
           </View>
         </Card.Content>
@@ -203,7 +191,6 @@ export function WeatherCard({ city }: WeatherCardProps) {
     return (
       <Card
         mode="outlined"
-        onPress={handleOpenDetails}
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.error }}
       >
         <Card.Content>
@@ -245,7 +232,6 @@ export function WeatherCard({ city }: WeatherCardProps) {
   return (
     <Card
       mode="outlined"
-      onPress={handleOpenDetails}
       style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
     >
       <Card.Content>

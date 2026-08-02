@@ -61,7 +61,6 @@ export type AppStackParamList = {
   RecommendationDetails: {
     recommendationId?: string;
   };
-  AIRecommendationForm: undefined;
   PlantDiseaseDetection: undefined;
   PlantDiseasePrediction: undefined;
   RecommendationResult: {
@@ -98,9 +97,6 @@ export type AppStackParamList = {
     storeId?: string;
     storeName?: string;
     reviewId?: string;
-  };
-  WeatherDetails: {
-    district?: string;
   };
   Settings: undefined;
 };
@@ -148,7 +144,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               MyOrders: 'orders',
               Farms: 'store',
               FarmerOrders: 'farmer/orders',
-              Recommendations: 'recommendations',
+              Recommendations: 'recommendations/new',
               Notifications: 'notifications',
               Profile: 'profile',
             },
@@ -166,11 +162,9 @@ export const linking: LinkingOptions<RootStackParamList> = {
           CreateStory: 'store/stories/new',
           StoryFeed: 'marketplace/stories',
           RecommendationDetails: 'recommendations/:recommendationId',
-          AIRecommendationForm: 'recommendations/new',
           PlantDiseaseDetection: 'recommendations/disease-detect',
           PlantDiseasePrediction: 'recommendations/disease-result',
           RecommendationResult: 'recommendations/result',
-          WeatherDetails: 'weather/:district',
           Settings: 'settings',
         },
       },

@@ -29,7 +29,7 @@ import { AppTextInput } from '@/components/form/app-text-input';
 import { Screen } from '@/components/layout/screen';
 import { QUERY_STALE_TIME_MS } from '@/constants/app';
 import { useAppTheme } from '@/hooks/use-app-theme';
-import type { AppStackScreenProps } from '@/navigation/types';
+import type { AppTabScreenProps } from '@/navigation/types';
 import type { AppError } from '@/types/api';
 import { getErrorMessage } from '@/utils/errorHandler';
 
@@ -132,7 +132,7 @@ function toSmartPayload(
 
 export function SmartRecommendationScreen({
   navigation,
-}: AppStackScreenProps<'AIRecommendationForm'>) {
+}: AppTabScreenProps<'Recommendations'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();

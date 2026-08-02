@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { View } from 'react-native';
-import { Button, Card, Chip, SegmentedButtons, Snackbar, Text } from 'react-native-paper';
+import { Button, Card, Chip, IconButton, SegmentedButtons, Snackbar, Text } from 'react-native-paper';
 
 import {
   getFarmerOrders,
@@ -22,11 +22,12 @@ import { LoadingState } from '@/components/common/loading-state';
 import { Screen } from '@/components/layout/screen';
 import { OrderCard } from '@/components/marketplace/OrderCard';
 import { useAppTheme } from '@/hooks/use-app-theme';
+import type { AppTabScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 
 type OrdersTab = 'orders' | 'pre_orders';
 
-export function FarmerOrdersScreen() {
+export function FarmerOrdersScreen({ navigation }: AppTabScreenProps<'FarmerOrders'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -97,6 +98,15 @@ export function FarmerOrdersScreen() {
     preOrderStatusMutation.mutate({ requestId, status });
   }
 
+  const handleBackPress = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate('Home');
+  };
+
   const orders = ordersQuery.data ?? [];
   const preOrderRequests = preOrderRequestsQuery.data ?? [];
   const isOrdersTab = activeTab === 'orders';
@@ -131,6 +141,18 @@ export function FarmerOrdersScreen() {
       onRefresh={() => {
         void activeQuery.refetch();
       }}>
+      <View className="flex-row items-center gap-sm">
+        <IconButton
+          icon="arrow-left"
+          size={24}
+          onPress={handleBackPress}
+          accessibilityLabel="Go back"
+        />
+        <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+          Orders
+        </Text>
+      </View>
+
       <Card mode="contained" style={{ backgroundColor: theme.colors.surface }}>
         <Card.Content>
           <View className="gap-sm">

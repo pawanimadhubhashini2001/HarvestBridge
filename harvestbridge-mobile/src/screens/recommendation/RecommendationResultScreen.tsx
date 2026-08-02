@@ -483,7 +483,7 @@ export function RecommendationResultScreen({
         message="Create a new smart recommendation first so this screen has cached result data to display."
         actionLabel="Create Recommendation"
         onAction={() => {
-          navigation.replace('AIRecommendationForm');
+          navigation.navigate('MainTabs', { screen: 'Recommendations' });
         }}
       />
     );
@@ -640,7 +640,7 @@ export function RecommendationResultScreen({
             mode="text"
             textColor={theme.colors.primary}
             onPress={() => {
-              navigation.replace('AIRecommendationForm');
+              navigation.navigate('MainTabs', { screen: 'Recommendations' });
             }}
           >
             Create New Recommendation

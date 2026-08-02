@@ -1,10 +1,10 @@
 import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { View } from 'react-native';
-import { Chip, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 
 import { getStoryFeed, getStoryFeedQueryKey } from '@/api/story-feed.api';
-import { getMyStoreQueryKey } from '@/api/store.api';
+import { getMyStore, getMyStoreQueryKey } from '@/api/store.api';
 import { getCurrentWeatherQueryKey } from '@/api/weather.api';
 import { FarmSummaryCard } from '@/components/dashboard/FarmSummaryCard';
 import { WeatherCard } from '@/components/dashboard/WeatherCard';
@@ -44,9 +44,17 @@ export function HomeScreen({ navigation }: AppTabScreenProps<'Home'>) {
   const now = useMemo(() => new Date(), []);
   const greeting = getGreeting(now);
   const currentDateLabel = formatDate(now);
-  const weatherCity = user?.district?.trim() || undefined;
   const isFarmer = user?.role === 'farmer';
   const storeQueryKey = getMyStoreQueryKey();
+  const storeQuery = useQuery({
+    queryKey: storeQueryKey,
+    queryFn: getMyStore,
+    enabled: isFarmer,
+  });
+  const weatherCity =
+    user?.district?.trim()
+    || storeQuery.data?.district?.trim()
+    || undefined;
   const weatherQueryKey = getCurrentWeatherQueryKey(weatherCity);
   const storyFeedQueryKey = getStoryFeedQueryKey({
     sort: 'newest',

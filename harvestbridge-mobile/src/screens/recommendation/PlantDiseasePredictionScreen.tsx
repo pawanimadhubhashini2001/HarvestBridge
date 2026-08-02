@@ -210,7 +210,7 @@ export function PlantDiseasePredictionScreen({
             <Button
               mode="outlined"
               onPress={() => {
-                navigation.navigate('AIRecommendationForm');
+                navigation.navigate('MainTabs', { screen: 'Recommendations' });
               }}
             >
               Open Smart Recommendation
