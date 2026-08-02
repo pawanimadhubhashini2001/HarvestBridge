@@ -10,7 +10,6 @@ export type ExplanationSectionId =
   | 'soil'
   | 'weather'
   | 'season'
-  | 'market'
   | 'overall';
 
 type ExplanationCardProps = {
@@ -18,7 +17,6 @@ type ExplanationCardProps = {
   recommendedCrop: string;
   soilType: string;
   season: string;
-  marketDemand: string;
   district: string;
   weatherSummary: string;
   confidence: number;
@@ -57,13 +55,12 @@ function normalizeExplanation(
   }
 
   if (Array.isArray(explanation)) {
-    const [soil, weather, season, market] = explanation;
+    const [soil, weather, season] = explanation;
 
     return {
       soil,
       weather,
       season,
-      market,
     } as Partial<Record<ExplanationSectionId, string>>;
   }
 
@@ -73,7 +70,6 @@ function normalizeExplanation(
     soil: record.soil,
     weather: record.weather,
     season: record.season,
-    market: record.market,
   } satisfies Partial<Record<ExplanationSectionId, string>>;
 }
 
@@ -82,7 +78,6 @@ function buildOverallRecommendation({
   district,
   weatherSummary,
   season,
-  marketDemand,
   confidence,
   fallbackExplanation,
 }: {
@@ -90,13 +85,12 @@ function buildOverallRecommendation({
   district: string;
   weatherSummary: string;
   season: string;
-  marketDemand: string;
   confidence: number;
   fallbackExplanation?: string;
 }) {
   const confidencePercent = Math.round(clampConfidence(confidence));
-  const overview = `${recommendedCrop} is recommended for ${district} based on the latest soil, weather, seasonal, and market signals.`;
-  const context = `${weatherSummary} supports the ${season} season outlook, while market demand is currently ${marketDemand}.`;
+  const overview = `${recommendedCrop} is recommended for ${district} based on soil pH, planting month, and live weather signals.`;
+  const context = `${weatherSummary} supports the ${season} planting plan.`;
   const confidenceLine = `The model returned a confidence score of ${confidencePercent}%.`;
 
   return [overview, fallbackExplanation, context, confidenceLine]
@@ -119,7 +113,6 @@ export function ExplanationCard({
   recommendedCrop,
   soilType,
   season,
-  marketDemand,
   district,
   weatherSummary,
   confidence,
@@ -152,7 +145,6 @@ export function ExplanationCard({
         district,
         weatherSummary,
         season,
-        marketDemand,
         confidence,
         fallbackExplanation: normalized.soil,
       });
@@ -164,10 +156,10 @@ export function ExplanationCard({
         icon: 'sprout',
         content:
           normalized.soil ??
-          `${soilType} soil data was used to evaluate how suitable the store location is for ${recommendedCrop}.`,
+          `${soilType} was used to evaluate how suitable the store location is for ${recommendedCrop}.`,
         preview:
           normalized.soil ??
-          `${soilType} conditions were considered in the recommendation.`,
+          `${soilType} was considered in the recommendation.`,
       },
       {
         id: 'weather',
@@ -182,25 +174,14 @@ export function ExplanationCard({
       },
       {
         id: 'season',
-        title: 'Season Analysis',
+        title: 'Planting Month Analysis',
         icon: 'calendar-month',
         content:
           normalized.season ??
-          `${season} season timing was used when ranking ${recommendedCrop}.`,
+          `${season} planting timing was used when ranking ${recommendedCrop}.`,
         preview:
           normalized.season ??
-          `${season} seasonal timing influenced the recommendation.`,
-      },
-      {
-        id: 'market',
-        title: 'Market Analysis',
-        icon: 'chart-line',
-        content:
-          normalized.market ??
-          `Market demand was evaluated as ${marketDemand} for ${recommendedCrop}.`,
-        preview:
-          normalized.market ??
-          `${marketDemand} market demand was included in the analysis.`,
+          `${season} planting timing influenced the recommendation.`,
       },
       {
         id: 'overall',
@@ -219,7 +200,6 @@ export function ExplanationCard({
     confidence,
     district,
     explanation,
-    marketDemand,
     recommendedCrop,
     season,
     soilType,
@@ -337,7 +317,7 @@ export function ExplanationCard({
                     Explainable AI
                   </Text>
                   <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    Expand each card to see how soil, weather, season, and market signals shaped the
+                    Expand each card to see how soil pH, weather, and planting month shaped the
                     recommendation.
                   </Text>
                 </View>

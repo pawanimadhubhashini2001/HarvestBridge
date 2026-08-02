@@ -26,7 +26,7 @@ class CropRecommendationAlertNotification extends Notification
             ->subject('New Crop Recommendation Available')
             ->line('Recommended crop: ' . $this->history->recommended_crop)
             ->line('Confidence: ' . $this->history->confidence)
-            ->line('Season: ' . $this->history->season);
+            ->line('Planting month: ' . $this->history->season);
     }
 
     public function toArray(object $notifiable): array
@@ -36,6 +36,7 @@ class CropRecommendationAlertNotification extends Notification
             'recommended_crop' => $this->history->recommended_crop,
             'confidence' => $this->history->confidence,
             'season' => $this->history->season,
+            'plant_month' => $this->history->season,
             'district' => $this->history->district,
             'prediction_history_id' => $this->history->id,
         ];

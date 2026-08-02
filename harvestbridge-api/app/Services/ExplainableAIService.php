@@ -12,7 +12,7 @@ class ExplainableAIService
 
             'soil' => $this->soilExplanation(
                 $crop,
-                $input['Soil_Type']
+                $input['pH'] ?? null
             ),
 
             'weather' => $this->weatherExplanation(
@@ -21,11 +21,7 @@ class ExplainableAIService
 
             'season' => $this->seasonExplanation(
                 $crop,
-                $input['Season']
-            ),
-
-            'market' => $this->marketExplanation(
-                $input['Market_Demand'] ?? null
+                $input['Plant_Month'] ?? $input['Plant Month'] ?? $input['Season'] ?? 'the selected month'
             ),
 
         ];
@@ -33,10 +29,14 @@ class ExplainableAIService
 
     private function soilExplanation(
         string $crop,
-        string $soil
+        mixed $soilPh
     ): string {
 
-        return "{$soil} soil is suitable for growing {$crop}.";
+        if ($soilPh === null || $soilPh === '') {
+            return "Soil pH was not provided, so {$crop} was ranked using district, planting month, and weather.";
+        }
+
+        return "Soil pH {$soilPh} was used when ranking {$crop}.";
     }
 
     private function weatherExplanation(
@@ -51,16 +51,6 @@ class ExplainableAIService
         string $season
     ): string {
 
-        return "{$season} season is appropriate for cultivating {$crop}.";
-    }
-
-    private function marketExplanation(
-        ?string $demand
-    ): string {
-        if ($demand === null || trim($demand) === '') {
-            return 'Current market demand data was not provided for this recommendation.';
-        }
-
-        return "Current market demand is {$demand}.";
+        return "{$season} planting month was used when ranking {$crop}.";
     }
 }

@@ -81,9 +81,9 @@ class AIService
 
             'district' => $input['District'],
 
-            'season' => $input['Season'],
+            'season' => $input['Plant_Month'] ?? $input['Plant Month'] ?? $input['Season'] ?? null,
 
-            'soil_type' => $input['Soil_Type'],
+            'soil_type' => $input['Soil_Type'] ?? 'Dataset model',
 
             'temperature' => $input['Temperature_C'] ?? null,
 
@@ -111,7 +111,7 @@ class AIService
             $history,
             [
                 'district' => $history->district,
-                'season' => $history->season,
+                'plant_month' => $history->season,
                 'recommended_crop' => $history->recommended_crop,
                 'confidence' => $history->confidence,
             ],
@@ -314,15 +314,11 @@ class AIService
 
         return [
             'District' => $data['District'],
-            'Season' => $data['Season'],
-            'Soil_Type' => $data['Soil_Type'],
+            'Plant_Month' => $data['Plant_Month'] ?? $data['Plant Month'] ?? $data['Season'],
             'Temperature_C' => $data['Temperature_C'] ?? $weather['temperature'],
             'Rainfall_mm' => $data['Rainfall_mm'] ?? $weather['rainfall'],
             'Humidity_pct' => $data['Humidity_pct'] ?? $weather['humidity'],
             'pH' => $data['pH'] ?? null,
-            'Previous_Crop' => $data['Previous_Crop'] ?? null,
-            'Previous_Yield_t_ha' => $data['Previous_Yield_t_ha'] ?? null,
-            'Market_Demand' => $data['Market_Demand'] ?? null,
         ];
     }
 
@@ -341,14 +337,11 @@ class AIService
         return [
             'input' => [
                 'district' => $payload['District'],
-                'soil_type' => $payload['Soil_Type'],
-                'season' => $payload['Season'],
+                'plant_month' => $payload['Plant_Month'] ?? $payload['Plant Month'] ?? $payload['Season'] ?? null,
                 'temperature' => round((float) $payload['Temperature_C'], 2),
                 'rainfall' => round((float) $payload['Rainfall_mm'], 2),
                 'humidity' => round((float) $payload['Humidity_pct'], 2),
                 'ph' => isset($payload['pH']) ? round((float) $payload['pH'], 2) : null,
-                'previous_crop' => $payload['Previous_Crop'] ?? null,
-                'market_demand' => $payload['Market_Demand'] ?? null,
             ],
             'prediction' => [
                 'recommended_crop' => $recommendedCropName,
@@ -391,9 +384,9 @@ class AIService
             );
         } else {
             $tips[] = sprintf(
-                '%s is suitable for the %s season.',
+                '%s is suitable for planting in %s.',
                 $recommendedCropName,
-                $payload['Season']
+                $payload['Plant_Month'] ?? $payload['Plant Month'] ?? $payload['Season'] ?? 'the selected month'
             );
         }
 
@@ -404,8 +397,8 @@ class AIService
             );
         } else {
             $tips[] = sprintf(
-                'Use well-prepared %s soil with good drainage.',
-                $payload['Soil_Type']
+                'Plan around the entered soil pH of %s.',
+                isset($payload['pH']) ? round((float) $payload['pH'], 2) : 'not provided'
             );
         }
 

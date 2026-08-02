@@ -1,0 +1,10 @@
+=== HARVESTBRIDGE CROP RECOMMENDATION SUMMARY ===
+Dataset: 45,000 records | 15 crops | 25 districts
+Split: 80% train / 20% test
+Model: RandomForestClassifier
+Accuracy: 0.6621
+Precision: 0.6621
+Recall: 0.6621
+F1 Score: 0.6621
+Top-3 Accuracy: 1.0000
+CV Accuracy: 0.6620 +/- 0.0050

@@ -17,17 +17,9 @@ class SmartPredictionRequest extends FormRequest
 
             'District' => 'required|string',
 
-            'Season' => 'required|string',
+            'Plant_Month' => 'required|string',
 
-            'Soil_Type' => 'required|string',
-
-            'pH' => 'nullable|numeric',
-
-            'Previous_Crop' => 'nullable|string',
-
-            'Previous_Yield_t_ha' => 'nullable|numeric',
-
-            'Market_Demand' => 'nullable|string',
+            'pH' => 'required|numeric|min:0|max:14',
 
         ];
     }

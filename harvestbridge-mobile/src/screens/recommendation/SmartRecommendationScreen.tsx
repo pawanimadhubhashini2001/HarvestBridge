@@ -33,18 +33,25 @@ import type { AppStackScreenProps } from '@/navigation/types';
 import type { AppError } from '@/types/api';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-const seasonOptions = ['Yala', 'Maha'] as const;
-const marketDemandOptions = ['Low', 'Medium', 'High'] as const;
+const plantMonthOptions = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
 
 const smartRecommendationSchema = z.object({
-  season: z.enum(seasonOptions, {
-    message: 'Please select a season.',
+  plant_month: z.enum(plantMonthOptions, {
+    message: 'Please select a planting month.',
   }),
-  soil_type: z
-    .string()
-    .trim()
-    .min(1, 'Soil type is required.')
-    .max(100, 'Soil type is too long.'),
   soil_ph: z
     .string()
     .trim()
@@ -54,25 +61,13 @@ const smartRecommendationSchema = z.object({
       (value) => Number(value) >= 0 && Number(value) <= 14,
       'Soil pH must be between 0 and 14.',
     ),
-  market_demand: z.enum(marketDemandOptions, {
-    message: 'Please select market demand.',
-  }),
-  previous_crop: z
-    .string()
-    .trim()
-    .max(100, 'Previous crop is too long.')
-    .optional()
-    .or(z.literal('')),
 });
 
 type SmartRecommendationFormValues = z.infer<typeof smartRecommendationSchema>;
 
 const formFieldNames = [
-  'season',
-  'soil_type',
+  'plant_month',
   'soil_ph',
-  'market_demand',
-  'previous_crop',
 ] as const satisfies readonly (keyof SmartRecommendationFormValues)[];
 
 function SelectorField({
@@ -130,12 +125,8 @@ function toSmartPayload(
 ): SmartPredictionPayload {
   return {
     District: store.district,
-    Season: values.season,
-    Soil_Type: values.soil_type.trim(),
+    Plant_Month: values.plant_month,
     pH: Number(values.soil_ph),
-    Previous_Crop: values.previous_crop?.trim() || null,
-    Market_Demand: values.market_demand,
-    Previous_Yield_t_ha: null,
   };
 }
 
@@ -154,11 +145,8 @@ export function SmartRecommendationScreen({
     formState: { errors, isValid },
   } = useForm<SmartRecommendationFormValues>({
     defaultValues: {
-      season: 'Yala',
-      soil_type: '',
+      plant_month: plantMonthOptions[new Date().getMonth()],
       soil_ph: '',
-      market_demand: 'Medium',
-      previous_crop: '',
     },
     resolver: zodResolver(smartRecommendationSchema),
     mode: 'onChange',
@@ -193,11 +181,8 @@ export function SmartRecommendationScreen({
             district: store.district,
           },
           form: {
-            season: payload.Season,
-            soil_type: payload.Soil_Type,
+            plant_month: payload.Plant_Month,
             soil_ph: payload.pH ?? 0,
-            market_demand: payload.Market_Demand ?? 'Medium',
-            previous_crop: payload.Previous_Crop ?? null,
           },
         };
 
@@ -324,8 +309,8 @@ export function SmartRecommendationScreen({
               Smart Crop Recommendation
             </Text>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Enter your season, soil type, soil pH, market demand, and previous crop. Live
-              district weather is added automatically before the AI service recommends a crop.
+              Enter planting month and soil pH. Live district weather is added automatically before
+              the AI service ranks the three best crop matches.
             </Text>
           </View>
 
@@ -349,31 +334,14 @@ export function SmartRecommendationScreen({
 
                   <Controller
                     control={control}
-                    name="season"
+                    name="plant_month"
                     render={({ field: { onChange, value } }) => (
                       <SelectorField
-                        label="Season"
+                        label="Planting Month"
                         value={value}
-                        options={seasonOptions}
+                        options={plantMonthOptions}
                         onSelect={onChange}
-                        errorMessage={errors.season?.message}
-                        disabled={smartRecommendationMutation.isPending}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    control={control}
-                    name="soil_type"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <AppTextInput
-                        containerClassName="gap-0"
-                        label="Soil Type"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        autoCapitalize="words"
-                        errorMessage={errors.soil_type?.message}
+                        errorMessage={errors.plant_month?.message}
                         disabled={smartRecommendationMutation.isPending}
                       />
                     )}
@@ -396,37 +364,6 @@ export function SmartRecommendationScreen({
                     )}
                   />
 
-                  <Controller
-                    control={control}
-                    name="market_demand"
-                    render={({ field: { onChange, value } }) => (
-                      <SelectorField
-                        label="Market Demand"
-                        value={value}
-                        options={marketDemandOptions}
-                        onSelect={onChange}
-                        errorMessage={errors.market_demand?.message}
-                        disabled={smartRecommendationMutation.isPending}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    control={control}
-                    name="previous_crop"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <AppTextInput
-                        containerClassName="gap-0"
-                        label="Previous Crop (optional)"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        autoCapitalize="words"
-                        errorMessage={errors.previous_crop?.message}
-                        disabled={smartRecommendationMutation.isPending}
-                      />
-                    )}
-                  />
 
                   {smartRecommendationMutation.isPending ? (
                     <View

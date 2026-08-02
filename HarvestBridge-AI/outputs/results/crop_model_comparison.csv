@@ -1,0 +1,3 @@
+Model,Accuracy,Precision,Recall,F1 Score,Top-3 Accuracy
+Random Forest,0.6621,0.6621,0.6621,0.6621,1.0
+Decision Tree,0.6567,0.6564,0.6567,0.6532,0.9598

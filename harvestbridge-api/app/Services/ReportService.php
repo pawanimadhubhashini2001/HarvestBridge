@@ -79,8 +79,7 @@ class ReportService
             fputcsv($handle, [
                 'ID',
                 'District',
-                'Season',
-                'Soil Type',
+                'Planting Month',
                 'Recommended Crop',
                 'Confidence',
                 'Favorite',
@@ -92,7 +91,6 @@ class ReportService
                     $history->id,
                     $history->district,
                     $history->season,
-                    $history->soil_type,
                     $history->recommended_crop,
                     $history->confidence,
                     $history->is_favorite ? 'Yes' : 'No',

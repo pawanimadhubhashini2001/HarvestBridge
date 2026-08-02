@@ -3,25 +3,17 @@ import type { ApiSuccessResponse, LaravelPaginatedData } from '@/types/api';
 
 export interface PredictionPayload {
   District: string;
-  Season: string;
-  Soil_Type: string;
+  Plant_Month: string;
   Temperature_C: number;
   Rainfall_mm: number;
   Humidity_pct: number;
   pH: number;
-  Previous_Crop?: string | null;
-  Previous_Yield_t_ha?: number | null;
-  Market_Demand: string;
 }
 
 export interface SmartPredictionPayload {
   District: string;
-  Season: string;
-  Soil_Type: string;
+  Plant_Month: string;
   pH?: number | null;
-  Previous_Crop?: string | null;
-  Previous_Yield_t_ha?: number | null;
-  Market_Demand?: string | null;
 }
 
 export interface RecommendationExplanation {
@@ -78,11 +70,8 @@ export interface CachedSmartRecommendationResult {
     district: string;
   };
   form: {
-    season: string;
-    soil_type: string;
+    plant_month: string;
     soil_ph: number;
-    market_demand: string;
-    previous_crop?: string | null;
   };
 }
 
@@ -90,6 +79,7 @@ export interface PredictionHistoryDto {
   id: number;
   district: string;
   season: string;
+  plant_month?: string | null;
   recommended_crop: string;
   confidence: number;
   market_demand?: string | null;
@@ -105,6 +95,7 @@ export interface RecommendationHistoryDto {
   confidence: number;
   district: string;
   season: string;
+  plant_month?: string | null;
   soil_type: string;
   market_demand?: string | null;
   is_favorite: boolean;

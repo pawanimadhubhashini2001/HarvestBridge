@@ -21,6 +21,8 @@ class RecommendationHistoryResource extends JsonResource
 
             'season' => $this->season,
 
+            'plant_month' => $this->season,
+
             'soil_type' => $this->soil_type,
 
             'market_demand' => $this->market_demand,

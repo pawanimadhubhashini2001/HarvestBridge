@@ -45,9 +45,7 @@
 
 <tr><th>District</th><td>{{ $input['District'] }}</td></tr>
 
-<tr><th>Season</th><td>{{ $input['Season'] }}</td></tr>
-
-<tr><th>Soil Type</th><td>{{ $input['Soil_Type'] }}</td></tr>
+<tr><th>Planting Month</th><td>{{ $input['Plant_Month'] ?? $input['Season'] ?? 'Not provided' }}</td></tr>
 
 <tr><th>pH</th><td>{{ $input['pH'] }}</td></tr>
 

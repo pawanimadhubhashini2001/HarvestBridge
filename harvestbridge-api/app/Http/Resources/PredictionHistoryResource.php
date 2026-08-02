@@ -12,6 +12,7 @@ class PredictionHistoryResource extends JsonResource
             'id' => $this->id,
             'district' => $this->district,
             'season' => $this->season,
+            'plant_month' => $this->season,
             'recommended_crop' => $this->recommended_crop,
             'confidence' => $this->confidence,
             'market_demand' => $this->market_demand,

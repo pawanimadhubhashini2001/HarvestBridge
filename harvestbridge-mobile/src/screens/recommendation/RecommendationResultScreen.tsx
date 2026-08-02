@@ -1,15 +1,13 @@
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Animated,
   Easing,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Card, Chip, Divider, Snackbar, Text } from 'react-native-paper';
+import { Button, Card, Chip, Snackbar, Text } from 'react-native-paper';
 
 import {
   getLatestSmartRecommendationResultQueryKey,
@@ -23,12 +21,10 @@ import {
 } from '@/api/recommendation.api';
 import { ErrorState } from '@/components/common/error-state';
 import { LoadingState } from '@/components/common/loading-state';
-import { ConfidenceMeter } from '@/components/recommendation/ConfidenceMeter';
 import {
   ExplanationCard,
   type ExplanationSectionId,
 } from '@/components/recommendation/ExplanationCard';
-import { MarketPriceCard } from '@/components/recommendation/MarketPriceCard';
 import { Screen } from '@/components/layout/screen';
 import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
@@ -45,6 +41,26 @@ function formatConfidence(confidence: number) {
   const percent = confidence <= 1 ? confidence * 100 : confidence;
 
   return `${Math.round(percent)}%`;
+}
+
+function normalizeConfidence(confidence: number) {
+  const percent = confidence <= 1 ? confidence * 100 : confidence;
+
+  return Math.max(0, Math.min(100, percent));
+}
+
+function getConfidenceTone(confidence: number) {
+  const percent = normalizeConfidence(confidence);
+
+  if (percent >= 80) {
+    return 'Strong match';
+  }
+
+  if (percent >= 55) {
+    return 'Best available match';
+  }
+
+  return 'Review conditions';
 }
 
 function formatRecommendationTime(value: string) {
@@ -74,45 +90,32 @@ function formatPdfProgress(progress: number | null) {
 function SuccessHero({
   crop,
   confidence,
+  district,
+  plantMonth,
 }: {
   crop: string;
   confidence: number;
+  district: string;
+  plantMonth: string;
 }) {
   const theme = useAppTheme();
-  const scale = useRef(new Animated.Value(0.9)).current;
-  const glow = useRef(new Animated.Value(0.35)).current;
+  const scale = useRef(new Animated.Value(0.96)).current;
 
   useEffect(() => {
     const pulse = Animated.loop(
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(scale, {
-            toValue: 1.04,
-            duration: 900,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(scale, {
-            toValue: 0.97,
-            duration: 900,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.sequence([
-          Animated.timing(glow, {
-            toValue: 0.55,
-            duration: 900,
-            easing: Easing.out(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(glow, {
-            toValue: 0.3,
-            duration: 900,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ]),
+      Animated.sequence([
+        Animated.timing(scale, {
+          toValue: 1.02,
+          duration: 900,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 0.98,
+          duration: 900,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
       ]),
     );
 
@@ -121,60 +124,76 @@ function SuccessHero({
     return () => {
       pulse.stop();
     };
-  }, [glow, scale]);
+  }, [scale]);
 
   return (
     <Card
       mode="outlined"
       style={{
-        backgroundColor: theme.colors.surface,
-        borderColor: theme.colors.outline,
+        backgroundColor: theme.colors.primaryContainer,
+        borderColor: theme.colors.primary,
         overflow: 'hidden',
       }}
     >
       <Card.Content>
-        <View className="items-center gap-md px-md py-lg">
-          <Animated.View
-            style={{
-              transform: [{ scale }],
-              opacity: glow,
-              position: 'absolute',
-              top: 28,
-              height: 144,
-              width: 144,
-              borderRadius: 999,
-              backgroundColor: theme.colors.primaryContainer,
-            }}
-          />
-          <Animated.View
-            className="items-center justify-center rounded-full"
-            style={{
-              height: 108,
-              width: 108,
-              transform: [{ scale }],
-              backgroundColor: theme.colors.primaryContainer,
-            }}
+        <View className="gap-md py-sm">
+          <View className="flex-row items-center gap-sm">
+            <Animated.View
+              className="items-center justify-center rounded-full"
+              style={{
+                height: 58,
+                width: 58,
+                transform: [{ scale }],
+                backgroundColor: theme.colors.surface,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="sprout"
+                size={32}
+                color={theme.colors.primary}
+              />
+            </Animated.View>
+            <View style={{ flex: 1 }} className="gap-xs">
+              <Text variant="labelLarge" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+                Best Crop Match
+              </Text>
+              <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
+                {crop}
+              </Text>
+            </View>
+          </View>
+
+          <View
+            className="gap-xs rounded-lg px-md py-md"
+            style={{ backgroundColor: theme.colors.surface }}
           >
-            <MaterialCommunityIcons
-              name="sprout"
-              size={52}
-              color={theme.colors.primary}
-            />
-          </Animated.View>
-          <Chip
-            compact
-            style={{ backgroundColor: theme.colors.secondaryContainer }}
-            textStyle={{ color: theme.colors.secondary }}
-          >
-            Recommendation Ready
-          </Chip>
-          <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-            {crop}
-          </Text>
-          <ConfidenceMeter confidence={confidence} size={164} />
-          <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-            Generated from your latest store location, soil, weather, and market inputs.
-          </Text>
+            <View className="flex-row items-center justify-between gap-md">
+              <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
+                {formatConfidence(confidence)}
+              </Text>
+              <Text variant="labelLarge" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+                {getConfidenceTone(confidence)}
+              </Text>
+            </View>
+            <View
+              className="overflow-hidden rounded-full"
+              style={{ height: 10, backgroundColor: theme.colors.surfaceVariant }}
+            >
+              <View
+                className="rounded-full"
+                style={{
+                  height: 10,
+                  width: `${normalizeConfidence(confidence)}%`,
+                  backgroundColor: theme.colors.primary,
+                }}
+              />
+            </View>
+          </View>
+
+          <View className="flex-row flex-wrap gap-sm">
+            <Chip compact>{district}</Chip>
+            <Chip compact>{plantMonth}</Chip>
+          </View>
         </View>
       </Card.Content>
     </Card>
@@ -200,7 +219,7 @@ function SummarySection({
       <Card.Content>
         <View className="gap-md">
           <View className="gap-xs">
-            <Text variant="titleLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+            <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
               {title}
             </Text>
             {subtitle ? (
@@ -237,42 +256,54 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 function AlternativeRecommendationCard({
   candidate,
   isPrimary,
+  rank,
 }: {
   candidate: RankedRecommendationCandidate;
   isPrimary: boolean;
+  rank: number;
 }) {
   const theme = useAppTheme();
 
   return (
     <View
-      className="gap-sm rounded-lg border px-md py-md"
+      className="flex-row items-center gap-md rounded-lg border px-md py-md"
       style={{
         borderColor: isPrimary ? theme.colors.primary : theme.colors.outline,
         backgroundColor: isPrimary ? theme.colors.primaryContainer : theme.colors.surface,
       }}
     >
-      <View className="flex-row items-center justify-between gap-md">
+      <View
+        className="items-center justify-center rounded-full"
+        style={{
+          height: 38,
+          width: 38,
+          backgroundColor: isPrimary ? theme.colors.primary : theme.colors.surfaceVariant,
+        }}
+      >
         <Text
-          variant="titleMedium"
-          style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1 }}
+          variant="titleSmall"
+          style={{
+            color: isPrimary ? theme.colors.onPrimary : theme.colors.onSurfaceVariant,
+            fontWeight: '800',
+          }}
         >
-          {candidate.name}
+          {rank}
         </Text>
-        <Chip compact>{formatConfidence(candidate.confidence)}</Chip>
       </View>
-      {candidate.category ? (
+      <View style={{ flex: 1 }} className="gap-xs">
+        <View className="flex-row items-center justify-between gap-sm">
+          <Text
+            variant="titleMedium"
+            style={{ color: theme.colors.onSurface, fontWeight: '800', flex: 1 }}
+          >
+            {candidate.name}
+          </Text>
+          <Chip compact>{formatConfidence(candidate.confidence)}</Chip>
+        </View>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Category: {candidate.category}
+          {isPrimary ? 'Highest probability from the Random Forest model.' : 'Next best model match.'}
         </Text>
-      ) : null}
-      {candidate.description ? (
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {candidate.description}
-        </Text>
-      ) : null}
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-        {isPrimary ? 'Top-ranked match from the current AI model.' : 'Alternative AI match.'}
-      </Text>
+      </View>
     </View>
   );
 }
@@ -285,10 +316,10 @@ function findMatchingRecommendation(
     const matchesCrop =
       item.recommended_crop === cachedResult.response.prediction.recommended_crop;
     const matchesDistrict = item.district === cachedResult.request.District;
-    const matchesSeason = item.season === cachedResult.request.Season;
-    const matchesSoil = item.soil_type === cachedResult.request.Soil_Type;
+    const matchesPlantMonth =
+      (item.plant_month ?? item.season) === cachedResult.request.Plant_Month;
 
-    return matchesCrop && matchesDistrict && matchesSeason && matchesSoil;
+    return matchesCrop && matchesDistrict && matchesPlantMonth;
   });
 }
 
@@ -297,8 +328,6 @@ export function RecommendationResultScreen({
 }: AppStackScreenProps<'RecommendationResult'>) {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-  const { width } = useWindowDimensions();
-  const isWide = width >= 720;
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [expandedExplanationSection, setExpandedExplanationSection] =
     useState<ExplanationSectionId | null>(null);
@@ -494,146 +523,136 @@ export function RecommendationResultScreen({
       <SuccessHero
         crop={cachedResult.response.prediction.recommended_crop}
         confidence={cachedResult.response.prediction.confidence}
+        district={cachedResult.request.District}
+        plantMonth={cachedResult.request.Plant_Month}
       />
 
-      <View className={isWide ? 'flex-row gap-md' : 'gap-md'}>
-        <View style={{ flex: 1 }} className="gap-md">
-          <SummarySection title="Recommendation Summary">
-            <DetailRow
-              label="Recommended Crop"
-              value={cachedResult.response.prediction.recommended_crop}
+      <SummarySection
+        title="Top 3 Recommended Crops"
+        subtitle="The crops with the highest model probabilities for this district, month, soil pH, and weather."
+      >
+        <View className="gap-sm">
+          {rankedRecommendations.map((candidate, index) => (
+            <AlternativeRecommendationCard
+              key={`${candidate.name}-${index}`}
+              candidate={candidate}
+              rank={index + 1}
+              isPrimary={index === 0}
             />
-            <DetailRow label="Confidence Percentage" value={confidence} />
-            <DetailRow label="Market Demand" value={cachedResult.request.Market_Demand ?? 'Not provided'} />
-            <DetailRow label="Recommendation Time" value={formatRecommendationTime(recommendationTime)} />
-            <DetailRow label="District" value={cachedResult.request.District} />
-            <DetailRow label="Season" value={cachedResult.request.Season} />
-          </SummarySection>
+          ))}
+        </View>
+      </SummarySection>
 
-          <SummarySection
-            title="Top AI Matches"
-            subtitle="These are the real ranked crops returned by the current model for your input."
-          >
-            <View className="gap-sm">
-              {rankedRecommendations.map((candidate, index) => (
-                <AlternativeRecommendationCard
-                  key={`${candidate.name}-${index}`}
-                  candidate={candidate}
-                  isPrimary={index === 0}
-                />
-              ))}
-            </View>
-          </SummarySection>
+      <SummarySection title="Prediction Details">
+        <DetailRow
+          label="Recommended Crop"
+          value={cachedResult.response.prediction.recommended_crop}
+        />
+        <DetailRow label="Confidence" value={confidence} />
+        <DetailRow label="Generated" value={formatRecommendationTime(recommendationTime)} />
+        <DetailRow label="Store" value={cachedResult.store.name} />
+      </SummarySection>
 
-          <SummarySection title="Weather Summary">
-            <DetailRow label="Temperature" value={`${weather.temperature} deg C`} />
-            <DetailRow label="Humidity" value={`${weather.humidity}%`} />
-            <DetailRow label="Rainfall" value={`${weather.rainfall} mm`} />
-            <DetailRow
-              label="Condition"
-              value={weather.condition || 'Current conditions available'}
-            />
-            <DetailRow
-              label="Location"
-              value={weather.location || cachedResult.request.District}
-            />
-          </SummarySection>
+      <SummarySection title="Input And Weather">
+        <DetailRow label="District" value={cachedResult.request.District} />
+        <DetailRow label="Planting Month" value={cachedResult.request.Plant_Month} />
+        <DetailRow label="Soil pH" value={`${cachedResult.form.soil_ph}`} />
+        <DetailRow label="Temperature" value={`${weather.temperature} deg C`} />
+        <DetailRow label="Humidity" value={`${weather.humidity}%`} />
+        <DetailRow label="Rainfall" value={`${weather.rainfall} mm`} />
+        <DetailRow
+          label="Condition"
+          value={weather.condition || 'Current conditions available'}
+        />
+      </SummarySection>
 
-          <MarketPriceCard
-            recommendedCrop={cachedResult.response.prediction.recommended_crop}
-            marketPrice={cachedResult.response.market_price}
-            isRefreshing={cachedResultQuery.isRefetching || recommendationsQuery.isRefetching}
-            onRefresh={() => {
-              void handleRefresh();
+      <SummarySection title="Actions">
+        <View className="gap-sm">
+          <Button
+            mode="contained"
+            icon="text-box-search-outline"
+            onPress={() => {
+              if (!cachedResult.response.prediction.explanation) {
+                setFeedbackMessage(
+                  'Explainable AI details are not available for this recommendation yet.',
+                );
+                return;
+              }
+
+              setExpandedExplanationSection('overall');
+              setFeedbackMessage('Explainable AI details are available below.');
             }}
-          />
-        </View>
-
-        <View style={{ flex: 1 }} className="gap-md">
-          <SummarySection title="Soil Summary" subtitle={`Store: ${cachedResult.store.name}`}>
-            <DetailRow label="Soil Type" value={cachedResult.request.Soil_Type} />
-            <DetailRow label="Soil pH" value={`${cachedResult.form.soil_ph}`} />
-            <DetailRow
-              label="Previous Crop"
-              value={cachedResult.form.previous_crop || 'Not provided'}
-            />
-          </SummarySection>
-
-          <SummarySection
-            title="Actions"
-            subtitle="Follow-up actions using the current cached recommendation."
           >
-            <View className="gap-sm">
-              <Button
-                mode="contained"
-                onPress={() => {
-                  if (!cachedResult.response.prediction.explanation) {
-                    setFeedbackMessage(
-                      'Explainable AI details are not available for this recommendation yet.',
-                    );
-                    return;
-                  }
+            View Explanation
+          </Button>
+          <View className="flex-row gap-sm">
+            <Button
+              mode="outlined"
+              icon="download"
+              style={{ flex: 1 }}
+              onPress={() => void handleDownloadPdf()}
+            >
+              {pdfAction === 'download' ? 'Downloading...' : 'PDF'}
+            </Button>
+            <Button
+              mode="outlined"
+              icon="share-variant"
+              style={{ flex: 1 }}
+              onPress={() => void handleSharePdf()}
+            >
+              {pdfAction === 'share' ? 'Sharing...' : 'Share'}
+            </Button>
+          </View>
+          <View className="flex-row gap-sm">
+            <Button
+              mode="outlined"
+              icon="file-eye-outline"
+              style={{ flex: 1 }}
+              onPress={() => void handleViewPdf()}
+            >
+              {pdfAction === 'view' ? 'Opening...' : 'View'}
+            </Button>
+            <Button
+              mode="outlined"
+              icon={isFavorite ? 'star' : 'star-outline'}
+              style={{ flex: 1 }}
+              disabled={favoriteMutation.isPending}
+              onPress={() => {
+                if (!matchingRecommendation) {
+                  setFeedbackMessage(
+                    'Saved recommendation history is not ready yet. Pull to refresh and try again.',
+                  );
+                  return;
+                }
 
-                  setExpandedExplanationSection('overall');
-                  setFeedbackMessage('Explainable AI details are available below.');
-                }}
-              >
-                View Explanation
-              </Button>
-              <Button mode="outlined" onPress={() => void handleDownloadPdf()}>
-                {pdfAction === 'download' ? 'Downloading PDF...' : 'Download PDF'}
-              </Button>
-              <Button mode="outlined" onPress={() => void handleViewPdf()}>
-                {pdfAction === 'view' ? 'Opening PDF...' : 'View PDF'}
-              </Button>
-              <Button mode="outlined" onPress={() => void handleSharePdf()}>
-                {pdfAction === 'share' ? 'Sharing PDF...' : 'Share PDF'}
-              </Button>
-              <Button
-                mode="outlined"
-                disabled={favoriteMutation.isPending}
-                onPress={() => {
-                  if (!matchingRecommendation) {
-                    setFeedbackMessage(
-                      'Saved recommendation history is not ready yet. Pull to refresh and try again.',
-                    );
-                    return;
-                  }
-
-                  void favoriteMutation.mutateAsync(matchingRecommendation.id);
-                }}
-              >
-                {favoriteMutation.isPending
-                  ? 'Saving...'
-                  : isFavorite
-                    ? 'Saved Favorite'
-                    : 'Save Favorite'}
-              </Button>
-              {pdfAction ? (
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                  {formatPdfProgress(pdfProgress)}
-                </Text>
-              ) : null}
-              <Button
-                mode="text"
-                textColor={theme.colors.primary}
-                onPress={() => {
-                  navigation.replace('AIRecommendationForm');
-                }}
-              >
-                Create New Recommendation
-              </Button>
-            </View>
-          </SummarySection>
+                void favoriteMutation.mutateAsync(matchingRecommendation.id);
+              }}
+            >
+              {favoriteMutation.isPending ? 'Saving...' : isFavorite ? 'Saved' : 'Save'}
+            </Button>
+          </View>
+          {pdfAction ? (
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              {formatPdfProgress(pdfProgress)}
+            </Text>
+          ) : null}
+          <Button
+            mode="text"
+            textColor={theme.colors.primary}
+            onPress={() => {
+              navigation.replace('AIRecommendationForm');
+            }}
+          >
+            Create New Recommendation
+          </Button>
         </View>
-      </View>
+      </SummarySection>
 
       <ExplanationCard
         explanation={cachedResult.response.prediction.explanation}
         recommendedCrop={cachedResult.response.prediction.recommended_crop}
-        soilType={cachedResult.request.Soil_Type}
-        season={cachedResult.request.Season}
-        marketDemand={cachedResult.request.Market_Demand ?? cachedResult.form.market_demand}
+        soilType={`pH ${cachedResult.form.soil_ph}`}
+        season={cachedResult.request.Plant_Month}
         district={cachedResult.request.District}
         weatherSummary={weatherSummary}
         confidence={cachedResult.response.prediction.confidence}
@@ -644,34 +663,6 @@ export function RecommendationResultScreen({
         expandedSection={expandedExplanationSection}
         onExpandedSectionChange={setExpandedExplanationSection}
       />
-
-      <SummarySection title="Recommendation Status">
-        {recommendationsQuery.isLoading && !recommendationsQuery.data ? (
-          <View className="items-center gap-sm py-md">
-            <ActivityIndicator size="small" color={theme.colors.primary} />
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Syncing recommendation history...
-            </Text>
-          </View>
-        ) : recommendationsQuery.isError ? (
-          <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
-            {getErrorMessage(recommendationsQuery.error)}
-          </Text>
-        ) : (
-          <View className="gap-sm">
-            <View className="flex-row flex-wrap gap-sm">
-              <Chip compact>{isFavorite ? 'Favorite Saved' : 'Not Favorited Yet'}</Chip>
-              <Chip compact>{cachedResult.store.district}</Chip>
-              <Chip compact>{cachedResult.request.Season}</Chip>
-            </View>
-            <Divider />
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-              Pull to refresh if you want to resync favorite state or other linked recommendation
-              metadata from the backend.
-            </Text>
-          </View>
-        )}
-      </SummarySection>
 
       <Snackbar
         visible={Boolean(feedbackMessage)}

@@ -26,15 +26,15 @@ class CropPredictionRequest extends FormRequest
 
             'District' => 'required|string|max:100',
 
-            'Season' => 'required|string|max:100',
-
-            'Soil_Type' => 'required|string|max:100',
+            'Plant_Month' => 'required|string|max:100',
 
             'Temperature_C' => 'nullable|numeric',
 
             'Rainfall_mm' => 'nullable|numeric|min:0',
 
             'Humidity_pct' => 'nullable|numeric|min:0|max:100',
+
+            'pH' => 'required|numeric|min:0|max:14',
 
         ];
     }
