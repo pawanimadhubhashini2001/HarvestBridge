@@ -1,10 +1,21 @@
-=== HARVESTBRIDGE CROP RECOMMENDATION SUMMARY ===
-Dataset: 45,000 records | 15 crops | 25 districts
-Split: 80% train / 20% test
-Model: RandomForestClassifier
-Accuracy: 0.6621
-Precision: 0.6621
-Recall: 0.6621
-F1 Score: 0.6621
-Top-3 Accuracy: 1.0000
-CV Accuracy: 0.6620 +/- 0.0050
+              precision    recall  f1-score   support
+
+       Beans       0.06      0.06      0.06       600
+   Big Onion       0.08      0.08      0.08       600
+     Brinjal       0.07      0.08      0.08       600
+     Cabbage       0.07      0.07      0.07       600
+      Carrot       0.09      0.09      0.09       600
+       Chili       0.06      0.06      0.06       600
+      Cowpea       0.07      0.07      0.07       600
+  Green Gram       0.07      0.07      0.07       600
+   Groundnut       0.05      0.05      0.05       600
+       Maize       0.07      0.07      0.07       600
+       Paddy       0.08      0.09      0.08       600
+      Potato       0.07      0.07      0.07       600
+     Pumpkin       0.06      0.06      0.06       600
+   Red Onion       0.06      0.07      0.06       600
+      Tomato       0.06      0.06      0.06       600
+
+    accuracy                           0.07      9000
+   macro avg       0.07      0.07      0.07      9000
+weighted avg       0.07      0.07      0.07      9000

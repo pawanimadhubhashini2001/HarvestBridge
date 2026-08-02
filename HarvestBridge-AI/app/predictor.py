@@ -50,22 +50,26 @@ def _predict_from_bundle(data: dict):
         temperature = float(_get_value(data, "Temperature(C)"))
         humidity = float(_get_value(data, "Humidity(%)"))
         soil_ph = float(_get_value(data, "Soil pH"))
-        growing_days = int(data.get("Growing Days") or data.get("Growing_Days") or bundle.get("default_growing_days", 100))
+        district_enc = _encode_known_value(district_encoder, district, "District")
+        plant_month_num = int(month_map[plant_month])
         temp_humidity = temperature * humidity / 100
-        rain_per_day = rainfall / (growing_days + 1)
         ph_deviation = abs(soil_ph - 7.0)
 
         row = {
-            "District_enc": _encode_known_value(district_encoder, district, "District"),
-            "Plant Month Num": int(month_map[plant_month]),
+            "District_enc": district_enc,
+            "Plant Month Num": plant_month_num,
             "Rainfall(mm)": rainfall,
             "Temperature(C)": temperature,
             "Humidity(%)": humidity,
             "Soil pH": soil_ph,
-            "Growing Days": growing_days,
             "Temp_Humidity": temp_humidity,
-            "Rain_per_day": rain_per_day,
             "pH_deviation": ph_deviation,
+            "Rain_Temp": rainfall * temperature,
+            "Rain_Humidity": rainfall * humidity / 100,
+            "Temp_pH": temperature * soil_ph,
+            "Humidity_pH": humidity * soil_ph,
+            "Month_Rain": plant_month_num * rainfall,
+            "District_Month": district_enc * plant_month_num,
         }
         df = pd.DataFrame([row], columns=feature_names)
         prediction = model.predict(df)[0]

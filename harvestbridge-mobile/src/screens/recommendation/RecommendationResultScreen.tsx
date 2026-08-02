@@ -301,7 +301,7 @@ function AlternativeRecommendationCard({
           <Chip compact>{formatConfidence(candidate.confidence)}</Chip>
         </View>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {isPrimary ? 'Highest probability from the Random Forest model.' : 'Next best model match.'}
+          {isPrimary ? 'Highest probability from the trained crop model.' : 'Next best model match.'}
         </Text>
       </View>
     </View>
