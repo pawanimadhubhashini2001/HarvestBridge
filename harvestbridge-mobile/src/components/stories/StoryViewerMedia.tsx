@@ -10,6 +10,15 @@ const IMAGE_DURATION_MS = 5000;
 const PROGRESS_TICK_MS = 60;
 const VIDEO_TICK_MS = 120;
 
+function safelyControlPlayer(action: () => void) {
+  try {
+    action();
+  } catch {
+    // The expo-video hook owns native player disposal. During rapid story changes,
+    // cleanup can race with a released shared object on Android.
+  }
+}
+
 interface StoryViewerMediaProps {
   story: StoryFeedStoryDto;
   isActive: boolean;
@@ -48,8 +57,10 @@ export function StoryViewerMedia({
   useEffect(() => {
     if (!isActive) {
       if (story.media_type === 'video') {
-        player.pause();
-        player.currentTime = 0;
+        safelyControlPlayer(() => {
+          player.pause();
+          player.currentTime = 0;
+        });
       }
 
       imageElapsedMsRef.current = 0;
@@ -82,19 +93,34 @@ export function StoryViewerMedia({
       };
     }
 
-    if (player.currentTime > 0.1 && player.duration > 0 && player.currentTime >= player.duration) {
-      player.currentTime = 0;
-    }
+    safelyControlPlayer(() => {
+      if (
+        player.currentTime > 0.1 &&
+        player.duration > 0 &&
+        player.currentTime >= player.duration
+      ) {
+        player.currentTime = 0;
+      }
+    });
 
     if (isPaused) {
-      player.pause();
+      safelyControlPlayer(() => {
+        player.pause();
+      });
     } else {
-      player.play();
+      safelyControlPlayer(() => {
+        player.play();
+      });
     }
 
     const interval = setInterval(() => {
-      const duration = Number.isFinite(player.duration) ? player.duration : 0;
-      const currentTime = Number.isFinite(player.currentTime) ? player.currentTime : 0;
+      let duration = 0;
+      let currentTime = 0;
+
+      safelyControlPlayer(() => {
+        duration = Number.isFinite(player.duration) ? player.duration : 0;
+        currentTime = Number.isFinite(player.currentTime) ? player.currentTime : 0;
+      });
 
       if (duration <= 0) {
         return;
@@ -105,32 +131,34 @@ export function StoryViewerMedia({
 
       if (progress >= 0.995 && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
-        player.pause();
+        safelyControlPlayer(() => {
+          player.pause();
+        });
         onComplete();
       }
     }, VIDEO_TICK_MS);
 
     return () => {
       clearInterval(interval);
-      player.pause();
     };
   }, [isActive, isPaused, onComplete, onProgressChange, player, story.media_type]);
 
-  const media = story.media_type === 'video' ? (
-    <VideoView
-      style={{ width: '100%', height: '100%' }}
-      player={player}
-      nativeControls={false}
-      contentFit="contain"
-    />
-  ) : (
-    <Image
-      source={{ uri: story.media_url }}
-      style={{ width: '100%', height: '100%' }}
-      contentFit="contain"
-      transition={180}
-    />
-  );
+  const media =
+    story.media_type === 'video' ? (
+      <VideoView
+        style={{ width: '100%', height: '100%' }}
+        player={player}
+        nativeControls={false}
+        contentFit="contain"
+      />
+    ) : (
+      <Image
+        source={{ uri: story.media_url }}
+        style={{ width: '100%', height: '100%' }}
+        contentFit="contain"
+        transition={180}
+      />
+    );
 
   return (
     <Pressable style={{ flex: 1 }} onPress={onTogglePause}>
