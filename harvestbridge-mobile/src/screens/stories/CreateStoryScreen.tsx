@@ -140,7 +140,10 @@ export function CreateStoryScreen({ navigation, route }: AppStackScreenProps<'Cr
       });
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: getMyStoreStoriesQueryKey() });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getMyStoreStoriesQueryKey() }),
+        queryClient.invalidateQueries({ queryKey: ['stories', 'feed'] }),
+      ]);
       setFeedbackMessage(existingStory ? 'Story updated successfully.' : 'Story created successfully.');
 
       if (navigation.canGoBack()) {

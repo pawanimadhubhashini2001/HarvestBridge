@@ -657,6 +657,34 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Card.Content>
+          <View className="gap-md">
+            <View className="gap-xs">
+              <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+                My Stories
+              </Text>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                Manage active store stories and delete stories that should no longer be visible.
+              </Text>
+            </View>
+            <Button
+              mode="contained-tonal"
+              icon="image-multiple-outline"
+              onPress={() => {
+                navigation.navigate('MyStories');
+              }}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              Open My Stories
+            </Button>
+          </View>
+        </Card.Content>
+      </Card>
+
+      <Card
+        mode="outlined"
+        style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
+      >
+        <Card.Content>
           <View className="gap-sm">
             <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
               Store Listings

@@ -106,7 +106,7 @@ export function AppNavigator() {
       <Stack.Screen
         name="StoryFeed"
         component={StoryFeedScreen}
-        options={{ title: 'Stories' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="RecommendationDetails"

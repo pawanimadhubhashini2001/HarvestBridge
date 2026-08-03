@@ -190,6 +190,15 @@ export function MyFarmsScreen({ navigation }: AppTabScreenProps<'Farms'>) {
                 Customer Orders
               </Button>
               <Button
+                mode="contained-tonal"
+                icon="image-multiple-outline"
+                onPress={() => {
+                  navigation.navigate('MyStories');
+                }}
+              >
+                My Stories
+              </Button>
+              <Button
                 mode="outlined"
                 onPress={() => {
                   navigation.navigate('EditFarm', { farmId: String(store.id) });

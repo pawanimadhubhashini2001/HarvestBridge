@@ -33,9 +33,60 @@ import { useAppTheme } from '@/hooks/use-app-theme';
 import type { AppStackScreenProps } from '@/navigation/types';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-function formatDistance(distance?: number | null) {
+function toFiniteNumber(value?: number | string | null) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
+function toRadians(value: number) {
+  return (value * Math.PI) / 180;
+}
+
+function calculateDistanceKm(
+  fromLatitude?: number | null,
+  fromLongitude?: number | null,
+  toLatitude?: number | null,
+  toLongitude?: number | null,
+) {
+  if (
+    fromLatitude === null
+    || fromLatitude === undefined
+    || fromLongitude === null
+    || fromLongitude === undefined
+    || toLatitude === null
+    || toLatitude === undefined
+    || toLongitude === null
+    || toLongitude === undefined
+  ) {
+    return null;
+  }
+
+  const earthRadiusKm = 6371;
+  const latitudeDelta = toRadians(toLatitude - fromLatitude);
+  const longitudeDelta = toRadians(toLongitude - fromLongitude);
+  const startLatitude = toRadians(fromLatitude);
+  const endLatitude = toRadians(toLatitude);
+  const haversine =
+    Math.sin(latitudeDelta / 2) ** 2
+    + Math.cos(startLatitude)
+      * Math.cos(endLatitude)
+      * Math.sin(longitudeDelta / 2) ** 2;
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function formatDistance(distance?: number | null, fallbackLabel?: string | null) {
   if (typeof distance !== 'number' || !Number.isFinite(distance)) {
-    return 'Distance unavailable';
+    return fallbackLabel?.trim() || 'Location available';
   }
 
   return `${distance.toFixed(distance % 1 === 0 ? 0 : 1)} km away`;
@@ -127,6 +178,17 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
     listRef.current?.scrollToIndex({ index, animated });
   }
 
+  function handleCloseStories() {
+    setIsPaused(false);
+
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return;
+    }
+
+    navigation.navigate('MainTabs', { screen: 'Home' });
+  }
+
   function handleAdvance() {
     if (currentIndex < stories.length - 1) {
       goToIndex(currentIndex + 1);
@@ -139,7 +201,7 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
       return;
     }
 
-    navigation.goBack();
+    handleCloseStories();
   }
 
   function handleRetreat() {
@@ -295,14 +357,19 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
   }
 
   const viewCount = viewCountOverrides[currentStory.id] ?? currentStory.view_count ?? 0;
-  const distanceLabel = formatDistance(currentStory.distance_km ?? currentStory.distance ?? null);
+  const storyDistance = toFiniteNumber(currentStory.distance_km ?? currentStory.distance);
+  const calculatedDistance = calculateDistanceKm(
+    route.params?.latitude,
+    route.params?.longitude,
+    toFiniteNumber(currentStory.store?.latitude),
+    toFiniteNumber(currentStory.store?.longitude),
+  );
+  const distanceLabel = formatDistance(
+    storyDistance ?? calculatedDistance,
+    currentStory.store?.district ?? currentStory.store?.address ?? null,
+  );
   const storeName = currentStory.store?.store_name ?? 'Store unavailable';
   const phoneNumber = currentStory.store?.actions?.phone ?? currentStory.store?.phone_number ?? null;
-  const openMapsUrl =
-    currentStory.store?.actions?.open_maps_action?.url
-    ?? currentStory.store?.actions?.google_maps_url
-    ?? null;
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#050505' }}>
       <View style={{ flex: 1 }}>
@@ -379,8 +446,9 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
                 size={20}
                 containerColor="rgba(0, 0, 0, 0.45)"
                 iconColor={theme.colors.onPrimary}
-                onPress={() => {
-                  navigation.goBack();
+                onPress={(event) => {
+                  event.stopPropagation();
+                  handleCloseStories();
                 }}
               />
 
@@ -502,17 +570,15 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
             </View>
           </View>
 
-          <View className="gap-md px-md pb-lg">
+          <View
+            className="px-md"
+            style={{ paddingBottom: Math.max(10, Math.min(18, height * 0.025)) }}>
             <View
-              className="gap-md rounded-3xl p-lg"
+              className="gap-sm rounded-3xl px-md py-sm"
               style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}>
               <View className="gap-sm">
                 <Text variant="titleMedium" style={{ color: theme.colors.onPrimary, fontWeight: '700' }}>
                   {currentStory.caption?.trim() || 'Fresh update from this store'}
-                </Text>
-                <Text variant="bodyMedium" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>
-                  Swipe left or right to move between nearby stories. Tap anywhere to pause or
-                  resume the current story.
                 </Text>
               </View>
 
@@ -546,37 +612,6 @@ export function StoryFeedScreen({ navigation, route }: AppStackScreenProps<'Stor
                     });
                   }}>
                   Open Store
-                </Button>
-                <Button
-                  mode="outlined"
-                  textColor={theme.colors.onPrimary}
-                  icon="shopping-outline"
-                  onPress={() => {
-                    if (!currentStory.store?.id) {
-                      setActionError('Store products are not available for this story.');
-                      return;
-                    }
-
-                    navigation.navigate('StoreDetails', {
-                      storeId: String(currentStory.store.id),
-                      latitude: route.params?.latitude,
-                      longitude: route.params?.longitude,
-                      distanceKm: currentStory.distance_km ?? currentStory.distance ?? null,
-                    });
-                  }}>
-                  View Products
-                </Button>
-                <Button
-                  mode="text"
-                  textColor={theme.colors.onPrimary}
-                  icon="map-marker-path"
-                  onPress={() => {
-                    void openExternalUrl(
-                      openMapsUrl,
-                      'Directions are not available for this story yet.',
-                    );
-                  }}>
-                  Directions
                 </Button>
               </View>
             </View>
