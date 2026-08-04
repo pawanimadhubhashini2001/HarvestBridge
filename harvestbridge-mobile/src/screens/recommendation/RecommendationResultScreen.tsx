@@ -301,7 +301,9 @@ function AlternativeRecommendationCard({
           <Chip compact>{formatConfidence(candidate.confidence)}</Chip>
         </View>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {isPrimary ? 'Highest probability from the trained crop model.' : 'Next best model match.'}
+          {isPrimary
+            ? 'Best crop match with historical condition support.'
+            : 'Next crop match with historical condition support.'}
         </Text>
       </View>
     </View>
@@ -529,7 +531,7 @@ export function RecommendationResultScreen({
 
       <SummarySection
         title="Top 3 Recommended Crops"
-        subtitle="The crops with the highest model probabilities for this district, month, soil pH, and weather."
+        subtitle="The strongest crop matches with confidence calibrated from similar historical records for this district, month, soil pH, and weather."
       >
         <View className="gap-sm">
           {rankedRecommendations.map((candidate, index) => (
@@ -549,6 +551,13 @@ export function RecommendationResultScreen({
           value={cachedResult.response.prediction.recommended_crop}
         />
         <DetailRow label="Confidence" value={confidence} />
+        {cachedResult.response.prediction.model_probability !== undefined &&
+        cachedResult.response.prediction.model_probability !== null ? (
+          <DetailRow
+            label="Model Probability"
+            value={formatConfidence(cachedResult.response.prediction.model_probability)}
+          />
+        ) : null}
         <DetailRow label="Generated" value={formatRecommendationTime(recommendationTime)} />
         <DetailRow label="Store" value={cachedResult.store.name} />
       </SummarySection>

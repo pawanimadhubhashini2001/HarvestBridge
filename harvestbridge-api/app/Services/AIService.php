@@ -12,6 +12,17 @@ use Illuminate\Support\Facades\DB;
 
 class AIService
 {
+    private const HISTORICAL_SCORE_FIELDS = [
+        'Rainfall(mm)',
+        'Temperature(C)',
+        'Humidity(%)',
+        'Soil pH',
+    ];
+
+    private ?array $historicalRows = null;
+
+    private array $historicalScales = [];
+
     public function __construct(
         protected AuditLogService $auditLogService,
         protected WeatherService $weatherService
@@ -50,6 +61,11 @@ class AIService
         return $payload;
     }
 
+    public function normalizePrediction(array $payload, array $prediction): array
+    {
+        return $this->normalizeRecommendation($payload, $prediction);
+    }
+
     public function recommendCrops(
         User $user,
         array $data,
@@ -62,7 +78,7 @@ class AIService
         $this->savePrediction(
             $user,
             $payload,
-            $prediction,
+            $normalized['prediction'],
             $request
         );
 
@@ -324,8 +340,14 @@ class AIService
 
     private function normalizeRecommendation(array $payload, array $prediction): array
     {
+        $prediction = $this->calibrateRecommendationScores($payload, $prediction);
         $recommendedCropName = (string) ($prediction['recommended_crop'] ?? '');
         $confidenceScore = round((float) ($prediction['confidence'] ?? 0), 4);
+        $modelProbability = round((float) (
+            $prediction['model_probability']
+            ?? $prediction['raw_confidence']
+            ?? $confidenceScore
+        ), 4);
         $crop = $this->findCropByName($recommendedCropName);
         $rankedRecommendations = $this->normalizeRankedRecommendations(
             $prediction['recommended_crops'] ?? [],
@@ -349,6 +371,8 @@ class AIService
                 'confidence' => $confidenceScore,
                 'confidence_score' => $confidenceScore,
                 'confidence_percentage' => round($confidenceScore * 100, 2),
+                'model_probability' => $modelProbability,
+                'raw_confidence' => $modelProbability,
                 'growing_tips' => $this->buildGrowingTips($crop, $payload, $recommendedCropName),
             ],
         ];
@@ -460,6 +484,14 @@ class AIService
 
                 $crop = $this->findCropByName($name);
                 $confidence = round((float) ($item['confidence'] ?? 0), 4);
+                $modelProbability = round((float) (
+                    $item['model_probability']
+                    ?? $item['raw_confidence']
+                    ?? $confidence
+                ), 4);
+                $historicalConfidence = isset($item['historical_confidence'])
+                    ? round((float) $item['historical_confidence'], 4)
+                    : null;
 
                 return [
                     'id' => $crop?->id,
@@ -468,6 +500,9 @@ class AIService
                     'description' => $crop?->description,
                     'confidence' => $confidence,
                     'confidence_percentage' => round($confidence * 100, 2),
+                    'model_probability' => $modelProbability,
+                    'raw_confidence' => $modelProbability,
+                    'historical_confidence' => $historicalConfidence,
                 ];
             })
             ->filter()
@@ -481,10 +516,305 @@ class AIService
                 'description' => $fallbackCrop?->description,
                 'confidence' => $fallbackConfidence,
                 'confidence_percentage' => round($fallbackConfidence * 100, 2),
+                'model_probability' => $fallbackConfidence,
+                'raw_confidence' => $fallbackConfidence,
             ]];
         }
 
         return $normalized->all();
+    }
+
+    private function calibrateRecommendationScores(array $payload, array $prediction): array
+    {
+        $recommendations = $prediction['recommended_crops'] ?? [];
+
+        if ($recommendations === [] && ! empty($prediction['recommended_crop'])) {
+            $recommendations = [[
+                'name' => $prediction['recommended_crop'],
+                'confidence' => $prediction['confidence'] ?? 0,
+            ]];
+        }
+
+        $cropNames = collect($recommendations)
+            ->map(fn ($item) => is_array($item)
+                ? trim((string) ($item['name'] ?? $item['recommended_crop'] ?? ''))
+                : '')
+            ->filter()
+            ->values()
+            ->all();
+
+        if ($cropNames === []) {
+            return $prediction;
+        }
+
+        $historicalScores = $this->historicalSuitabilityScores($payload, $cropNames);
+
+        if ($historicalScores === []) {
+            return $prediction;
+        }
+
+        $calibratedRecommendations = collect($recommendations)
+            ->map(function ($item) use ($historicalScores) {
+                if (! is_array($item)) {
+                    return null;
+                }
+
+                $name = trim((string) ($item['name'] ?? $item['recommended_crop'] ?? ''));
+
+                if ($name === '') {
+                    return null;
+                }
+
+                $lookupKey = mb_strtolower($name);
+                $modelProbability = round((float) (
+                    $item['model_probability']
+                    ?? $item['raw_confidence']
+                    ?? $item['confidence']
+                    ?? 0
+                ), 4);
+                $historicalConfidence = $historicalScores[$lookupKey] ?? null;
+
+                if ($historicalConfidence === null) {
+                    return array_merge($item, [
+                        'name' => $name,
+                        'model_probability' => $modelProbability,
+                        'raw_confidence' => $modelProbability,
+                    ]);
+                }
+
+                return array_merge($item, [
+                    'name' => $name,
+                    'confidence' => $historicalConfidence,
+                    'model_probability' => $modelProbability,
+                    'raw_confidence' => $modelProbability,
+                    'historical_confidence' => $historicalConfidence,
+                ]);
+            })
+            ->filter()
+            ->sort(function (array $left, array $right) {
+                return [
+                    (float) ($right['confidence'] ?? 0),
+                    (float) ($right['model_probability'] ?? 0),
+                ] <=> [
+                    (float) ($left['confidence'] ?? 0),
+                    (float) ($left['model_probability'] ?? 0),
+                ];
+            })
+            ->values()
+            ->all();
+
+        if ($calibratedRecommendations === []) {
+            return $prediction;
+        }
+
+        $topRecommendation = $calibratedRecommendations[0];
+
+        $prediction['recommended_crop'] = $topRecommendation['name'];
+        $prediction['confidence'] = round((float) $topRecommendation['confidence'], 4);
+        $prediction['model_probability'] = round((float) ($topRecommendation['model_probability'] ?? 0), 4);
+        $prediction['raw_confidence'] = $prediction['model_probability'];
+        $prediction['recommended_crops'] = $calibratedRecommendations;
+        $prediction['top_3_crops'] = $calibratedRecommendations;
+
+        return $prediction;
+    }
+
+    private function historicalSuitabilityScores(array $payload, array $cropNames): array
+    {
+        $rows = $this->loadHistoricalRows();
+
+        if ($rows === []) {
+            return [];
+        }
+
+        $district = $this->normalizedText($payload['District'] ?? null);
+        $plantMonth = $this->normalizedText(
+            $payload['Plant_Month']
+            ?? $payload['Plant Month']
+            ?? $payload['Season']
+            ?? null
+        );
+        $numericInputs = [];
+
+        foreach (self::HISTORICAL_SCORE_FIELDS as $field) {
+            $value = $this->payloadFieldValue($payload, $field);
+
+            if (is_numeric($value)) {
+                $numericInputs[$field] = (float) $value;
+            }
+        }
+
+        if ($district === '' || $plantMonth === '' || $numericInputs === []) {
+            return [];
+        }
+
+        $scores = [];
+
+        foreach ($cropNames as $cropName) {
+            $cropKey = $this->normalizedText($cropName);
+            $cropRows = array_values(array_filter(
+                $rows,
+                fn (array $row) => $this->normalizedText($row['Crop'] ?? null) === $cropKey
+            ));
+
+            if ($cropRows === []) {
+                continue;
+            }
+
+            $contextRows = array_values(array_filter(
+                $cropRows,
+                fn (array $row) =>
+                    $this->normalizedText($row['District'] ?? null) === $district
+                    && $this->normalizedText($row['Plant Month'] ?? null) === $plantMonth
+            ));
+            $comparisonRows = count($contextRows) >= 3 ? $contextRows : $cropRows;
+            $similarities = [];
+
+            foreach ($comparisonRows as $row) {
+                $distance = 0.0;
+                $usedFields = 0;
+
+                foreach ($numericInputs as $field => $inputValue) {
+                    if (! isset($row[$field]) || ! is_numeric($row[$field])) {
+                        continue;
+                    }
+
+                    $scale = $this->historicalScales[$field] ?? 1.0;
+                    $distance += (((float) $row[$field] - $inputValue) / $scale) ** 2;
+                    $usedFields++;
+                }
+
+                if ($usedFields > 0) {
+                    $similarities[] = exp(-0.5 * ($distance / $usedFields));
+                }
+            }
+
+            if ($similarities !== []) {
+                $scores[$cropKey] = round(max(0.0, min($this->percentile($similarities, 0.9), 0.99)), 4);
+            }
+        }
+
+        return $scores;
+    }
+
+    private function loadHistoricalRows(): array
+    {
+        if ($this->historicalRows !== null) {
+            return $this->historicalRows;
+        }
+
+        $path = base_path('../HarvestBridge-AI/dataset/HarvestBridge.csv');
+
+        if (! file_exists($path)) {
+            $this->historicalRows = [];
+            $this->historicalScales = [];
+
+            return $this->historicalRows;
+        }
+
+        $file = new \SplFileObject($path);
+        $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::SKIP_EMPTY);
+        $headers = null;
+        $rows = [];
+
+        foreach ($file as $row) {
+            if ($row === [null] || $row === false) {
+                continue;
+            }
+
+            if ($headers === null) {
+                $headers = array_map(fn ($header) => trim((string) $header), $row);
+                continue;
+            }
+
+            $record = [];
+
+            foreach ($headers as $index => $header) {
+                $record[$header] = isset($row[$index]) ? trim((string) $row[$index]) : null;
+            }
+
+            if (($record['Crop'] ?? '') !== '') {
+                $rows[] = $record;
+            }
+        }
+
+        $this->historicalRows = $rows;
+        $this->historicalScales = $this->calculateHistoricalScales($rows);
+
+        return $this->historicalRows;
+    }
+
+    private function calculateHistoricalScales(array $rows): array
+    {
+        $scales = [];
+
+        foreach (self::HISTORICAL_SCORE_FIELDS as $field) {
+            $values = collect($rows)
+                ->map(fn (array $row) => $row[$field] ?? null)
+                ->filter(fn ($value) => is_numeric($value))
+                ->map(fn ($value) => (float) $value)
+                ->values()
+                ->all();
+
+            if ($values === []) {
+                continue;
+            }
+
+            $mean = array_sum($values) / count($values);
+            $variance = collect($values)
+                ->map(fn (float $value) => ($value - $mean) ** 2)
+                ->sum() / count($values);
+
+            $scales[$field] = max(sqrt($variance), 1.0);
+        }
+
+        return $scales;
+    }
+
+    private function payloadFieldValue(array $payload, string $canonicalField): mixed
+    {
+        $aliases = [
+            'Rainfall(mm)' => ['Rainfall(mm)', 'Rainfall_mm', 'rainfall'],
+            'Temperature(C)' => ['Temperature(C)', 'Temperature_C', 'temperature'],
+            'Humidity(%)' => ['Humidity(%)', 'Humidity_pct', 'humidity'],
+            'Soil pH' => ['Soil pH', 'Soil_pH', 'pH', 'ph'],
+        ];
+
+        foreach ($aliases[$canonicalField] ?? [$canonicalField] as $key) {
+            if (array_key_exists($key, $payload) && $payload[$key] !== null) {
+                return $payload[$key];
+            }
+        }
+
+        return null;
+    }
+
+    private function normalizedText(mixed $value): string
+    {
+        return mb_strtolower(trim((string) $value));
+    }
+
+    private function percentile(array $values, float $percentile): float
+    {
+        sort($values);
+        $count = count($values);
+
+        if ($count === 1) {
+            return (float) $values[0];
+        }
+
+        $position = ($count - 1) * $percentile;
+        $lower = (int) floor($position);
+        $upper = (int) ceil($position);
+
+        if ($lower === $upper) {
+            return (float) $values[$lower];
+        }
+
+        $weight = $position - $lower;
+
+        return ((float) $values[$lower] * (1 - $weight))
+            + ((float) $values[$upper] * $weight);
     }
 
     private function normalizeDiseasePrediction(array $payload): array

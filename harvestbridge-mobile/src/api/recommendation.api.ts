@@ -31,6 +31,9 @@ export interface RankedRecommendationCandidate {
   description?: string | null;
   confidence: number;
   confidence_percentage?: number;
+  model_probability?: number | null;
+  raw_confidence?: number | null;
+  historical_confidence?: number | null;
 }
 
 export interface MarketPriceSnapshot {
@@ -54,6 +57,10 @@ export interface SmartPredictionResponse {
   prediction: {
     recommended_crop: string;
     confidence: number;
+    confidence_score?: number;
+    confidence_percentage?: number;
+    model_probability?: number | null;
+    raw_confidence?: number | null;
     recommended_crops?: RankedRecommendationCandidate[];
     explanation: RecommendationExplanation | string[] | string;
   };

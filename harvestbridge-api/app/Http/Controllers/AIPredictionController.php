@@ -121,23 +121,25 @@ class AIPredictionController extends Controller
 
         // AI Prediction
         $prediction = $this->service->predict($input);
+        $normalized = $this->service->normalizePrediction($input, $prediction);
+        $predictionPayload = $normalized['prediction'];
 
         // Generate explanation
         $explanation = $explainService->explain(
             $input,
-            $prediction
+            $predictionPayload
         );
 
         // Latest market price
         $market = $marketService->latestPrice(
-            $prediction['recommended_crop']
+            $predictionPayload['recommended_crop']
         );
 
         // Save prediction history
         $this->service->savePrediction(
             $request->user(),
             $input,
-            $prediction,
+            $predictionPayload,
             $request
         );
 
@@ -147,11 +149,19 @@ class AIPredictionController extends Controller
 
             'prediction' => [
 
-                'recommended_crop' => $prediction['recommended_crop'],
+                'recommended_crop' => $predictionPayload['recommended_crop'],
 
-                'recommended_crops' => $prediction['recommended_crops'] ?? [],
+                'recommended_crops' => $predictionPayload['recommended_crops'] ?? [],
 
-                'confidence' => $prediction['confidence'],
+                'confidence' => $predictionPayload['confidence'],
+
+                'confidence_score' => $predictionPayload['confidence_score'],
+
+                'confidence_percentage' => $predictionPayload['confidence_percentage'],
+
+                'model_probability' => $predictionPayload['model_probability'] ?? null,
+
+                'raw_confidence' => $predictionPayload['raw_confidence'] ?? null,
 
                 'explanation' => $explanation,
 
