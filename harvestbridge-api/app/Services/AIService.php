@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Crop;
 use App\Models\PredictionHistory;
+use App\Support\MediaStorage;
 use Illuminate\Support\Facades\Http;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class AIService
 {
+    private const DISEASE_IMAGE_DIRECTORY = 'ai/disease-detection';
+
     private const HISTORICAL_SCORE_FIELDS = [
         'Rainfall(mm)',
         'Temperature(C)',
@@ -308,6 +311,11 @@ class AIService
         }
 
         $normalized = $this->normalizeDiseasePrediction($payload);
+        $imagePath = MediaStorage::storeUploadedFile(
+            $image,
+            self::DISEASE_IMAGE_DIRECTORY.'/'.$user->id
+        );
+        $imageUrl = MediaStorage::url($imagePath, $request);
 
         $this->auditLogService->log(
             'ai.disease.prediction.requested',
@@ -317,11 +325,17 @@ class AIService
                 'disease_name' => $normalized['disease_name'],
                 'confidence' => $normalized['confidence'],
                 'image_name' => $image->getClientOriginalName(),
+                'image_path' => $imagePath,
+                'image_url' => $imageUrl,
             ],
             $request
         );
 
-        return $normalized;
+        return [
+            ...$normalized,
+            'image_path' => $imagePath,
+            'image_url' => $imageUrl,
+        ];
     }
 
     private function buildPredictionPayload(array $data): array

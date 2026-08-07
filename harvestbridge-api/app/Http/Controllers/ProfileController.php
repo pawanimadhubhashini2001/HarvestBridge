@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Resources\ProfileResource;
 use App\Services\ProfileService;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class ProfileController extends Controller
         );
 
         return ApiResponse::success(
-            $profile,
+            new ProfileResource($profile),
             'Profile retrieved successfully'
         );
     }
@@ -33,7 +34,7 @@ class ProfileController extends Controller
         );
 
         return ApiResponse::success(
-            $profile,
+            new ProfileResource($profile),
             'Profile updated successfully'
         );
     }

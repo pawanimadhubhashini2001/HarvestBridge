@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,7 +21,9 @@ class StoreReviewResource extends JsonResource
             'reviewer' => $this->whenLoaded('reviewer', fn () => [
                 'id' => $this->reviewer?->id,
                 'name' => $this->reviewer?->name,
-                'profile_photo' => $this->reviewer?->profile_photo,
+                'profile_photo' => $this->reviewer?->profile_photo
+                    ? MediaStorage::url($this->reviewer->profile_photo, $request)
+                    : null,
             ]),
             'can_edit' => $request->user()?->id === $this->reviewer_id,
             'created_at' => $this->created_at,

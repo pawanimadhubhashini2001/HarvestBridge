@@ -34,10 +34,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/auth/register/request-otp', [AuthController::class, 'requestRegistrationOtp']);
-Route::post('/auth/register/verify-otp', [AuthController::class, 'verifyRegistrationOtp']);
-Route::post('/auth/login/request-otp', [AuthController::class, 'requestLoginOtp']);
-Route::post('/auth/login/verify-otp', [AuthController::class, 'verifyLoginOtp']);
+//Route::post('/auth/register/request-otp', [AuthController::class, 'requestRegistrationOtp']);
+//Route::post('/auth/register/verify-otp', [AuthController::class, 'verifyRegistrationOtp']);
+//Route::post('/auth/login/request-otp', [AuthController::class, 'requestLoginOtp']);
+//Route::post('/auth/login/verify-otp', [AuthController::class, 'verifyLoginOtp']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 // =============================

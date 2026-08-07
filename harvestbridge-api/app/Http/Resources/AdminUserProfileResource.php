@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\MediaStorage;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,7 +23,9 @@ class AdminUserProfileResource extends JsonResource
             'longitude' => $this->longitude,
             'organization_name' => $this->organization_name,
             'company_name' => $this->company_name,
-            'profile_photo' => $this->profile_photo,
+            'profile_photo' => $this->profile_photo
+                ? MediaStorage::url($this->profile_photo, $request)
+                : null,
             'email_verified_at' => $this->email_verified_at,
             'counts' => [
                 'stores' => (int) ($this->farms_count ?? 0),

@@ -20,6 +20,10 @@ class MediaStorage
             return null;
         }
 
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
         $url = self::resolveUrl($path);
 
         if (

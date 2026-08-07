@@ -31,7 +31,14 @@ class UpdateProfileRequest extends FormRequest
 
             'company_name' => 'nullable|string|max:255',
 
-            'profile_photo' => 'nullable|string'
+            'profile_photo' => [
+                'sometimes',
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
 
         ];
     }

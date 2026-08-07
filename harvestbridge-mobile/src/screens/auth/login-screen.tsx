@@ -6,7 +6,8 @@ import { Pressable, TouchableOpacity, View } from 'react-native';
 import { Checkbox, Divider, Text, TextInput as PaperTextInput } from 'react-native-paper';
 import { z } from 'zod';
 
-import { requestLoginOtp, verifyLoginOtp } from '@/api/auth.api';
+//import { requestLoginOtp, verifyLoginOtp } from '@/api/auth.api';
+import { login } from '@/api/auth.api';
 import { AppButton } from '@/components/common/app-button';
 import { AppTextInput } from '@/components/form/app-text-input';
 import { Screen } from '@/components/layout/screen';
@@ -52,93 +53,113 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
     mode: 'onChange',
   });
 
-  const requestOtpMutation = useMutation({
-    mutationFn: async (values: LoginMutationVariables) =>
-      requestLoginOtp({
-        email: values.email.trim(),
-        password: values.password,
-      }),
-    onSuccess: (_, variables) => {
-      setApiError(null);
-      setIsOtpStep(true);
-      setOtpSentToEmail(variables.email.trim());
-      setSuccessMessage('OTP sent to your email. Enter the code to finish login.');
-    },
-    onError: (error: AppError) => {
-      setSuccessMessage(null);
-      setApiError(error.message);
+  // const requestOtpMutation = useMutation({
+  //   mutationFn: async (values: LoginMutationVariables) =>
+  //     requestLoginOtp({
+  //       email: values.email.trim(),
+  //       password: values.password,
+  //     }),
+  //   onSuccess: (_, variables) => {
+  //     setApiError(null);
+  //     setIsOtpStep(true);
+  //     setOtpSentToEmail(variables.email.trim());
+  //     setSuccessMessage('OTP sent to your email. Enter the code to finish login.');
+  //   },
+  //   onError: (error: AppError) => {
+  //     setSuccessMessage(null);
+  //     setApiError(error.message);
 
-      const emailError = error.errors?.email;
-      const passwordError = error.errors?.password;
+  //     const emailError = error.errors?.email;
+  //     const passwordError = error.errors?.password;
 
-      if (emailError) {
-        setError('email', {
-          message: Array.isArray(emailError) ? emailError[0] : emailError,
-        });
-      }
+  //     if (emailError) {
+  //       setError('email', {
+  //         message: Array.isArray(emailError) ? emailError[0] : emailError,
+  //       });
+  //     }
 
-      if (passwordError) {
-        setError('password', {
-          message: Array.isArray(passwordError) ? passwordError[0] : passwordError,
-        });
-      }
-    },
-  });
+  //     if (passwordError) {
+  //       setError('password', {
+  //         message: Array.isArray(passwordError) ? passwordError[0] : passwordError,
+  //       });
+  //     }
+  //   },
+  // });
 
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (values: LoginMutationVariables) =>
-      verifyLoginOtp({
-        email: values.email.trim(),
-        otp: values.otp?.trim() ?? '',
-      }),
-    onSuccess: async (session, variables) => {
-      clearAuthError();
-      setApiError(null);
-      setSuccessMessage(null);
-      await setSession(session, { persist: variables.rememberMe });
-    },
-    onError: (error: AppError) => {
-      setSuccessMessage(null);
-      setApiError(error.message);
+  // const verifyOtpMutation = useMutation({
+  //   mutationFn: async (values: LoginMutationVariables) =>
+  //     verifyLoginOtp({
+  //       email: values.email.trim(),
+  //       otp: values.otp?.trim() ?? '',
+  //     }),
+  //   onSuccess: async (session, variables) => {
+  //     clearAuthError();
+  //     setApiError(null);
+  //     setSuccessMessage(null);
+  //     await setSession(session, { persist: variables.rememberMe });
+  //   },
+  //   onError: (error: AppError) => {
+  //     setSuccessMessage(null);
+  //     setApiError(error.message);
 
-      const emailError = error.errors?.email;
-      const otpError = error.errors?.otp;
+  //     const emailError = error.errors?.email;
+  //     const otpError = error.errors?.otp;
 
-      if (emailError) {
-        setError('email', {
-          message: Array.isArray(emailError) ? emailError[0] : emailError,
-        });
-      }
+  //     if (emailError) {
+  //       setError('email', {
+  //         message: Array.isArray(emailError) ? emailError[0] : emailError,
+  //       });
+  //     }
 
-      if (otpError) {
-        setError('otp', {
-          message: Array.isArray(otpError) ? otpError[0] : otpError,
-        });
-      }
-    },
-  });
+  //     if (otpError) {
+  //       setError('otp', {
+  //         message: Array.isArray(otpError) ? otpError[0] : otpError,
+  //       });
+  //     }
+  //   },
+  // });
 
+  const loginMutation = useMutation({
+  mutationFn: async (values: LoginMutationVariables) =>
+    login({
+      email: values.email.trim(),
+      password: values.password,
+    }),
+  onSuccess: async (session, variables) => {
+    clearAuthError();
+    setApiError(null);
+    setSuccessMessage(null);
+    await setSession(session, { persist: variables.rememberMe });
+  },
+  onError: (error: AppError) => {
+    setApiError(error.message);
+  },
+});
+  
   const onSubmit = handleSubmit(async (values) => {
     clearAuthError();
     setApiError(null);
     setSuccessMessage(null);
 
-    if (isOtpStep && !values.otp?.trim()) {
-      setError('otp', { message: 'OTP is required.' });
-      return;
-    }
+    // if (isOtpStep && !values.otp?.trim()) {
+    //   setError('otp', { message: 'OTP is required.' });
+    //   return;
+    // }
 
-    if (isOtpStep) {
-      await verifyOtpMutation.mutateAsync(values);
-      return;
-    }
+    // if (isOtpStep) {
+    //   await verifyOtpMutation.mutateAsync(values);
+    //   return;
+    // }
 
-    await requestOtpMutation.mutateAsync(values);
+    // await requestOtpMutation.mutateAsync(values);
+
+    await loginMutation.mutateAsync(values);
   });
 
   const passwordValue = watch('password');
   const otpValue = watch('otp');
-  const isSubmitting = requestOtpMutation.isPending || verifyOtpMutation.isPending;
+  // const isSubmitting = requestOtpMutation.isPending || verifyOtpMutation.isPending;
+  const isSubmitting = loginMutation.isPending;
   const canSubmit =
     isValid
     && !isSubmitting

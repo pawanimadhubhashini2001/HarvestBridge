@@ -6,7 +6,8 @@ import { Pressable, TouchableOpacity, View } from 'react-native';
 import { Divider, RadioButton, Text, TextInput as PaperTextInput } from 'react-native-paper';
 import { z } from 'zod';
 
-import { requestRegistrationOtp, verifyRegistrationOtp } from '@/api/auth.api';
+//import { requestRegistrationOtp, verifyRegistrationOtp } from '@/api/auth.api';
+import { register } from '@/api/auth.api';
 import { AppButton } from '@/components/common/app-button';
 import { AppTextInput } from '@/components/form/app-text-input';
 import { Screen } from '@/components/layout/screen';
@@ -73,96 +74,117 @@ export function RegisterScreen({ navigation }: AuthScreenProps<'Register'>) {
     mode: 'onChange',
   });
 
-  const requestOtpMutation = useMutation({
-    mutationFn: async (values: RegisterMutationVariables) =>
-      requestRegistrationOtp({
-        name: values.name.trim(),
-        email: values.email.trim(),
-        role: values.role,
-        password: values.password,
-        password_confirmation: values.password_confirmation,
-      }),
-    onSuccess: (_, variables) => {
-      setApiError(null);
-      setRegistrationEmail(variables.email.trim());
-      setIsOtpStep(true);
-      setSuccessMessage('OTP sent to your email. Enter the code to finish registration.');
-    },
-    onError: (error: AppError) => {
-      setSuccessMessage(null);
-      setApiError(error.message);
+  // const requestOtpMutation = useMutation({
+  //   mutationFn: async (values: RegisterMutationVariables) =>
+  //     requestRegistrationOtp({
+  //       name: values.name.trim(),
+  //       email: values.email.trim(),
+  //       role: values.role,
+  //       password: values.password,
+  //       password_confirmation: values.password_confirmation,
+  //     }),
+  //   onSuccess: (_, variables) => {
+  //     setApiError(null);
+  //     setRegistrationEmail(variables.email.trim());
+  //     setIsOtpStep(true);
+  //     setSuccessMessage('OTP sent to your email. Enter the code to finish registration.');
+  //   },
+  //   onError: (error: AppError) => {
+  //     setSuccessMessage(null);
+  //     setApiError(error.message);
 
-      const fields: (keyof RegisterFormValues)[] = [
-        'name',
-        'email',
-        'role',
-        'password',
-        'password_confirmation',
-      ];
+  //     const fields: (keyof RegisterFormValues)[] = [
+  //       'name',
+  //       'email',
+  //       'role',
+  //       'password',
+  //       'password_confirmation',
+  //     ];
 
-      for (const field of fields) {
-        const fieldError = error.errors?.[field];
+  //     for (const field of fields) {
+  //       const fieldError = error.errors?.[field];
 
-        if (fieldError) {
-          setError(field, {
-            message: Array.isArray(fieldError) ? fieldError[0] : fieldError,
-          });
-        }
-      }
-    },
-  });
+  //       if (fieldError) {
+  //         setError(field, {
+  //           message: Array.isArray(fieldError) ? fieldError[0] : fieldError,
+  //         });
+  //       }
+  //     }
+  //   },
+  // });
 
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (values: RegisterMutationVariables) =>
-      verifyRegistrationOtp({
-        email: registrationEmail ?? values.email.trim(),
-        otp: values.otp?.trim() ?? '',
-      }),
-    onSuccess: async (session) => {
-      setApiError(null);
-      setSuccessMessage('Account verified successfully. Signing you in...');
-      await setSession(session);
-    },
-    onError: (error: AppError) => {
-      setSuccessMessage(null);
-      setApiError(error.message);
+  // const verifyOtpMutation = useMutation({
+  //   mutationFn: async (values: RegisterMutationVariables) =>
+  //     verifyRegistrationOtp({
+  //       email: registrationEmail ?? values.email.trim(),
+  //       otp: values.otp?.trim() ?? '',
+  //     }),
+  //   onSuccess: async (session) => {
+  //     setApiError(null);
+  //     setSuccessMessage('Account verified successfully. Signing you in...');
+  //     await setSession(session);
+  //   },
+  //   onError: (error: AppError) => {
+  //     setSuccessMessage(null);
+  //     setApiError(error.message);
 
-      const emailError = error.errors?.email;
-      const otpError = error.errors?.otp;
+  //     const emailError = error.errors?.email;
+  //     const otpError = error.errors?.otp;
 
-      if (emailError) {
-        setError('email', {
-          message: Array.isArray(emailError) ? emailError[0] : emailError,
-        });
-      }
+  //     if (emailError) {
+  //       setError('email', {
+  //         message: Array.isArray(emailError) ? emailError[0] : emailError,
+  //       });
+  //     }
 
-      if (otpError) {
-        setError('otp', {
-          message: Array.isArray(otpError) ? otpError[0] : otpError,
-        });
-      }
-    },
-  });
+  //     if (otpError) {
+  //       setError('otp', {
+  //         message: Array.isArray(otpError) ? otpError[0] : otpError,
+  //       });
+  //     }
+  //   },
+  // });
+
+  const registerMutation = useMutation({
+  mutationFn: async (values: RegisterMutationVariables) =>
+    register({
+      name: values.name.trim(),
+      email: values.email.trim(),
+      role: values.role,
+      password: values.password,
+      password_confirmation: values.password_confirmation,
+    }),
+  onSuccess: async (session) => {
+    setApiError(null);
+    setSuccessMessage('Account created successfully. Signing you in...');
+    await setSession(session);
+  },
+  onError: (error: AppError) => {
+    setApiError(error.message);
+  },
+});
 
   const onSubmit = handleSubmit(async (values) => {
     setApiError(null);
     setSuccessMessage(null);
 
-    if (isOtpStep) {
-      if (!values.otp?.trim()) {
-        setError('otp', { message: 'OTP is required.' });
-        return;
-      }
+    // if (isOtpStep) {
+    //   if (!values.otp?.trim()) {
+    //     setError('otp', { message: 'OTP is required.' });
+    //     return;
+    //   }
 
-      await verifyOtpMutation.mutateAsync(values);
-      return;
-    }
+    //   await verifyOtpMutation.mutateAsync(values);
+    //   return;
+    // }
 
-    await requestOtpMutation.mutateAsync(values);
+    // await requestOtpMutation.mutateAsync(values);
+    await registerMutation.mutateAsync(values);
   });
 
   const otpValue = watch('otp');
-  const isWorking = requestOtpMutation.isPending || verifyOtpMutation.isPending;
+  // const isWorking = requestOtpMutation.isPending || verifyOtpMutation.isPending;
+  const isWorking = registerMutation.isPending;
 
   return (
     <Screen scrollable contentClassName="justify-center">
