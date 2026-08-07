@@ -95,6 +95,20 @@ export interface CreatePreOrderProductPayload {
   description?: string;
 }
 
+export interface UpdatePreOrderProductPayload {
+  crop_id?: number | null;
+  crop_name?: string | null;
+  crop_category?: string | null;
+  expected_quantity?: number;
+  unit?: string;
+  price_per_unit?: number;
+  quality_grade?: string | null;
+  expected_harvest_date?: string;
+  order_deadline?: string | null;
+  status?: Extract<PreOrderProductStatus, 'open' | 'closed' | 'cancelled'>;
+  description?: string | null;
+}
+
 export interface CreatePreOrderRequestPayload {
   pre_order_product_id: number;
   quantity: number;
@@ -137,6 +151,18 @@ export async function getAvailablePreOrders() {
 export async function createPreOrderProduct(payload: CreatePreOrderProductPayload) {
   const response = await apiClient.post<ApiSuccessResponse<PreOrderProductDto>>(
     '/pre-order-products',
+    payload,
+  );
+
+  return response.data.data;
+}
+
+export async function updatePreOrderProduct(
+  productId: number | string,
+  payload: UpdatePreOrderProductPayload,
+) {
+  const response = await apiClient.put<ApiSuccessResponse<PreOrderProductDto>>(
+    `/pre-order-products/${productId}`,
     payload,
   );
 

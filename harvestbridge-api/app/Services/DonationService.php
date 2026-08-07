@@ -139,7 +139,16 @@ class DonationService
             $data['crop_category'] = $listing->crop?->category ?? $listing->crop_category;
         }
 
-        $donation->update($data);
+        DB::transaction(function () use ($donation, $data) {
+            $payload = $data;
+            unset($payload['images']);
+
+            $donation->update($payload);
+
+            if (array_key_exists('images', $data)) {
+                $this->replaceImages($donation, $data['images'] ?? []);
+            }
+        });
 
         return $donation->fresh()->load($this->resourceRelations());
     }
@@ -237,6 +246,29 @@ class DonationService
                 'sort_order' => $sortOrder,
             ]);
         }
+    }
+
+    /**
+     * @param UploadedFile[] $images
+     */
+    private function replaceImages(Donation $donation, array $images): void
+    {
+        if (count($images) > self::MAX_IMAGES_PER_DONATION) {
+            throw ValidationException::withMessages([
+                'images' => [
+                    'A donation may have up to '.self::MAX_IMAGES_PER_DONATION.' images.',
+                ],
+            ]);
+        }
+
+        $donation->loadMissing('images');
+
+        foreach ($donation->images as $image) {
+            MediaStorage::delete($image->image_path);
+        }
+
+        $donation->images()->delete();
+        $this->storeImages($donation, $images);
     }
 
     private function assertListingOwnership(HarvestListing $listing, User $farmer): void

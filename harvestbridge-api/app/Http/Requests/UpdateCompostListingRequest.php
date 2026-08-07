@@ -20,6 +20,7 @@ class UpdateCompostListingRequest extends FormRequest
             'crop_category' => 'sometimes|string|max:100',
             'quantity' => 'sometimes|numeric|min:1',
             'unit' => 'sometimes|string|max:20',
+            'price_per_unit' => 'sometimes|nullable|numeric|min:0',
             'pickup_location' => 'sometimes|string|max:255',
             'available_from' => 'sometimes|date',
             'available_until' => 'sometimes|nullable|date',

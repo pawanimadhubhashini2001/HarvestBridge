@@ -120,6 +120,17 @@ export interface CreateCompostListingPayload {
   images?: CompostListingImageAsset[];
 }
 
+type CompostListingFormPayload = Partial<Omit<
+  CreateCompostListingPayload,
+  'price_per_unit' | 'available_until' | 'notes'
+>> & {
+  price_per_unit?: number | null;
+  available_until?: string | null;
+  notes?: string | null;
+};
+
+export type UpdateCompostListingPayload = CompostListingFormPayload;
+
 export function getCompostListingsQueryKey() {
   return ['compost-listings'] as const;
 }
@@ -184,7 +195,7 @@ export async function createCompostListing(payload: CreateCompostListingPayload)
 
 export async function updateCompostListing(
   listingId: number,
-  payload: Partial<CreateCompostListingPayload>,
+  payload: UpdateCompostListingPayload,
 ) {
   const formData = buildCompostListingFormData(payload);
   formData.append('_method', 'PUT');
@@ -206,7 +217,7 @@ export async function deleteCompostListing(listingId: number) {
   await apiClient.delete(`/compost-listings/${listingId}`);
 }
 
-function buildCompostListingFormData(payload: Partial<CreateCompostListingPayload>) {
+function buildCompostListingFormData(payload: CompostListingFormPayload) {
   const formData = new FormData();
 
   if (payload.harvest_listing_id !== undefined) {
@@ -229,8 +240,10 @@ function buildCompostListingFormData(payload: Partial<CreateCompostListingPayloa
     formData.append('unit', payload.unit);
   }
 
-  if (payload.price_per_unit !== undefined) {
+  if (payload.price_per_unit !== undefined && payload.price_per_unit !== null) {
     formData.append('price_per_unit', String(payload.price_per_unit));
+  } else if (payload.price_per_unit === null) {
+    formData.append('price_per_unit', '');
   }
 
   if (payload.pickup_location !== undefined) {
@@ -243,6 +256,8 @@ function buildCompostListingFormData(payload: Partial<CreateCompostListingPayloa
 
   if (payload.available_until) {
     formData.append('available_until', payload.available_until);
+  } else if (payload.available_until === null) {
+    formData.append('available_until', '');
   }
 
   if (payload.description !== undefined) {
@@ -251,6 +266,8 @@ function buildCompostListingFormData(payload: Partial<CreateCompostListingPayloa
 
   if (payload.notes) {
     formData.append('notes', payload.notes);
+  } else if (payload.notes === null) {
+    formData.append('notes', '');
   }
 
   (payload.images ?? []).forEach((image) => {

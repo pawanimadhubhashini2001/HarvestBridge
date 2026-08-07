@@ -148,6 +148,9 @@ export function FarmerProductCard({
             <Button mode="outlined" onPress={onChangeStatus} disabled={busy}>
               Change Status
             </Button>
+            <Button mode="outlined" onPress={onManageGallery} disabled={busy}>
+              Gallery
+            </Button>
             <Button mode="outlined" textColor="#B42318" onPress={onDelete} disabled={busy}>
               Delete
             </Button>

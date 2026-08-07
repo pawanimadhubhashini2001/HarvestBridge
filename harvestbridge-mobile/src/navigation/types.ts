@@ -41,6 +41,7 @@ export type AppStackParamList = {
   };
   AddHarvestListing: {
     listingType?: 'product' | 'donation' | 'compost' | 'pre_order';
+    listingId?: number | string;
     compostListingId?: number;
   } | undefined;
   AddFarm: undefined;

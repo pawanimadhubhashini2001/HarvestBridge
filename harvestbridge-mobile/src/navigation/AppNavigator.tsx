@@ -72,13 +72,21 @@ export function AppNavigator() {
         component={AddHarvestListingScreen}
         options={({ route }) => ({
           title:
-            route.params?.listingType === 'compost' && route.params?.compostListingId
-              ? 'Edit Compost'
+            route.params?.listingId || route.params?.compostListingId
+              ? route.params?.listingType === 'pre_order'
+                ? 'Edit Pre-order'
+                : route.params?.listingType === 'donation'
+                  ? 'Edit Donation'
+                  : route.params?.listingType === 'compost'
+                    ? 'Edit Compost'
+                    : 'Edit Product'
               : route.params?.listingType === 'donation'
-              ? 'Add Donation'
-              : route.params?.listingType === 'compost'
-                ? 'Add Compost'
-                : 'Add Product',
+                ? 'Add Donation'
+                : route.params?.listingType === 'compost'
+                  ? 'Add Compost'
+                  : route.params?.listingType === 'pre_order'
+                    ? 'Add Pre-order'
+                    : 'Add Product',
         })}
       />
       <Stack.Screen

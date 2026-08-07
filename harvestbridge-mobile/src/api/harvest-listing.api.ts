@@ -70,6 +70,20 @@ export interface UpdateHarvestListingAvailabilityPayload {
   available_quantity?: number;
 }
 
+export interface UpdateHarvestListingPayload {
+  farm_id?: number | string;
+  crop_id?: number | null;
+  crop_name?: string | null;
+  crop_category?: string | null;
+  quantity?: number;
+  unit?: string;
+  price_per_unit?: number;
+  quality_grade?: string | null;
+  harvest_date?: string;
+  available_until?: string | null;
+  description?: string | null;
+}
+
 export function getHarvestListingsQueryKey() {
   return ['harvest-listings'] as const;
 }
@@ -83,6 +97,18 @@ export async function getHarvestListings() {
 export async function createHarvestListing(payload: CreateHarvestListingPayload) {
   const response = await apiClient.post<ApiSuccessResponse<HarvestListingDto>>(
     '/harvest-listings',
+    payload,
+  );
+
+  return response.data.data;
+}
+
+export async function updateHarvestListing(
+  listingId: number | string,
+  payload: UpdateHarvestListingPayload,
+) {
+  const response = await apiClient.put<ApiSuccessResponse<HarvestListingDto>>(
+    `/harvest-listings/${listingId}`,
     payload,
   );
 

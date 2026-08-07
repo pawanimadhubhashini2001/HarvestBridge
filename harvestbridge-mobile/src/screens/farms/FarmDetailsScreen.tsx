@@ -261,6 +261,11 @@ function StoreListingManagementCard({
             <Button mode="outlined" onPress={onEdit} disabled={busy}>
               Edit
             </Button>
+            {onManageGallery ? (
+              <Button mode="outlined" onPress={onManageGallery} disabled={busy}>
+                Gallery
+              </Button>
+            ) : null}
             <Button mode="outlined" textColor="#B42318" onPress={onDelete} disabled={busy}>
               Delete
             </Button>
@@ -801,7 +806,10 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                     item={listing}
                     busy={updateAvailabilityMutation.isPending || deleteHarvestListingMutation.isPending}
                     onEdit={() => {
-                      openEditDialog(listing);
+                      navigation.navigate('AddHarvestListing', {
+                        listingType: 'product',
+                        listingId: listing.id,
+                      });
                     }}
                     onChangeStatus={() => {
                       openStatusDialog(listing);
@@ -882,7 +890,10 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                     description={product.description ?? null}
                     busy={deletePreOrderProductMutation.isPending}
                     onEdit={() => {
-                      setFeedbackMessage('Pre-order editing is prepared for the next form update.');
+                      navigation.navigate('AddHarvestListing', {
+                        listingType: 'pre_order',
+                        listingId: product.id,
+                      });
                     }}
                     onDelete={() => {
                       setSelectedPreOrderProduct(product);
@@ -958,10 +969,10 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                     description={donation.description ?? donation.notes ?? null}
                     busy={deleteDonationMutation.isPending}
                     onEdit={() => {
-                      setFeedbackMessage('Donation editing is prepared for the next form update.');
-                    }}
-                    onManageGallery={() => {
-                      setFeedbackMessage('Donation gallery management is prepared for the next form update.');
+                      navigation.navigate('AddHarvestListing', {
+                        listingType: 'donation',
+                        listingId: donation.id,
+                      });
                     }}
                     onDelete={() => {
                       setSelectedDonation(donation);
@@ -1037,10 +1048,10 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                     description={listing.description ?? listing.notes ?? null}
                     busy={deleteCompostListingMutation.isPending}
                     onEdit={() => {
-                      setFeedbackMessage('Compost editing is prepared for the next form update.');
-                    }}
-                    onManageGallery={() => {
-                      setFeedbackMessage('Compost gallery management is prepared for the next form update.');
+                      navigation.navigate('AddHarvestListing', {
+                        listingType: 'compost',
+                        listingId: listing.id,
+                      });
                     }}
                     onDelete={() => {
                       setSelectedCompostListing(listing);

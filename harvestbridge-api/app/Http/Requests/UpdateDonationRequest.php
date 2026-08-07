@@ -26,6 +26,8 @@ class UpdateDonationRequest extends FormRequest
             'pickup_date' => 'sometimes|nullable|date',
             'pickup_time' => 'sometimes|nullable',
             'available_until' => 'sometimes|date|after_or_equal:today',
+            'images' => ['sometimes', 'array', 'min:1', 'max:5'],
+            'images.*' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'notes' => 'sometimes|nullable|string|max:2000',
         ];
     }

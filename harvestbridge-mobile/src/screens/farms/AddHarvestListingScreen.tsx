@@ -10,17 +10,32 @@ import { z } from 'zod';
 
 import {
   createCompostListing,
+  getCompostListings,
   getCompostListingsQueryKey,
+  updateCompostListing,
+  type CompostListingDto,
 } from '@/api/compost-listing.api';
-import { createDonation, getDonationsQueryKey } from '@/api/donation.api';
+import {
+  createDonation,
+  getDonations,
+  getDonationsQueryKey,
+  updateDonation,
+  type DonationDto,
+} from '@/api/donation.api';
 import {
   createPreOrderProduct,
+  getPreOrderProducts,
   getPreOrderProductsQueryKey,
+  updatePreOrderProduct,
+  type PreOrderProductDto,
 } from '@/api/pre-order.api';
 import {
   createHarvestListing,
+  getHarvestListings,
   getHarvestListingsQueryKey,
+  updateHarvestListing,
   type HarvestListingImageAsset,
+  type HarvestListingDto,
   uploadHarvestListingImages,
 } from '@/api/harvest-listing.api';
 import { getMyStore, getMyStoreQueryKey, getStoreDetailsQueryKey } from '@/api/store.api';
@@ -49,6 +64,7 @@ const productCategories = [
   'Herbs & Spices',
   'Nuts & Seeds',
   'Coconut Products',
+  'Other',
 ] as const;
 const qualityGradeOptions = ['Premium', 'Second Grade'] as const;
 
@@ -327,6 +343,106 @@ function getListingLabel(listingType: ListingType) {
         : 'Product';
 }
 
+function toDateInputValue(value?: string | null) {
+  if (!value) {
+    return '';
+  }
+
+  return value.includes('T') ? value.split('T')[0] : value;
+}
+
+function getEditListingId(routeParams: AppStackScreenProps<'AddHarvestListing'>['route']['params']) {
+  return routeParams?.listingId ?? routeParams?.compostListingId ?? null;
+}
+
+function getEditFormValues({
+  listingType,
+  harvestListing,
+  preOrderProduct,
+  donation,
+  compostListing,
+}: {
+  listingType: ListingType;
+  harvestListing?: HarvestListingDto | null;
+  preOrderProduct?: PreOrderProductDto | null;
+  donation?: DonationDto | null;
+  compostListing?: CompostListingDto | null;
+}): AddListingFormValues | null {
+  if (listingType === 'product' && harvestListing) {
+    return {
+      listing_type: 'product',
+      category: (harvestListing.crop_category as AddListingFormValues['category']) ?? 'Vegetables',
+      crop_name: harvestListing.crop_name ?? harvestListing.crop ?? '',
+      quantity: String(harvestListing.quantity ?? ''),
+      unit: harvestListing.unit ?? 'kg',
+      price_per_unit: String(harvestListing.price_per_unit ?? ''),
+      quality_grade: harvestListing.quality_grade ?? '',
+      harvest_date: toDateInputValue(harvestListing.harvest_date),
+      available_until: toDateInputValue(harvestListing.available_until),
+      pickup_location: '',
+      description: harvestListing.description ?? '',
+    };
+  }
+
+  if (listingType === 'pre_order' && preOrderProduct) {
+    return {
+      listing_type: 'pre_order',
+      category: (preOrderProduct.crop_category as AddListingFormValues['category']) ?? 'Vegetables',
+      crop_name: preOrderProduct.crop_name ?? preOrderProduct.crop ?? '',
+      quantity: String(preOrderProduct.expected_quantity ?? ''),
+      unit: preOrderProduct.unit ?? 'kg',
+      price_per_unit: String(preOrderProduct.price_per_unit ?? ''),
+      quality_grade: preOrderProduct.quality_grade ?? '',
+      harvest_date: toDateInputValue(preOrderProduct.expected_harvest_date),
+      available_until: toDateInputValue(preOrderProduct.order_deadline),
+      pickup_location: '',
+      description: preOrderProduct.description ?? '',
+    };
+  }
+
+  if (listingType === 'donation' && donation) {
+    return {
+      listing_type: 'donation',
+      category: (
+        donation.product?.crop_category
+        ?? donation.crop_category
+        ?? 'Vegetables'
+      ) as AddListingFormValues['category'],
+      crop_name: donation.product?.crop_name ?? donation.crop_name ?? '',
+      quantity: String(donation.quantity ?? ''),
+      unit: donation.unit ?? 'kg',
+      price_per_unit: donation.price_per_unit !== null && donation.price_per_unit !== undefined
+        ? String(donation.price_per_unit)
+        : '',
+      quality_grade: '',
+      harvest_date: '',
+      available_until: toDateInputValue(donation.available_until),
+      pickup_location: donation.pickup_location ?? donation.location?.pickup_location ?? '',
+      description: donation.description ?? donation.notes ?? '',
+    };
+  }
+
+  if (listingType === 'compost' && compostListing) {
+    return {
+      listing_type: 'compost',
+      category: (compostListing.crop_category as AddListingFormValues['category']) ?? 'Vegetables',
+      crop_name: compostListing.waste_type ?? '',
+      quantity: String(compostListing.quantity ?? ''),
+      unit: compostListing.unit ?? 'kg',
+      price_per_unit: compostListing.price_per_unit !== null && compostListing.price_per_unit !== undefined
+        ? String(compostListing.price_per_unit)
+        : '',
+      quality_grade: '',
+      harvest_date: toDateInputValue(compostListing.available_from),
+      available_until: toDateInputValue(compostListing.available_until),
+      pickup_location: compostListing.pickup_location ?? '',
+      description: compostListing.description ?? compostListing.notes ?? '',
+    };
+  }
+
+  return null;
+}
+
 export function AddHarvestListingScreen({
   navigation,
   route,
@@ -336,10 +452,13 @@ export function AddHarvestListingScreen({
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [selectedImages, setSelectedImages] = useState<HarvestListingImageAsset[]>([]);
   const initialListingType = route.params?.listingType ?? 'product';
+  const editListingId = getEditListingId(route.params);
+  const isEditMode = editListingId !== null && editListingId !== undefined;
 
   const {
     control,
     handleSubmit,
+    reset,
     setError,
     setValue,
     watch,
@@ -383,19 +502,170 @@ export function AddHarvestListingScreen({
     queryFn: getMyStore,
   });
 
+  const editHarvestListingsQuery = useQuery({
+    queryKey: getHarvestListingsQueryKey(),
+    queryFn: getHarvestListings,
+    enabled: isEditMode && initialListingType === 'product',
+  });
+
+  const editPreOrderProductsQuery = useQuery({
+    queryKey: getPreOrderProductsQueryKey(),
+    queryFn: getPreOrderProducts,
+    enabled: isEditMode && initialListingType === 'pre_order',
+  });
+
+  const editDonationsQuery = useQuery({
+    queryKey: getDonationsQueryKey(),
+    queryFn: getDonations,
+    enabled: isEditMode && initialListingType === 'donation',
+  });
+
+  const editCompostListingsQuery = useQuery({
+    queryKey: getCompostListingsQueryKey(),
+    queryFn: getCompostListings,
+    enabled: isEditMode && initialListingType === 'compost',
+  });
+
+  const editingHarvestListing =
+    editHarvestListingsQuery.data?.find((listing) => String(listing.id) === String(editListingId))
+    ?? null;
+  const editingPreOrderProduct =
+    editPreOrderProductsQuery.data?.find((product) => String(product.id) === String(editListingId))
+    ?? null;
+  const editingDonation =
+    editDonationsQuery.data?.find((donation) => String(donation.id) === String(editListingId))
+    ?? null;
+  const editingCompostListing =
+    editCompostListingsQuery.data?.find((listing) => String(listing.id) === String(editListingId))
+    ?? null;
+
   useEffect(() => {
-    if (storeQuery.data?.address && !getValues('pickup_location')) {
+    if (!isEditMode && storeQuery.data?.address && !getValues('pickup_location')) {
       setValue('pickup_location', storeQuery.data.address, {
         shouldDirty: false,
         shouldValidate: false,
       });
     }
-  }, [getValues, setValue, storeQuery.data?.address]);
+  }, [getValues, isEditMode, setValue, storeQuery.data?.address]);
+
+  useEffect(() => {
+    if (!isEditMode) {
+      return;
+    }
+
+    const values = getEditFormValues({
+      listingType: initialListingType,
+      harvestListing: editingHarvestListing,
+      preOrderProduct: editingPreOrderProduct,
+      donation: editingDonation,
+      compostListing: editingCompostListing,
+    });
+
+    if (!values) {
+      return;
+    }
+
+    reset(values);
+    setSelectedImages([]);
+  }, [
+    editingCompostListing,
+    editingDonation,
+    editingHarvestListing,
+    editingPreOrderProduct,
+    initialListingType,
+    isEditMode,
+    reset,
+  ]);
 
   const createListingMutation = useMutation({
     mutationFn: async (values: AddListingSubmitValues) => {
       if (!storeQuery.data?.id) {
         throw new Error('Create your store profile before adding listings.');
+      }
+
+      if (isEditMode) {
+        if (!editListingId) {
+          throw new Error('Select a listing to edit.');
+        }
+
+        if (values.listing_type === 'pre_order') {
+          return {
+            listingType: values.listing_type,
+            result: await updatePreOrderProduct(editListingId, {
+              crop_name: values.crop_name.trim(),
+              crop_category: values.category,
+              expected_quantity: Number(values.quantity),
+              unit: values.unit.trim(),
+              price_per_unit: Number(values.price_per_unit),
+              quality_grade: values.quality_grade.trim() || null,
+              expected_harvest_date: values.harvest_date.trim(),
+              order_deadline: values.available_until.trim() || null,
+              description: values.description.trim() || null,
+            }),
+          };
+        }
+
+        if (values.listing_type === 'donation') {
+          return {
+            listingType: values.listing_type,
+            result: await updateDonation(editListingId, {
+              crop_name: values.crop_name.trim(),
+              crop_category: values.category,
+              quantity: Number(values.quantity),
+              unit: values.unit.trim(),
+              price_per_unit: values.price_per_unit.trim()
+                ? Number(values.price_per_unit)
+                : null,
+              description: values.description.trim(),
+              pickup_location: values.pickup_location.trim(),
+              available_until: values.available_until.trim(),
+              ...(selectedImages.length > 0 ? { images: selectedImages } : {}),
+            }),
+          };
+        }
+
+        if (values.listing_type === 'compost') {
+          return {
+            listingType: values.listing_type,
+            result: await updateCompostListing(Number(editListingId), {
+              waste_type: values.crop_name.trim(),
+              crop_category: values.category ?? 'Other',
+              quantity: Number(values.quantity),
+              unit: values.unit.trim(),
+              price_per_unit: values.price_per_unit.trim()
+                ? Number(values.price_per_unit)
+                : null,
+              pickup_location: values.pickup_location.trim(),
+              available_from: values.harvest_date.trim(),
+              available_until: values.available_until.trim() || null,
+              description: values.description.trim(),
+              ...(selectedImages.length > 0 ? { images: selectedImages } : {}),
+            }),
+          };
+        }
+
+        const updatedListing = await updateHarvestListing(editListingId, {
+          farm_id: storeQuery.data.id,
+          crop_name: values.crop_name.trim(),
+          crop_category: values.category,
+          quantity: Number(values.quantity),
+          unit: values.unit.trim(),
+          price_per_unit: Number(values.price_per_unit),
+          quality_grade: values.quality_grade.trim() || null,
+          harvest_date: values.harvest_date.trim(),
+          available_until: values.available_until.trim() || null,
+          description: values.description.trim() || null,
+        });
+
+        const finalListing =
+          selectedImages.length > 0
+            ? await uploadHarvestListingImages(updatedListing.id, selectedImages)
+            : updatedListing;
+
+        return {
+          listingType: values.listing_type,
+          result: finalListing,
+        };
       }
 
       if (values.listing_type === 'pre_order') {
@@ -502,7 +772,9 @@ export function AddHarvestListingScreen({
           : Promise.resolve(),
       ]);
 
-      setFeedbackMessage(`${listingLabel} created successfully. Returning to your store profile...`);
+      setFeedbackMessage(
+        `${listingLabel} ${isEditMode ? 'updated' : 'created'} successfully. Returning to your store profile...`,
+      );
 
       setTimeout(() => {
         navigation.replace('FarmDetails', {
@@ -660,6 +932,57 @@ export function AddHarvestListingScreen({
     );
   }
 
+  const editDataQuery =
+    initialListingType === 'pre_order'
+      ? editPreOrderProductsQuery
+      : initialListingType === 'donation'
+        ? editDonationsQuery
+        : initialListingType === 'compost'
+          ? editCompostListingsQuery
+          : editHarvestListingsQuery;
+  const hasLoadedEditData = !isEditMode || editDataQuery.isSuccess;
+  const hasEditingRecord = Boolean(
+    initialListingType === 'pre_order'
+      ? editingPreOrderProduct
+      : initialListingType === 'donation'
+        ? editingDonation
+        : initialListingType === 'compost'
+          ? editingCompostListing
+          : editingHarvestListing,
+  );
+
+  if (isEditMode && editDataQuery.isLoading) {
+    return <LoadingState message={`Loading ${listingLabel.toLowerCase()} details...`} />;
+  }
+
+  if (isEditMode && editDataQuery.isError) {
+    return (
+      <ErrorState
+        title={`Unable to load ${listingLabel.toLowerCase()}`}
+        message={getErrorMessage(editDataQuery.error)}
+        actionLabel="Retry"
+        onAction={() => {
+          void editDataQuery.refetch();
+        }}
+      />
+    );
+  }
+
+  if (isEditMode && hasLoadedEditData && !hasEditingRecord) {
+    return (
+      <ErrorState
+        title={`${listingLabel} not found`}
+        message="The selected listing could not be found in your store."
+        actionLabel="Back to Store"
+        onAction={() => {
+          navigation.replace('FarmDetails', {
+            farmId: String(storeQuery.data?.id ?? ''),
+          });
+        }}
+      />
+    );
+  }
+
   return (
     <Screen scrollable contentClassName="gap-lg">
       <View
@@ -667,10 +990,10 @@ export function AddHarvestListingScreen({
         style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }}
       >
         <Text variant="headlineMedium" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-          Add {listingLabel}
+          {isEditMode ? 'Edit' : 'Add'} {listingLabel}
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          {typeDescription}
+          {isEditMode ? `Update this ${listingLabel.toLowerCase()} listing.` : typeDescription}
         </Text>
       </View>
 
@@ -687,6 +1010,7 @@ export function AddHarvestListingScreen({
               <Chip
                 key={typeOption}
                 selected={listingType === typeOption}
+                disabled={isEditMode || createListingMutation.isPending}
                 onPress={() => {
                   setValue('listing_type', typeOption, {
                     shouldDirty: true,
@@ -1019,7 +1343,7 @@ export function AddHarvestListingScreen({
                 void onSubmit();
               }}
             >
-              Save {listingLabel}
+              {isEditMode ? 'Update' : 'Save'} {listingLabel}
             </Button>
           </View>
         </View>

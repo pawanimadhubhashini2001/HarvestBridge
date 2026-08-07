@@ -155,6 +155,22 @@ export interface CreateDonationPayload {
   }[];
 }
 
+export interface UpdateDonationPayload {
+  harvest_listing_id?: number | null;
+  crop_name?: string | null;
+  crop_category?: string | null;
+  quantity?: number;
+  unit?: string;
+  price_per_unit?: number | null;
+  description?: string;
+  pickup_location?: string;
+  pickup_date?: string | null;
+  pickup_time?: string | null;
+  available_until?: string;
+  notes?: string | null;
+  images?: CreateDonationPayload['images'];
+}
+
 export function getDonationsQueryKey() {
   return ['donations'] as const;
 }
@@ -254,6 +270,101 @@ export async function createDonation(payload: CreateDonationPayload) {
 
   const response = await apiClient.post<ApiSuccessResponse<DonationDto>>(
     '/donations',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    },
+  );
+
+  return response.data.data;
+}
+
+export async function updateDonation(
+  donationId: number | string,
+  payload: UpdateDonationPayload,
+) {
+  const formData = new FormData();
+
+  if (payload.harvest_listing_id !== undefined && payload.harvest_listing_id !== null) {
+    formData.append('harvest_listing_id', String(payload.harvest_listing_id));
+  } else if (payload.harvest_listing_id === null) {
+    formData.append('harvest_listing_id', '');
+  }
+
+  if (payload.crop_name !== undefined && payload.crop_name !== null) {
+    formData.append('crop_name', payload.crop_name);
+  } else if (payload.crop_name === null) {
+    formData.append('crop_name', '');
+  }
+
+  if (payload.crop_category !== undefined && payload.crop_category !== null) {
+    formData.append('crop_category', payload.crop_category);
+  } else if (payload.crop_category === null) {
+    formData.append('crop_category', '');
+  }
+
+  if (payload.quantity !== undefined) {
+    formData.append('quantity', String(payload.quantity));
+  }
+
+  if (payload.unit !== undefined) {
+    formData.append('unit', payload.unit);
+  }
+
+  if (payload.price_per_unit !== undefined && payload.price_per_unit !== null) {
+    formData.append('price_per_unit', String(payload.price_per_unit));
+  } else if (payload.price_per_unit === null) {
+    formData.append('price_per_unit', '');
+  }
+
+  if (payload.description !== undefined) {
+    formData.append('description', payload.description);
+  }
+
+  if (payload.pickup_location !== undefined) {
+    formData.append('pickup_location', payload.pickup_location);
+  }
+
+  if (payload.pickup_date !== undefined && payload.pickup_date !== null) {
+    formData.append('pickup_date', payload.pickup_date);
+  } else if (payload.pickup_date === null) {
+    formData.append('pickup_date', '');
+  }
+
+  if (payload.pickup_time !== undefined && payload.pickup_time !== null) {
+    formData.append('pickup_time', payload.pickup_time);
+  } else if (payload.pickup_time === null) {
+    formData.append('pickup_time', '');
+  }
+
+  if (payload.available_until !== undefined) {
+    formData.append('available_until', payload.available_until);
+  }
+
+  if (payload.notes !== undefined && payload.notes !== null) {
+    formData.append('notes', payload.notes);
+  } else if (payload.notes === null) {
+    formData.append('notes', '');
+  }
+
+  (payload.images ?? []).forEach((image) => {
+    const imageFile =
+      image.file
+      ?? ({
+        uri: image.uri,
+        name: image.name,
+        type: image.type,
+      } as unknown as Blob);
+
+    formData.append('images[]', imageFile, image.name);
+  });
+
+  formData.append('_method', 'PUT');
+
+  const response = await apiClient.post<ApiSuccessResponse<DonationDto>>(
+    `/donations/${donationId}`,
     formData,
     {
       headers: {
