@@ -54,9 +54,12 @@ class HarvestListingController extends Controller
     ) {
         $this->authorize('update', $harvestListing);
 
+        $setPrimary = $request->boolean('set_primary', true);
+
         $listing = $this->service->uploadImages(
             $harvestListing,
-            $request->file('images', [])
+            $request->file('images', []),
+            $setPrimary
         );
 
         return ApiResponse::success(

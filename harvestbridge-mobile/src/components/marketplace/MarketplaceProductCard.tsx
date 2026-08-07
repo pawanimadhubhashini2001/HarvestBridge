@@ -78,6 +78,10 @@ function formatStatusLabel(status: string) {
 }
 
 function getPrimaryImageUrl(item: MarketplaceCardItem) {
+  if ('primary_image' in item && item.primary_image?.url) {
+    return item.primary_image.url;
+  }
+
   if ('images' in item && Array.isArray(item.images) && item.images.length > 0) {
     return item.images[0]?.url ?? null;
   }

@@ -16,6 +16,7 @@ class StoreHarvestListingImagesRequest extends FormRequest
         return [
             'images' => ['required', 'array', 'min:1', 'max:5'],
             'images.*' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'set_primary' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -143,6 +143,7 @@ export async function deleteHarvestListing(listingId: number | string) {
 export async function uploadHarvestListingImages(
   listingId: number | string,
   images: HarvestListingImageAsset[],
+  setPrimary: boolean = true,
 ) {
   const formData = new FormData();
 
@@ -157,6 +158,10 @@ export async function uploadHarvestListingImages(
 
     formData.append('images[]', imageFile, image.name);
   });
+
+  if (setPrimary) {
+    formData.append('set_primary', '1');
+  }
 
   const response = await apiClient.post<ApiSuccessResponse<HarvestListingDto>>(
     `/harvest-listings/${listingId}/images`,

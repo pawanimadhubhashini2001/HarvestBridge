@@ -349,7 +349,7 @@ class HarvestListingService
     /**
      * @param  UploadedFile[]  $images
      */
-    public function uploadImages(HarvestListing $listing, array $images)
+    public function uploadImages(HarvestListing $listing, array $images, bool $setPrimary = true)
     {
         $currentImageCount = $listing->images()->count();
         $incomingImageCount = count($images);
@@ -362,10 +362,11 @@ class HarvestListingService
             ]);
         }
 
-        DB::transaction(function () use ($listing, $images) {
+        $createdImages = DB::transaction(function () use ($listing, $images) {
             $nextSortOrder =
                 (int) ($listing->images()->max('sort_order') ?? 0);
 
+            $newModels = [];
             foreach ($images as $image) {
                 $nextSortOrder++;
 
@@ -374,12 +375,18 @@ class HarvestListingService
                     self::IMAGE_DIRECTORY.'/'.$listing->id
                 );
 
-                $listing->images()->create([
+                $newModels[] = $listing->images()->create([
                     'image_path' => $path,
                     'sort_order' => $nextSortOrder,
                 ]);
             }
+
+            return $newModels;
         });
+
+        if ($setPrimary && ! empty($createdImages)) {
+            $this->setPrimaryImage($listing, $createdImages[0]);
+        }
 
         return $listing->fresh()->load(self::SUMMARY_RELATIONS);
     }

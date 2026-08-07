@@ -65,7 +65,7 @@ export function FarmerProductCard({
   busy = false,
 }: FarmerProductCardProps) {
   const theme = useAppTheme();
-  const primaryImageUrl = item.images[0]?.url ?? null;
+  const primaryImageUrl = item.primary_image?.url ?? item.images[0]?.url ?? null;
   const availableQuantity = Number(item.available_quantity);
   const reservedQuantity = Number(item.reserved_quantity);
   const hasAvailableStock = Number.isFinite(availableQuantity) && availableQuantity > 0;
@@ -115,6 +115,7 @@ export function FarmerProductCard({
 
               <View className="flex-row flex-wrap gap-sm">
                 <Chip compact>{item.status_label ?? item.status}</Chip>
+                {item.quality_grade ? <Chip compact>Grade: {item.quality_grade}</Chip> : null}
                 <Chip compact>
                   {formatQuantity(item.available_quantity, item.unit)} available
                 </Chip>
