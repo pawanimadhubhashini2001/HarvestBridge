@@ -175,7 +175,6 @@ function StoreListingManagementCard({
   description,
   onEdit,
   onDelete,
-  onManageGallery,
   busy = false,
 }: {
   title: string;
@@ -190,7 +189,6 @@ function StoreListingManagementCard({
   description?: string | null;
   onEdit: () => void;
   onDelete: () => void;
-  onManageGallery?: () => void;
   busy?: boolean;
 }) {
   const theme = useAppTheme();
@@ -261,11 +259,6 @@ function StoreListingManagementCard({
             <Button mode="outlined" onPress={onEdit} disabled={busy}>
               Edit
             </Button>
-            {onManageGallery ? (
-              <Button mode="outlined" onPress={onManageGallery} disabled={busy}>
-                Gallery
-              </Button>
-            ) : null}
             <Button mode="outlined" textColor="#B42318" onPress={onDelete} disabled={busy}>
               Delete
             </Button>
@@ -816,11 +809,6 @@ export function FarmDetailsScreen({ navigation }: AppStackScreenProps<'FarmDetai
                     }}
                     onHideToggle={() => {
                       void handleHideToggle(listing);
-                    }}
-                    onManageGallery={() => {
-                      setGalleryListingId((currentId) =>
-                        currentId === listing.id ? null : listing.id,
-                      );
                     }}
                     onDelete={() => {
                       openDeleteDialog(listing);

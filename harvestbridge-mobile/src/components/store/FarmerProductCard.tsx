@@ -10,7 +10,6 @@ interface FarmerProductCardProps {
   onEdit: () => void;
   onChangeStatus: () => void;
   onHideToggle: () => void;
-  onManageGallery: () => void;
   onDelete: () => void;
   busy?: boolean;
 }
@@ -62,7 +61,6 @@ export function FarmerProductCard({
   onEdit,
   onChangeStatus,
   onHideToggle,
-  onManageGallery,
   onDelete,
   busy = false,
 }: FarmerProductCardProps) {
@@ -147,9 +145,6 @@ export function FarmerProductCard({
             </Button>
             <Button mode="outlined" onPress={onChangeStatus} disabled={busy}>
               Change Status
-            </Button>
-            <Button mode="outlined" onPress={onManageGallery} disabled={busy}>
-              Gallery
             </Button>
             <Button mode="outlined" textColor="#B42318" onPress={onDelete} disabled={busy}>
               Delete
